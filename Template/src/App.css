@@ -1,0 +1,85 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  border: none;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* App.css */
+*{
+  margin: 0;
+}
+.slideset, .slideview, p {
+  border: 1px solid black;
+}
+
+.app-container {
+  display: flex;
+  border: none !important;
+  width: 100vw;
+  height: 100vh;
+}
+
+.toolbar {
+  position: fixed;
+  top: 2vh;
+  left: 2vw;
+  width: 200px;
+  height: 96vh;
+  background-color: #f0f0f0;
+  border-right: 1px solid #ccc;
+}
+
+.slideset{
+  display: flex;
+  position: fixed;
+  bottom: 3vh;
+  left: 30vw;
+  width: 40vw;
+  height: 20vh;
+  flex-direction: row;
+}
+
+.slideview{
+  position: fixed;
+  left: 20vw;
+  top: 15vh;
+  width: 60vw;
+  height: 55vh;
+}
+.element {
+  display: flex;
+  width: inherit;
+  height: inherit;
+  cursor: inherit;
+  z-index: 0;
+  justify-content: center;
+  align-items: center;
+}
+.element-container {
+  border: none;
+}
+
+/* .element {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+}
+
+.element:hover {
+  cursor: nwse-resize; /* Changes cursor to diagonal resize */
+/* }
+
+.element:hover::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  top: -5px;
+  left: -5px;
+} */ 
+
