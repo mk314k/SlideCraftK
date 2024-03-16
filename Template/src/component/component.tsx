@@ -1,16 +1,36 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
+import { KSlideSet } from "../frame";
+import { useEffect } from "react";
 
-interface KElementProps {
-    childNode: React.ReactNode;
+export interface KElementProps {
+    eid:number,
+    childNode: React.ReactNode,
+    // styleVal?: {
+    //     x:number,
+    //     y:number,
+    //     width: number,
+    //     height:number
+    // }
 }
 
-export const KElement:React.FC<KElementProps> = ({childNode}) => {
-    const {style, handleMouseDown} = useKElemHook();
+
+export const KElement:React.FC<KElementProps> = ({
+    eid,
+    childNode
+}) => {
+    console.log("KElement");
+    const {style, handleMouseDown} = useKElemHook(eid);
+    useEffect(()=>{
+        const elem = document.getElementById(`${eid}`);
+        if (elem){
+            elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].inner;
+        }
+    }, [eid])
 
     return (
         <div
-            key={Date.now()}
+            key={eid}
             className='element-container'
             style={{
                 position: 'absolute',
@@ -29,56 +49,48 @@ export const KElement:React.FC<KElementProps> = ({childNode}) => {
 
 export const Kbutton:React.FC<{ id: number }> = ({id}) => {
     return (
-        <KElement childNode={
+        <KElement eid={id} childNode={
             <button
-                key={`${id}`}
                 id={`${id}`}
                 className='element'
-                onDoubleClick={() => handleEditText(id)}
-            >
-                Button
-            </button>
-        }/>
+                onDoubleClick={() => {handleEditText(id)}}
+            ></button>
+        } />
     )
 }
 
 export const KLatex:React.FC<{ id: number }> = ({id}) => {
     return (
-        <KElement childNode={
+        <KElement eid={id} childNode={
             <p
                 id={`${id}`}
-                key={`${id}`}
                 className='element'
                 onDoubleClick={() => handleEditText(id, true)}
-            >
-                Button
-            </p>
-        }/>
+            ></p>
+        } />
     )
 }
-export const KTextArea:React.FC<{ id: number }> = ({id}) => {
+export const KTextArea:React.FC<{ id: number}> = ({id}) => {
     return (
-        <KElement childNode={
+        <KElement eid={id} childNode={
             <textarea
                 id={`${id}`}
-                key={`${id}`}
                 className='element'
             ></textarea>
-        }/>
+        } />
     )
 }
 
 export const KImage:React.FC<{ id: number, imgUrl:string }> = ({id, imgUrl}) => {
     return (
-        <KElement childNode={
+        <KElement eid={id} childNode={
             <img
                 id={`${id}`}
-                key={`${id}`}
                 className='element'
                 src={imgUrl}
                 draggable="false"
             ></img>
-        }/>
+        } />
     )
 }
 

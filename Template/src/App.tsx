@@ -1,31 +1,29 @@
 import './App.css';
-import { produce } from 'immer';
 import React, { useState, useEffect } from 'react';
 import {KImage, KLatex, KTextArea, Kbutton} from './component/component';
-import { Frame } from './frame';
-
-const frameList = [new Frame([])];
+import { KSlide, KSlideSet } from './frame';
+import { downloadFile } from './component/utility';
 
 interface ToolsProps {
   newId: number,
-  handleAddElement: (elem:React.ReactNode)=>void
+  handleAddElement: (elem:React.ReactNode, elemType:string)=>void
 }
 
 const Tools:React.FC<ToolsProps> = ({newId, handleAddElement}) => {
 
   const handleAddButton = () => {
-    const buttonElem = <Kbutton id={newId}></Kbutton>
-    handleAddElement(buttonElem);
+    const buttonElem = <Kbutton key={`${newId}e`} id={newId}></Kbutton>
+    handleAddElement(buttonElem, 'button');
   };
 
   const handleAddLatex = () => {
-    const latexElem = <KLatex id={newId}></KLatex>
-    handleAddElement(latexElem);
+    const latexElem = <KLatex key={`${newId}e`} id={newId}></KLatex>
+    handleAddElement(latexElem, 'latex');
   };
 
   const handleAddTextArea = () => {
-    const buttonElem = <KTextArea id={newId}></KTextArea>
-    handleAddElement(buttonElem);
+    const buttonElem = <KTextArea key={`${newId}e`} id={newId}></KTextArea>
+    handleAddElement(buttonElem, 'textarea');
   };
 
   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,8 +32,8 @@ const Tools:React.FC<ToolsProps> = ({newId, handleAddElement}) => {
       const reader = new FileReader();
       reader.onload = () => {
         const imageDataUrl = reader.result as string; // Cast to string
-        const imgElem = <KImage id={newId} imgUrl={imageDataUrl}></KImage>
-        handleAddElement(imgElem);
+        const imgElem = <KImage key={`${newId}e`} id={newId} imgUrl={imageDataUrl}></KImage>
+        handleAddElement(imgElem, 'image');
       };
       reader.readAsDataURL(file);
     }
@@ -61,25 +59,23 @@ const Tools:React.FC<ToolsProps> = ({newId, handleAddElement}) => {
 }
 
 const SlideSet: React.FC<{
-  totalFrame: number;
-  handleAddFrame: () => void;
   setFrameId: React.Dispatch<React.SetStateAction<number>>
-}> = ({ totalFrame, handleAddFrame, setFrameId }) => {
+}> = ({ setFrameId }) => {
 
-  // const handleAddFrame = () => {
-  //     frameList[frame]
-  //     frameList.push(new Frame([]));
-  //     setFrameId (totalFrame + 1);
-  // };
+  const handleAddFrame = () => {
+      KSlideSet.slides.push(new KSlide());
+      setFrameId (KSlideSet.slides.length - 1);
+      console.log(KSlideSet);
+  };
 
   return (
       <div className="slideset">
-          {Array.from({ length: totalFrame }, (_, i) => (
-              <div className="mini" id={`${i}`} key={`${i}ss`} onClick={() => setFrameId(i)}> Frame {i}</div>
+          {Array.from({ length: KSlideSet.slides.length }, (_, i) => (
+              <button className="mini" id={`${i}ss`} key={`${i}ss`} onClick={() => setFrameId(i)}> Frame {i}</button>
           ))}
-          <div className="mini" onClick={handleAddFrame}>
+          <button className="mini" onClick={handleAddFrame}>
               Add
-          </div>
+          </button>
       </div>
   );
 };
@@ -90,20 +86,23 @@ const App:React.FC = () => {
   const [elementList, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
 
-  const handleAddElement = (elem: React.ReactNode) => {
-    setElementList(prevList => produce(prevList, (draft: React.ReactNode[]) => {draft.push(elem)}));
-    // frameList[frameId].elemList.push(elem);
-  };
-
-  const handleAddFrame = () => {
-    frameList[frameId].elemList = elementList;
-    frameList.push(new Frame([]));
-    setFrameId (frameList?.length);
+  const handleAddElement = (elem: React.ReactNode, elemType:string) => {
+    setElementList(prevList => [...prevList, elem]);
+    KSlideSet.slides[frameId].elemList.push(elem);
+    KSlideSet.slides[KSlideSet.curFrame].pushProp(elemType);
   };
 
   useEffect(()=>{
-    setElementList(frameList[frameId]?.elemList);
+    setElementList(KSlideSet.slides[frameId]?.elemList.slice());
+    KSlideSet.curFrame = frameId;
   },[frameId]);
+
+  const handleLoad = () => {
+
+  }  
+  const handleFullScreen = () => {
+    
+  }
 
   return (
     <div className="app-container">
@@ -113,7 +112,12 @@ const App:React.FC = () => {
           element
         ))}
       </div>
-      <SlideSet totalFrame={frameList?.length} handleAddFrame={handleAddFrame} setFrameId = {setFrameId} />
+      <SlideSet setFrameId = {setFrameId} />
+      <div className='top-sect'>
+          <button onClick={() => downloadFile('hello.kms', KSlideSet.save())}>download</button>
+          <input type="file" onChange={handleLoad}/>
+          <button onClick={handleFullScreen}>FullScreen</button>
+      </div>
     </div>
   )
 }

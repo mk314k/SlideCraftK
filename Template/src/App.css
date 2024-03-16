@@ -35,12 +35,14 @@
 
 .slideset{
   display: flex;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: scroll;
   position: fixed;
   bottom: 3vh;
   left: 30vw;
   width: 40vw;
   height: 20vh;
-  flex-direction: row;
 }
 
 .slideview{
@@ -50,6 +52,12 @@
   width: 60vw;
   height: 55vh;
 }
+.mini{
+  height: inherit;
+  width: min(200px, 20vw);
+  border: 1px solid black;
+}
+
 .element {
   display: flex;
   width: inherit;

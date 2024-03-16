@@ -1,207 +1,28 @@
 import './App.css';
-import { produce } from 'immer';
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import {KImage, KLatex, KTextArea, Kbutton} from './component/component';
+import { KSlide, KSlideSet } from './frame';
 
-interface Position {
-  x: number;
-  y: number;
+interface ToolsProps {
+  newId: number,
+  handleAddElement: (elem:React.ReactNode, elemType:string)=>void
 }
 
-interface Dimension {
-  width: number;
-  height: number;
-}
-
-interface KWindow extends Window {
-  MathJax?: {
-    typeset: () => void;
-    tex2mml: (tex:string) => string;
-  };
-}
-
-
-const tex2mml = (tex:string) => {
-  let res = tex;
-  if (window !== undefined){
-    res = (window as KWindow).MathJax?.tex2mml(res)??'';
-  }
-  return res;
-}
-
-const handleEditText = (id: number, ltx = false) => {
-  const element = document.getElementById(`${id}`);
-  if (element) {
-    const parentElement = element.parentElement;
-    const textInput = document.createElement('input');
-    
-    // Set initial input value to button's text
-    textInput.value = element.innerText;
-
-    // Set input styles
-    textInput.style.width = `${element.clientWidth}px`;
-    textInput.style.height = `${element.clientHeight}px`;
-    textInput.style.zIndex = '2';
-
-    const handleClick = (e:MouseEvent) => {
-      if (!textInput.contains(e.target as Node)) {
-        element.innerHTML = ltx ? tex2mml(textInput.value) : textInput.value;
-        parentElement?.replaceChild(element, textInput);
-        document.removeEventListener('click', handleClick);
-      }
-    }
-
-    // Handle click outside of input to update button text
-    document.addEventListener('click', handleClick);
-
-    // Replace button with input
-    parentElement?.replaceChild(textInput, element);
-
-    // Set focus to input
-    textInput.focus();
-  }
-};
-
-
-
-const AppFrame: React.FC = () => {
-
-  const [elementList, setElementList] = useState<React.ReactNode[]>([]);
-  const [posList, setPosList] = useState<Position[]>([]);
-  const [dimList, setDimList] = useState<Dimension[]>([]);
-  const [dragging, setDragging] = useState<number | null>(null);
-  const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [cursorStyle, setCursorStyle] = useState<string>('auto');
-  // const [image, setImage] = useState(null);
-
-
-
-
-  useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      if (dragging !== null) {
-        const updatedPositions = posList.map((pos, index) =>
-          index === dragging
-            ? { x: event.clientX - offset.x, y: event.clientY - offset.y }
-            : pos
-        );
-        setPosList(updatedPositions);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setDragging(null);
-    };
-
-    if (dragging !== null) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [dragging, posList, offset]);
-
-  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>, id: number) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
-
-    if ((rect.x + 5 <= mouseX) && 
-        (mouseX <= rect.x + rect.width - 5) &&
-        (rect.y + 5 <= mouseY) && 
-        (mouseY <= rect.y + rect.height - 5)
-    ){
-        setDragging(id);
-        const clickedElement = elementList[id];
-        if (clickedElement) {
-          const clickedPos = posList[id];
-          const newOffset = {
-            x: event.clientX - clickedPos.x,
-            y: event.clientY - clickedPos.y
-          };
-          setOffset(newOffset);
-        }
-      }else{
-        setCursorStyle('nwse-resize');
-        const handleResizeMouseMove = (e: MouseEvent) => {
-          const dx = e.clientX - mouseX;
-          const dy = e.clientY - mouseY;
-    
-          const updatedDimList = dimList.map((dim, index) =>
-            index === id
-              ? {
-                  width: rect.width + dx,
-                  height: rect.height + dy,
-                }
-              : dim
-          );
-    
-          setDimList(updatedDimList);
-        };
-    
-        const handleResizeMouseUp = () => {
-          setCursorStyle('auto');
-          document.removeEventListener('mousemove', handleResizeMouseMove);
-          document.removeEventListener('mouseup', handleResizeMouseUp);
-        };
-    
-        document.addEventListener('mousemove', handleResizeMouseMove);
-        document.addEventListener('mouseup', handleResizeMouseUp);
-      }
-    
-  };
-
-  const handleAddElement = (elem: React.ReactNode, pos: Position, dim: Dimension) => {
-    setElementList(prevList => produce(prevList, (draft: React.ReactNode[]) => {draft.push(elem)}));
-    setPosList((prevList) => produce(prevList, (draft: Position[]) => {draft.push(pos)}));
-    setDimList((prevList) => produce(prevList, (draft: Dimension[]) => {draft.push(dim)}));
-  };
-
-  return (
-    <div className="app-container">
-      <div className="slideview">
-        {elementList.map((element, index) => (
-          <div
-            key={index}
-            className='element-container'
-            style={{
-              position: 'absolute',
-              left: posList[index]?.x,
-              top: posList[index]?.y,
-              width: dimList[index]?.width,
-              height: dimList[index]?.height,
-              cursor: cursorStyle
-            }}
-            onMouseDown={e => handleMouseDown(e, index)}
-          >
-            {element}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Tools:React.FC = () => {
+const Tools:React.FC<ToolsProps> = ({newId, handleAddElement}) => {
 
   const handleAddButton = () => {
-    const index = elementList.length + 1;
-    const buttonElem = <button key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index)}>Button</button>;
-    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+    const buttonElem = <Kbutton key={`${newId}e`} id={newId}></Kbutton>
+    handleAddElement(buttonElem, 'button');
   };
 
   const handleAddLatex = () => {
-    const index = elementList.length + 1;
-    const latexElem = <p key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index, true)}></p>;
-    handleAddElement(latexElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+    const latexElem = <KLatex key={`${newId}e`} id={newId}></KLatex>
+    handleAddElement(latexElem, 'latex');
   };
 
   const handleAddTextArea = () => {
-    const buttonElem = <textarea name="hello" id="text" className='element'></textarea>
-    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+    const buttonElem = <KTextArea key={`${newId}e`} id={newId}></KTextArea>
+    handleAddElement(buttonElem, 'textarea');
   };
 
   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,9 +31,8 @@ const Tools:React.FC = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const imageDataUrl = reader.result as string; // Cast to string
-        const index = elementList.length + 1;
-        const imgElem = <img src={imageDataUrl} key={index} className='element' id={`${index}`} draggable="false" />;
-        handleAddElement(imgElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+        const imgElem = <KImage key={`${newId}e`} id={newId} imgUrl={imageDataUrl}></KImage>
+        handleAddElement(imgElem, 'image');
       };
       reader.readAsDataURL(file);
     }
@@ -233,34 +53,61 @@ const Tools:React.FC = () => {
           Add Image
           <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
         </label>
-      </div>
-  )
-}
-
-const SlideSet:React.FC = () => {
-  return (
-    <div className="slideset">
-      <Link to={'/1'}> <AppFrame /></Link>
     </div>
   )
 }
 
-const App:React.FC = () => {
-  const [frameList, setFrameList] = useState<React.FC[]>([]);
+const SlideSet: React.FC<{
+  setFrameId: React.Dispatch<React.SetStateAction<number>>
+}> = ({ setFrameId }) => {
+
+  const handleAddFrame = () => {
+      KSlideSet.slides.push(new KSlide());
+      setFrameId (KSlideSet.slides.length - 1);
+      console.log(KSlideSet);
+  };
 
   return (
-    <>
-      <Router>
-        <Tools />
-        <Routes>
-          {frameList.map((frame, index) => (
-            <Route path={`/${index}`} element = {frame()}></Route>
+      <div className="slideset">
+          {Array.from({ length: KSlideSet.slides.length }, (_, i) => (
+              <div className="mini" id={`${i}ss`} key={`${i}ss`} onClick={() => setFrameId(i)}> Frame {i}</div>
           ))}
-        </Routes>
-        <SlideSet />
-      </Router>
-    
-    </>
+          <div className="mini" onClick={handleAddFrame}>
+              Add
+          </div>
+      </div>
+  );
+};
+
+
+
+const App:React.FC = () => {
+  const [elementList, setElementList] = useState<React.ReactNode[]>([]);
+  const [frameId, setFrameId] = useState(0);
+
+  const handleAddElement = (elem: React.ReactNode, elemType:string) => {
+    console.log("check2 addelement");
+    setElementList(prevList => [...prevList, elem]);
+    KSlideSet.slides[frameId].elemList.push(elem);
+    KSlideSet.slides[KSlideSet.curFrame].pushProp(elemType);
+  };
+
+  useEffect(()=>{
+    console.log("check1 useeffect", frameId);
+    setElementList(KSlideSet.slides[frameId]?.elemList.slice());
+    KSlideSet.curFrame = frameId;
+  },[frameId]);
+
+  return (
+    <div className="app-container">
+      <Tools newId= {elementList?.length} handleAddElement={handleAddElement}/>
+      <div className="slideview">
+        {elementList?.map((element) => (
+          element
+        ))}
+      </div>
+      <SlideSet setFrameId = {setFrameId} />
+    </div>
   )
 }
 

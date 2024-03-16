@@ -1,49 +1,41 @@
 import { useState, useEffect } from 'react';
+import { defaultSV } from './utility';
+import { KSlideSet } from '../frame';
 
-const useKElemHook = () => {
-    const [posx, setPosX] = useState(0);
-    const [posy, setPosY] = useState(0);
-    const [width, setWidth] = useState(100);
-    const [height, setHeight] = useState(100);
+
+
+const useKElemHook = (eid:number, sv = defaultSV) => {
+    console.log("Khook");
+    if (eid < KSlideSet.slides[KSlideSet.curFrame].elemProp.length){
+        sv = {
+            x: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].x,
+            y: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].y,
+            width: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].width,
+            height: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].height
+        }
+        // const elem = document.getElementById(`${eid}`);
+        // if (elem){
+        //     elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].inner;
+        // }
+    }
+    const [posx, setPosX] = useState(sv.x);
+    const [posy, setPosY] = useState(sv.y);
+    const [width, setWidth] = useState(sv.width);
+    const [height, setHeight] = useState(sv.height);
     const [cursorStyle, setCursorStyle] = useState('auto');
-    const [dragging, setDragging] = useState(false);
-    const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-    // const handlePositionChange = (newX: number, newY: number) => {
-    //     setPosX(newX);
-    //     setPosY(newY);
-    // };
+    useEffect(()=>{
+        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].x = posx;
+        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].y = posy;
+    }, [posx, posy, eid])
 
-    // const handleDimensionChange = (newWidth: number, newHeight: number) => {
-    //     setWidth(newWidth);
-    //     setHeight(newHeight);
-    // };
-
-
-    useEffect(() => {
-        const handleMouseMove = (event: MouseEvent) => {
-        if (dragging) {
-            setPosX(event.clientX - offset.x);
-            setPosY(event.clientY - offset.y);
-        }
-        };
-
-        const handleMouseUp = () => {
-            setDragging(false);
-        };
-
-        if (dragging !== null) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        }
-
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [dragging, offset]);
+    useEffect(()=>{
+        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].width = width;
+        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].height = height;
+    }, [width, height, eid])
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        
         const rect = event.currentTarget.getBoundingClientRect();
         const mouseX = event.clientX;
         const mouseY = event.clientY;
@@ -53,19 +45,25 @@ const useKElemHook = () => {
             (rect.y + 5 <= mouseY) && 
             (mouseY <= rect.y + rect.height - 5)
         ){
-            setDragging(true);
-            const newOffset = {
-                x: event.clientX - posx,
-                y: event.clientY - posy
+            const handleMouseMove = (e: MouseEvent) => {
+                setPosX(e.clientX - mouseX + posx);
+                setPosY(e.clientY - mouseY + posy);
             };
-            setOffset(newOffset);
+        
+            const handleMouseUp = () => {
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+        
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
         }else{
             setCursorStyle('nwse-resize');
             const handleResizeMouseMove = (e: MouseEvent) => {
                 const dx = e.clientX - mouseX;
                 const dy = e.clientY - mouseY;
-                setWidth(rect.width + dx);
-                setHeight(rect.height + dy);
+                setWidth(width + dx);
+                setHeight(height + dy);
             };
         
             const handleResizeMouseUp = () => {
