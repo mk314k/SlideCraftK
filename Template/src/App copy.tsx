@@ -1,7 +1,7 @@
 import './App.css';
 import { produce } from 'immer';
 import React, { useState, useEffect } from 'react';
-
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 interface Position {
   x: number;
@@ -21,9 +21,50 @@ interface KWindow extends Window {
 }
 
 
+const tex2mml = (tex:string) => {
+  let res = tex;
+  if (window !== undefined){
+    res = (window as KWindow).MathJax?.tex2mml(res)??'';
+  }
+  return res;
+}
+
+const handleEditText = (id: number, ltx = false) => {
+  const element = document.getElementById(`${id}`);
+  if (element) {
+    const parentElement = element.parentElement;
+    const textInput = document.createElement('input');
+    
+    // Set initial input value to button's text
+    textInput.value = element.innerText;
+
+    // Set input styles
+    textInput.style.width = `${element.clientWidth}px`;
+    textInput.style.height = `${element.clientHeight}px`;
+    textInput.style.zIndex = '2';
+
+    const handleClick = (e:MouseEvent) => {
+      if (!textInput.contains(e.target as Node)) {
+        element.innerHTML = ltx ? tex2mml(textInput.value) : textInput.value;
+        parentElement?.replaceChild(element, textInput);
+        document.removeEventListener('click', handleClick);
+      }
+    }
+
+    // Handle click outside of input to update button text
+    document.addEventListener('click', handleClick);
+
+    // Replace button with input
+    parentElement?.replaceChild(textInput, element);
+
+    // Set focus to input
+    textInput.focus();
+  }
+};
 
 
-const App: React.FC = () => {
+
+const AppFrame: React.FC = () => {
 
   const [elementList, setElementList] = useState<React.ReactNode[]>([]);
   const [posList, setPosList] = useState<Position[]>([]);
@@ -119,106 +160,8 @@ const App: React.FC = () => {
     setDimList((prevList) => produce(prevList, (draft: Dimension[]) => {draft.push(dim)}));
   };
 
-  const handleAddButton = () => {
-    const index = elementList.length + 1;
-    const buttonElem = <button key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index)}>Button</button>;
-    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
-  };
-  const handleAddLatex = () => {
-    const index = elementList.length + 1;
-    const latexElem = <p key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index, true)}></p>;
-    handleAddElement(latexElem, { x: 0, y: 0 }, { width: 100, height: 50 });
-  };
-
-  const handleAddTextArea = () => {
-    const buttonElem = <textarea name="hello" id="text" className='element'></textarea>
-    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
-  };
-
-  const tex2mml = (tex:string) => {
-    let res = tex;
-    if (window !== undefined){
-      res = (window as KWindow).MathJax?.tex2mml(res)??'';
-    }
-    return res;
-  }
-
-  const handleEditText = (id: number, ltx = false) => {
-    const element = document.getElementById(`${id}`);
-    if (element) {
-      const parentElement = element.parentElement;
-      const textInput = document.createElement('input');
-      
-      // Set initial input value to button's text
-      textInput.value = element.innerText;
-  
-      // Set input styles
-      textInput.style.width = `${element.clientWidth}px`;
-      textInput.style.height = `${element.clientHeight}px`;
-      textInput.style.zIndex = '2';
-  
-      const handleClick = (e:MouseEvent) => {
-        if (!textInput.contains(e.target as Node)) {
-          element.innerHTML = ltx ? tex2mml(textInput.value) : textInput.value;
-          parentElement?.replaceChild(element, textInput);
-          document.removeEventListener('click', handleClick);
-        }
-      }
-  
-      // Handle click outside of input to update button text
-      document.addEventListener('click', handleClick);
-  
-      // Replace button with input
-      parentElement?.replaceChild(textInput, element);
-  
-      // Set focus to input
-      textInput.focus();
-    }
-  };
-  
-  const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const imageDataUrl = reader.result as string; // Cast to string
-        const index = elementList.length + 1;
-        const imgElem = <img src={imageDataUrl} key={index} className='element' id={`${index}`} draggable="false" />;
-        handleAddElement(imgElem, { x: 0, y: 0 }, { width: 100, height: 50 });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  
-  
-  
-  
-
   return (
     <div className="app-container">
-      <div className="toolbar">
-        <button className="tool" onClick={handleAddButton}>
-          Add Button
-        </button>
-        <button className="tool" onClick={handleAddTextArea}>
-          Add Text
-        </button>
-        <button className="tool" onClick={handleAddLatex}>
-          Add latex
-        </button>
-        <label className="tool" style={{ display: 'inline-block', padding: '6px 12px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}>
-  Add Image
-  <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
-</label>
-
-      </div>
-      <div className="slideset">
-      <div>
-      {/* <input type="file" accept="image/*" onChange={handleImageChange} />
-      {image && <img src={image} alt="Uploaded" style={{ maxWidth: '100%', maxHeight: '100%' }} />} */}
-    </div>
-      </div>
       <div className="slideview">
         {elementList.map((element, index) => (
           <div
@@ -241,5 +184,84 @@ const App: React.FC = () => {
     </div>
   );
 };
+
+const Tools:React.FC = () => {
+
+  const handleAddButton = () => {
+    const index = elementList.length + 1;
+    const buttonElem = <button key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index)}>Button</button>;
+    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+  };
+
+  const handleAddLatex = () => {
+    const index = elementList.length + 1;
+    const latexElem = <p key={index} className='element' id={`${index}`} onDoubleClick={() => handleEditText(index, true)}></p>;
+    handleAddElement(latexElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+  };
+
+  const handleAddTextArea = () => {
+    const buttonElem = <textarea name="hello" id="text" className='element'></textarea>
+    handleAddElement(buttonElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+  };
+
+  const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageDataUrl = reader.result as string; // Cast to string
+        const index = elementList.length + 1;
+        const imgElem = <img src={imageDataUrl} key={index} className='element' id={`${index}`} draggable="false" />;
+        handleAddElement(imgElem, { x: 0, y: 0 }, { width: 100, height: 50 });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <div className="toolbar">
+        <button className="tool" onClick={handleAddButton}>
+          Add Button
+        </button>
+        <button className="tool" onClick={handleAddTextArea}>
+          Add Text
+        </button>
+        <button className="tool" onClick={handleAddLatex}>
+          Add latex
+        </button>
+        <label className="tool" style={{ display: 'inline-block', padding: '6px 12px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}>
+          Add Image
+          <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
+        </label>
+      </div>
+  )
+}
+
+const SlideSet:React.FC = () => {
+  return (
+    <div className="slideset">
+      <Link to={'/1'}> <AppFrame /></Link>
+    </div>
+  )
+}
+
+const App:React.FC = () => {
+  const [frameList, setFrameList] = useState<React.FC[]>([]);
+
+  return (
+    <>
+      <Router>
+        <Tools />
+        <Routes>
+          {frameList.map((frame, index) => (
+            <Route path={`/${index}`} element = {frame()}></Route>
+          ))}
+        </Routes>
+        <SlideSet />
+      </Router>
+    
+    </>
+  )
+}
 
 export default App;
