@@ -1,4 +1,7 @@
+import { KSlideSet } from "../frame";
 
+export const defaultSV = {x:0, y:0, width:100, height:100};
+export type SV = typeof defaultSV;
 interface KWindow extends Window {
   MathJax?: {
     typeset: () => void;
@@ -16,6 +19,7 @@ const tex2mml = (tex:string) => {
   }
 
 export const handleEditText = (id: number, ltx = false) => {
+    console.log("editing");
     const element = document.getElementById(`${id}`);
     if (element) {
       const parentElement = element.parentElement;
@@ -31,7 +35,9 @@ export const handleEditText = (id: number, ltx = false) => {
   
       const handleClick = (e:MouseEvent) => {
         if (!textInput.contains(e.target as Node)) {
-          element.innerHTML = ltx ? tex2mml(textInput.value) : textInput.value;
+          const innerData = ltx ? tex2mml(textInput.value) : textInput.value;
+          element.innerHTML = innerData;
+          KSlideSet.slides[KSlideSet.curFrame].elemProp[id].inner = innerData;
           parentElement?.replaceChild(element, textInput);
           document.removeEventListener('click', handleClick);
         }
@@ -47,3 +53,17 @@ export const handleEditText = (id: number, ltx = false) => {
       textInput.focus();
     }
   };
+
+
+export function downloadFile(fileName:string, fileContent:string) {
+  const element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(fileContent));
+  element.setAttribute('download', fileName);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
