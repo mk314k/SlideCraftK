@@ -12,7 +12,9 @@ export class KElement {
         public inner = ''
     ){
         this.name = elemType;
-        this.inner = elemType;
+        if (this.inner === ''){
+            this.inner = elemType;
+        }
     }
 }
 
@@ -34,7 +36,7 @@ export class KSlideSet {
         // Parse the data string and update slides and everything inside
         const parsedData = JSON.parse(data);
         // Example logic: assuming data is an array of slides
-        this.slides = parsedData.map((slideData: KSlide) => {
+        KSlideSet.slides = parsedData.map((slideData: KSlide) => {
             const slide = new KSlide();
             slide.elemProp = slideData.elemProp.map((elemPropData: KElement) => {
                 return new KElement(elemPropData.name, elemPropData.x, elemPropData.y, elemPropData.width, elemPropData.height, elemPropData.inner);

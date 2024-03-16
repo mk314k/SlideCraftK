@@ -1,21 +1,18 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
 import { KSlideSet } from "../frame";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
+export interface KElementContainerProps {
+    eid:number,
+    childNode: React.ReactNode
+}
 export interface KElementProps {
     eid:number,
-    childNode: React.ReactNode,
-    // styleVal?: {
-    //     x:number,
-    //     y:number,
-    //     width: number,
-    //     height:number
-    // }
+    info?:string
 }
 
-
-export const KElement:React.FC<KElementProps> = ({
+export const KElement:React.FC<KElementContainerProps> = ({
     eid,
     childNode
 }) => {
@@ -47,52 +44,57 @@ export const KElement:React.FC<KElementProps> = ({
     )
 }
 
-export const Kbutton:React.FC<{ id: number }> = ({id}) => {
+export const KButton:React.FC<KElementProps> = ({eid}) => {
     return (
-        <KElement eid={id} childNode={
+        <KElement eid={eid} childNode={
             <button
-                id={`${id}`}
+                id={`${eid}`}
                 className='element'
-                onDoubleClick={() => {handleEditText(id)}}
+                onDoubleClick={() => {handleEditText(eid)}}
             ></button>
         } />
     )
 }
 
-export const KLatex:React.FC<{ id: number }> = ({id}) => {
+export const KLatex:React.FC<KElementProps> = ({eid}) => {
     return (
-        <KElement eid={id} childNode={
+        <KElement eid={eid} childNode={
             <p
-                id={`${id}`}
+                id={`${eid}`}
                 className='element'
-                onDoubleClick={() => handleEditText(id, true)}
+                onDoubleClick={() => handleEditText(eid, true)}
             ></p>
         } />
     )
 }
-export const KTextArea:React.FC<{ id: number}> = ({id}) => {
+export const KTextArea:React.FC<KElementProps> = ({eid}) => {
     return (
-        <KElement eid={id} childNode={
+        <KElement eid={eid} childNode={
             <textarea
-                id={`${id}`}
+                id={`${eid}`}
                 className='element'
             ></textarea>
         } />
     )
 }
 
-export const KImage:React.FC<{ id: number, imgUrl:string }> = ({id, imgUrl}) => {
+export const KImage:React.FC<KElementProps> = ({eid, info}) => {
     return (
-        <KElement eid={id} childNode={
+        <KElement eid={eid} childNode={
             <img
-                id={`${id}`}
+                id={`${eid}`}
                 className='element'
-                src={imgUrl}
+                src={info}
                 draggable="false"
             ></img>
         } />
     )
 }
+export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
+    ["button", KButton],
+    ["latex", KLatex],
+    ["textarea", KTextArea],
+    ["image", KImage]
+]);
 
-
-export default Kbutton;
+export default KComponents;

@@ -71,23 +71,13 @@
   border: none;
 }
 
-/* .element {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-}
 
-.element:hover {
-  cursor: nwse-resize; /* Changes cursor to diagonal resize */
-/* }
-
-.element:hover::after {
-  content: '';
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: red;
-  top: -5px;
-  left: -5px;
-} */ 
+.top-sect{
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 2vh;
+  right: 5vw;
+} 
 
