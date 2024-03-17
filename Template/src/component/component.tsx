@@ -1,6 +1,6 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
-import { KSlideSet } from "../frame";
+import { KElementData, KSlideSet } from "../frame";
 import React, { useEffect } from "react";
 
 export interface KElementContainerProps {
@@ -25,8 +25,29 @@ export const KElement:React.FC<KElementContainerProps> = ({
         }
     }, [eid])
 
+    const handleDelete = () => {
+        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid] = new KElementData('none');
+        const elem =document.getElementById(`${eid}div`);
+        if (elem){
+            elem.className = 'hidden';
+        }
+    }
+
+    const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        switch (event.key) {
+            case 'Delete':
+            case 'Backspace':
+            case 'Escape':
+                handleDelete();
+                break;
+            default:
+                break;
+        }
+    };
+
     return (
         <div
+            id={`${eid}div`}
             key={eid}
             className='element-container'
             style={{
@@ -38,6 +59,8 @@ export const KElement:React.FC<KElementContainerProps> = ({
                 cursor: style.cursor
             }}
             onMouseDown={e => handleMouseDown(e)}
+            onKeyDown={onKeyDown}
+            tabIndex={0}
         >
             {childNode}
         </div>
