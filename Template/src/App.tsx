@@ -1,19 +1,14 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import {KComponents, KElementProps} from './component/component';
-import {KElement, KSlide, KSlideSet } from './frame';
+import {KElementData, KSlide, KSlideSet } from './frame';
 import { downloadFile } from './component/utility';
 
 interface ToolsProps {
   handleAddElement: (elemType:string, info?:string)=>void
 }
 
-// const components:Map<string, React.FC> = new Map([
-//   ["button", (eid:number)=> {<Kbutton key={`${eid}e`} id={eid}/>}],
-
-// ]);
-
-function propL2ElementL(props: KElement[]) {
+function propL2ElementL(props: KElementData[]) {
   const elems:React.FunctionComponentElement<KElementProps>[] = [];
   for (let j=0; j<props.length; j++){
     const comp:React.FC<KElementProps>|undefined = KComponents.get(props[j].name);
@@ -28,28 +23,13 @@ function propL2ElementL(props: KElement[]) {
 
 const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
 
-  // const handleAddButton = () => {
-  //   // const buttonElem = (components.get('button')??defC)(newId);
-  //   handleAddElement('button');
-  // };
-
-  // const handleAddLatex = () => {
-  //   // const latexElem = <KLatex key={`${newId}e`} id={newId}></KLatex>
-  //   // handleAddElement(latexElem, 'latex');
-  // };
-
-  // const handleAddTextArea = () => {
-  //   // const buttonElem = <KTextArea key={`${newId}e`} id={newId}></KTextArea>
-  //   // handleAddElement(buttonElem, 'textarea');
-  // };
-
   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
         const imageDataUrl = reader.result as string; // Cast to string
-        // const imgElem = <KImage key={`${newId}e`} id={newId} imgUrl={imageDataUrl}></KImage>
+        console.log(imageDataUrl);
         handleAddElement('image', imageDataUrl);
       };
       reader.readAsDataURL(file);
@@ -82,7 +62,6 @@ const SlideSet: React.FC<{
   const handleAddFrame = () => {
       KSlideSet.slides.push(new KSlide());
       setFrameId (KSlideSet.slides.length - 1);
-      console.log(KSlideSet);
   };
 
   return (
@@ -114,7 +93,13 @@ const App:React.FC = () => {
   };
 
   useEffect(()=>{
-    setElementList(KSlideSet.slides[frameId]?.elemList.slice());
+    const eList = [];
+    for (let i=0; i<KSlideSet.numElement(frameId); i++ ){
+      if (KSlideSet.slides[frameId]?.elemProp[i]?.name !== 'none'){
+        eList.push(KSlideSet.slides[frameId]?.elemList[i])
+      }
+    }
+    setElementList(eList);
     KSlideSet.curFrame = frameId;
   },[frameId]);
 
@@ -130,12 +115,11 @@ const App:React.FC = () => {
             KSlideSet.slides[i].elemProp
           );
         }
-        setFrameId(0); // Trigger re-render after loading the file
+        setFrameId(0);
         setElementList(KSlideSet.slides[0]?.elemList.slice());
       };
       reader.readAsText(file);
     }
-    // setFrameId(0);
   };
   
   const handleFullScreen = () => {

@@ -81,3 +81,6 @@
   right: 5vw;
 } 
 
+.hidden {
+  display: none;
+}
