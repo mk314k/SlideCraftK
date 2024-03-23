@@ -8,6 +8,7 @@
 *{
   margin: 0;
 }
+
 .flex-vertical {
   display: flex;
   flex-direction: column;
@@ -70,6 +71,7 @@
   justify-content: center;
   align-items: center;
 }
+
 .element-container {
   border: none;
 }

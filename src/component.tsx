@@ -1,6 +1,6 @@
 import useKElemHook from "./hook";
-import { handleEditText } from "./utility";
-import { KSlideSet } from "./frame";
+// import { handleEditText } from "./utility";
+// import { KSlideSet } from "./frame";
 import { Component, JSXOutput, component$ } from '@builder.io/qwik'
 
 export interface KElementContainerProps {
@@ -26,27 +26,27 @@ export const KElement:Component<KElementContainerProps> = component$(({
     //     }
     // }, [eid])
 
-    const handleDelete = () => {
-        console.log("handleDelete called");
-        KSlideSet.slides[KSlideSet.curFrame].elemProp.delete(eid);
-        const elem =document.getElementById(`${eid}div`);
-        if (elem){
-            elem.className = 'hidden';
-        }
-    }
+    // const handleDelete = () => {
+    //     console.log("handleDelete called");
+    //     KSlideSet.slides[KSlideSet.curFrame].elemProp.delete(eid);
+    //     const elem =document.getElementById(`${eid}div`);
+    //     if (elem){
+    //         elem.className = 'hidden';
+    //     }
+    // }
 
-    const onKeyDown = (event: KeyboardEvent) => {
-        console.log("onkeydown called");
-        switch (event.key) {
-            case 'Delete':
-            case 'Backspace':
-            case 'Escape':
-                handleDelete();
-                break;
-            default:
-                break;
-        }
-    };
+    // const onKeyDown = (event: KeyboardEvent) => {
+    //     console.log("onkeydown called");
+    //     switch (event.key) {
+    //         case 'Delete':
+    //         case 'Backspace':
+    //         case 'Escape':
+    //             handleDelete();
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // };
 
     return (
         <div
@@ -62,8 +62,8 @@ export const KElement:Component<KElementContainerProps> = component$(({
                 cursor: style.cursor.value
             }}
             onMouseDown$={e => handleMouseDown(e)}
-            onKeyDown$={onKeyDown}
-            tabIndex={0}
+            // onKeyDown$={onKeyDown}
+            // tabIndex={0}
         >
             {childNode}
         </div>
@@ -77,55 +77,59 @@ export const KButton:Component<KElementProps> = component$(({eid}) => {
             <button
                 id={`${eid}`}
                 class='element'
-                onDoubleClick$={() => {handleEditText(eid)}}
+                // onDoubleClick$={() => {handleEditText(eid)}}
             ></button>
         } />
     )
 })
 
-export const KLatex:Component<KElementProps> = component$(({eid}) => {
-    console.log("rendering klatex");
-    return (
-        <KElement eid={eid} childNode={
-            <p
-                id={`${eid}`}
-                class='element'
-                onDoubleClick$={() => handleEditText(eid, true)}
-            ></p>
-        } />
-    )
-})
-export const KTextArea:Component<KElementProps> = component$(({eid}) => {
-    console.log("rendering ktext");
-    return (
-        <KElement eid={eid} childNode={
-            <textarea
-                id={`${eid}`}
-                class='element'
-            ></textarea>
-        } />
-    )
-})
+// export const KLatex:Component<KElementProps> = component$(({eid}) => {
+//     console.log("rendering klatex");
+//     return (
+//         <KElement eid={eid} childNode={
+//             <p
+//                 id={`${eid}`}
+//                 class='element'
+//                 onDoubleClick$={() => handleEditText(eid, true)}
+//             ></p>
+//         } />
+//     )
+// })
+// export const KTextArea:Component<KElementProps> = component$(({eid}) => {
+//     console.log("rendering ktext");
+//     return (
+//         <KElement eid={eid} childNode={
+//             <textarea
+//                 id={`${eid}`}
+//                 class='element'
+//             ></textarea>
+//         } />
+//     )
+// })
 
-export const KImage:Component<KElementProps> = component$(({eid, info}) => {
-    console.log("rendering kimage");
-    return (
-        <KElement eid={eid} childNode={
-            <img
-                id={`${eid}`}
-                class='element'
-                src={info}
-                draggable={false}
-            ></img>
-        } />
-    )
-})
+// export const KImage:Component<KElementProps> = component$(({eid, info}) => {
+//     console.log("rendering kimage");
+//     return (
+//         <KElement eid={eid} childNode={
+//             <img
+//                 id={`${eid}`}
+//                 class='element'
+//                 src={info}
+//                 draggable={false}
+//             ></img>
+//         } />
+//     )
+// })
 
-export const KComponents: Map<string, Component<KElementProps>> = new Map([
-    ["button", KButton],
-    ["latex", KLatex],
-    ["textarea", KTextArea],
-    ["image", KImage]
+export const KComponents: Map<string, any> = new Map([
+    ["button", (eid:number)=>{
+        return (
+            <KButton eid={eid}></KButton>
+        )
+    }],
+    // ["latex", KLatex],
+    // ["textarea", KTextArea],
+    // ["image", KImage]
 ]);
 
 export default KComponents;

@@ -3,6 +3,8 @@ import { Component } from "@builder.io/qwik";
 export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
 
+export const defaultFileName = 'untitled';
+
 export class KElementData {
     public readonly name:string;
     public constructor(
@@ -23,8 +25,15 @@ export class KSlide {
     public elemList:Component[] = [];
     public elemProp:Map<number, KElementData>= new Map();
 
-    public pushProp(eid:number, elemType:string){
-        this.elemProp.set(eid, new KElementData(elemType))
+    public push(elemType:string){
+      const eid = this.elemList.length;
+      this.elemProp.set(eid, new KElementData(elemType))
+    }
+    public set(eid:number, elemType:string){
+      this.elemProp.set(eid, new KElementData(elemType))
+    }
+    public get(eid:number):KElementData{
+      return this.elemProp.get(eid) ?? new KElementData('');
     }
 }
 
