@@ -1,5 +1,8 @@
 import React from "react";
-import { defaultSV } from "./component/utility";
+
+export const defaultSV = {x:0, y:0, width:100, height:100};
+export type SV = typeof defaultSV;
+export const defaultFileName = 'untitled.scs';
 
 export class KElementData {
     public name:string;
@@ -22,10 +25,18 @@ export class KElementData {
 export class KSlide {
     public elemList:React.ReactNode[] = [];
     public elemProp:KElementData[] = [];
+    public elemProps:Map<number, KElementData> = new Map();
 
     public pushProp(elemType:string){
-        this.elemProp.push(new KElementData(elemType))
+        this.elemProp.push(new KElementData(elemType));
     }
+    public setProp(eid:number, elemType:string){
+        this.elemProps.set(eid , new KElementData(elemType));
+    }
+    public getProp(eid:number):KElementData{
+        return this.elemProps.get(eid)?? new KElementData('none');
+    }
+
 }
 
 export class KSlideSet {

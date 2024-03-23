@@ -1,7 +1,6 @@
 import { KSlideSet } from "../frame";
 
-export const defaultSV = {x:0, y:0, width:100, height:100};
-export type SV = typeof defaultSV;
+
 interface KWindow extends Window {
   MathJax?: {
     typeset: () => void;
@@ -66,4 +65,20 @@ export function downloadFile(fileName:string, fileContent:string) {
   element.click();
 
   document.body.removeChild(element);
+}
+
+export function toggleFullscreen() {
+  const elem = document.getElementById("slide");
+
+  if (!document.fullscreenElement ) {
+    if (elem?.requestFullscreen) {
+      elem.requestFullscreen();
+    }
+    // document.addEventListener(onkeydown)
+    console.log("fullscrenn");
+  }
+}
+
+export function mod(a:number, b:number):number {
+  return ((a % b) + b) % b;
 }

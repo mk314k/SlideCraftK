@@ -1,6 +1,5 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import {KComponents, KElementProps} from './component/component';
 import {KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
 import { downloadFile, toggleFullscreen } from './component/utility';
@@ -34,9 +33,6 @@ const Tools:React.FC = () => {
       const elem = React.createElement(comp, {eid:eid, info:info});
       KSlideSet.slides[KSlideSet.curFrame].elemList.push(elem);
       KSlideSet.slides[KSlideSet.curFrame].setProp(eid, elemType);
-      const elemNode = document.createElement('div');
-      ReactDOM.render(elem, elemNode);
-      document.getElementById('view')?.appendChild(elemNode.firstChild?? elemNode);
     }
   };
 
@@ -113,17 +109,6 @@ const App:React.FC = () => {
   console.log("rendering app");
   // const [elementList, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
-
-  // const handleAddElement = (elemType:string, info?:string) => {
-  //   console.log("handleAddElement called");
-  //   const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
-  //   if (comp){
-  //     const elem = React.createElement(comp, {eid:elementList.length, info:info});
-  //     // setElementList(prevList => [...prevList, elem]);
-  //     KSlideSet.slides[frameId].elemList.push(elem);
-  //     KSlideSet.slides[frameId].pushProp(elemType);
-  //   }
-  // };
 
   useEffect(()=>{
     console.log("frameId effect hook");

@@ -16,9 +16,10 @@ export const KElement:React.FC<KElementContainerProps> = ({
     eid,
     childNode
 }) => {
-    console.log("KElement");
+    console.log("rendering KElement");
     const {style, handleMouseDown} = useKElemHook(eid);
     useEffect(()=>{
+        console.log("KElement effect hook");
         const elem = document.getElementById(`${eid}`);
         if (elem){
             elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].inner;
@@ -26,6 +27,7 @@ export const KElement:React.FC<KElementContainerProps> = ({
     }, [eid])
 
     const handleDelete = () => {
+        console.log("handleDelete called");
         KSlideSet.slides[KSlideSet.curFrame].elemProp[eid] = new KElementData('none');
         const elem =document.getElementById(`${eid}div`);
         if (elem){
@@ -34,6 +36,7 @@ export const KElement:React.FC<KElementContainerProps> = ({
     }
 
     const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        console.log("onkeydown called");
         switch (event.key) {
             case 'Delete':
             case 'Backspace':
@@ -68,6 +71,7 @@ export const KElement:React.FC<KElementContainerProps> = ({
 }
 
 export const KButton:React.FC<KElementProps> = ({eid}) => {
+    console.log("rendering kbutton");
     return (
         <KElement eid={eid} childNode={
             <button
@@ -80,6 +84,7 @@ export const KButton:React.FC<KElementProps> = ({eid}) => {
 }
 
 export const KLatex:React.FC<KElementProps> = ({eid}) => {
+    console.log("rendering klatex");
     return (
         <KElement eid={eid} childNode={
             <p
@@ -91,6 +96,7 @@ export const KLatex:React.FC<KElementProps> = ({eid}) => {
     )
 }
 export const KTextArea:React.FC<KElementProps> = ({eid}) => {
+    console.log("rendering ktext");
     return (
         <KElement eid={eid} childNode={
             <textarea
@@ -102,6 +108,7 @@ export const KTextArea:React.FC<KElementProps> = ({eid}) => {
 }
 
 export const KImage:React.FC<KElementProps> = ({eid, info}) => {
+    console.log("rendering kimage");
     return (
         <KElement eid={eid} childNode={
             <img
