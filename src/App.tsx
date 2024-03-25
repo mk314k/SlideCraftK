@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import {KComponents, KElementProps} from './component/component';
 import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
-import {downloadFile, handleFullScreen } from './component/utility';
+import {downloadFile, handleFullScreen, insertCode } from './component/utility';
 
 interface ToolsProps {
   handleAddElement: (elemType:string, info?:string)=>void
@@ -83,6 +83,8 @@ const SlideSet: React.FC<{
 
 const SlideView: React.FC = () => {
   console.log("rendering ElementRenderer");
+  // const [viewWidth, setViewWidth] = useState(0);
+  // const [viewHeight, setViewHeight] = useState(0);
   return (
       <div id='slide' className="slideview">
           {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
@@ -144,6 +146,11 @@ const App:React.FC = () => {
           <button onClick={() => downloadFile(defaultFileName+'.scs', KSlideSet.save())}>Save</button>
           <input type="file" onChange={handleLoad}/>
           <button onClick={handleFullScreen}>FullScreen</button>
+      </div>
+      <div className='bot-sect'>
+        <textarea name="code" id="code" cols={30} rows={12}></textarea>
+        <button onClick={()=>{insertCode('style')}}>Add CSS</button>
+        <button onClick={()=>{insertCode('script')}}>Add JS</button>
       </div>
     </div>
   )

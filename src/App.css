@@ -33,6 +33,13 @@
   background-color: #f0f0f0;
   border-right: 1px solid #ccc;
 }
+.bot-sect {
+  position: fixed;
+  left: 2vw;
+  bottom: 2vh;
+  width: calc(1.5 * var(--tool-width));
+  background-color: #f0f0f0;
+}
 
 .slideset{
   display: flex;
