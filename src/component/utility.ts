@@ -1,7 +1,6 @@
 import { KSlideSet } from "../frame";
 
-export const defaultSV = {x:0, y:0, width:100, height:100};
-export type SV = typeof defaultSV;
+
 interface KWindow extends Window {
   MathJax?: {
     typeset: () => void;
@@ -20,6 +19,7 @@ const tex2mml = (tex:string) => {
 
 export const handleEditText = (id: number, ltx = false) => {
     console.log("editing");
+    KSlideSet.editingMode = true;
     const element = document.getElementById(`${id}`);
     if (element) {
       const parentElement = element.parentElement;
@@ -37,8 +37,9 @@ export const handleEditText = (id: number, ltx = false) => {
         if (!textInput.contains(e.target as Node)) {
           const innerData = ltx ? tex2mml(textInput.value) : textInput.value;
           element.innerHTML = innerData;
-          KSlideSet.slides[KSlideSet.curFrame].elemProp[id].inner = innerData;
+          KSlideSet.slides[KSlideSet.curFrame].get(id).inner = innerData;
           parentElement?.replaceChild(element, textInput);
+          KSlideSet.editingMode = false;
           document.removeEventListener('click', handleClick);
         }
       }
@@ -66,4 +67,42 @@ export function downloadFile(fileName:string, fileContent:string) {
   element.click();
 
   document.body.removeChild(element);
+}
+
+// const calculateShift = (udim:number, vdim:number, pos:number):string => {
+//   return `${pos*vdim/udim}`
+// }
+
+export function handleFullScreen() {
+  const view = document.getElementById("slide");
+  // const urect = (view as HTMLElement).getBoundingClientRect();
+  // const handleFullScreenExit = ()=> {
+  //   if (view){
+  //     const vrect = view?.getBoundingClientRect();
+  //     view.childNodes.forEach((child)=>{
+  //       if (child instanceof HTMLElement){
+  //         console.log(child.style.left, urect, vrect);
+  //         child.style.left = calculateShift(
+  //           urect?.width, vrect.width, Number(child.style.left)
+  //         );
+  //         child.style.top = calculateShift(
+  //           urect.height, vrect.height, Number(child.style.top)
+  //         );
+  //         console.log(child.style.left);
+  //       }
+  //     })
+  //   }
+  // }
+
+  if (!document.fullscreenElement ) {
+    if (view?.requestFullscreen) {
+      view.requestFullscreen();
+      // document.addEventListener('fullscreenchange', handleFullScreenExit);
+    }
+    console.log("fullscrenn");
+  }
+}
+
+export function mod(a:number, b:number):number {
+  return ((a % b) + b) % b;
 }

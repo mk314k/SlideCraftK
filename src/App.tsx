@@ -1,19 +1,20 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import {KComponents, KElementProps} from './component/component';
-import {KElementData, KSlide, KSlideSet } from './frame';
-import { downloadFile } from './component/utility';
+import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
+import {downloadFile, handleFullScreen } from './component/utility';
 
 interface ToolsProps {
   handleAddElement: (elemType:string, info?:string)=>void
 }
 
-function propL2ElementL(props: KElementData[]) {
+function propL2ElementL(props:Map<number, KElementData>) {
+  console.log("propl2eL called");
   const elems:React.FunctionComponentElement<KElementProps>[] = [];
-  for (let j=0; j<props.length; j++){
-    const comp:React.FC<KElementProps>|undefined = KComponents.get(props[j].name);
+  for (const [index, prop] of props.entries()){
+    const comp:React.FC<KElementProps>|undefined = KComponents.get(prop.name);
     if (comp){
-      const elem = React.createElement(comp, {eid:j, info:props[j].inner});
+      const elem = React.createElement(comp, {eid:index, info:prop.inner});
       elems.push(elem);
     } 
   }
@@ -22,8 +23,10 @@ function propL2ElementL(props: KElementData[]) {
 
 
 const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
+  console.log("rendering tools");
 
   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("handleAdd Image called");
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -58,8 +61,10 @@ const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
 const SlideSet: React.FC<{
   setFrameId: React.Dispatch<React.SetStateAction<number>>
 }> = ({ setFrameId }) => {
+  console.log("renedring slideset");
 
   const handleAddFrame = () => {
+      console.log("addFrame called");
       KSlideSet.slides.push(new KSlide());
       setFrameId (KSlideSet.slides.length - 1);
   };
@@ -76,34 +81,42 @@ const SlideSet: React.FC<{
   );
 };
 
+const SlideView: React.FC = () => {
+  console.log("rendering ElementRenderer");
+  return (
+      <div id='slide' className="slideview">
+          {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
+              <React.Fragment key={index}>{element}</React.Fragment>
+          ))}
+      </div>
+  );
+};
 
 
 const App:React.FC = () => {
+  console.log("rendering app");
   const [elementList, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
 
   const handleAddElement = (elemType:string, info?:string) => {
+    console.log("handleAddElement called");
     const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
     if (comp){
       const elem = React.createElement(comp, {eid:elementList.length, info:info});
       setElementList(prevList => [...prevList, elem]);
-      KSlideSet.slides[frameId].elemList.push(elem);
-      KSlideSet.slides[frameId].pushProp(elemType);
+      KSlideSet.slides[frameId].push(elemType, elem);
     }
   };
 
   useEffect(()=>{
-    const eList = [];
-    for (let i=0; i<KSlideSet.numElement(frameId); i++ ){
-      if (KSlideSet.slides[frameId]?.elemProp[i]?.name !== 'none'){
-        eList.push(KSlideSet.slides[frameId]?.elemList[i])
-      }
-    }
+    console.log("frameId effect hook");
+    const eList = KSlideSet.slides[frameId].elements();
     setElementList(eList);
     KSlideSet.curFrame = frameId;
   },[frameId]);
 
   const handleLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("handleLoad called");
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -121,22 +134,14 @@ const App:React.FC = () => {
       reader.readAsText(file);
     }
   };
-  
-  const handleFullScreen = () => {
-
-  }
 
   return (
     <div className="app-container">
       <Tools handleAddElement={handleAddElement}/>
-      <div className="slideview">
-        {elementList?.map((element) => (
-          element
-        ))}
-      </div>
+      <SlideView />
       <SlideSet setFrameId = {setFrameId} />
       <div className='top-sect'>
-          <button onClick={() => downloadFile('1hello.kms', KSlideSet.save())}>download</button>
+          <button onClick={() => downloadFile(defaultFileName+'.scs', KSlideSet.save())}>Save</button>
           <input type="file" onChange={handleLoad}/>
           <button onClick={handleFullScreen}>FullScreen</button>
       </div>

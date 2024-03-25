@@ -6,6 +6,7 @@
   border: none;
   width: 100vw;
   height: 100vh;
+  --tool-width: min(25vw, 200px);
 }
 
 /* App.css */
@@ -27,7 +28,7 @@
   position: fixed;
   top: 2vh;
   left: 2vw;
-  width: 200px;
+  width: var(--tool-width);
   height: 96vh;
   background-color: #f0f0f0;
   border-right: 1px solid #ccc;
@@ -40,18 +41,28 @@
   overflow-x: scroll;
   position: fixed;
   bottom: 3vh;
-  left: 30vw;
+  left: calc(0.5*var(--tool-width) + 30vw);
   width: 40vw;
   height: 20vh;
 }
 
 .slideview{
   position: fixed;
-  left: 20vw;
+  left: calc(0.5*var(--tool-width) + 20vw);
   top: 15vh;
   width: 60vw;
   height: 55vh;
+  border-radius: 20px;
 }
+.slideview-full{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+
 .mini{
   height: inherit;
   width: min(200px, 20vw);
@@ -67,6 +78,8 @@
   justify-content: center;
   align-items: center;
 }
+
+
 .element-container {
   border: none;
 }
