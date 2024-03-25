@@ -1,21 +1,20 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
 import {KComponents, KElementProps} from './component/component';
-import {KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
-import { downloadFile, toggleFullscreen } from './component/utility';
+import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
+import {downloadFile, handleFullScreen } from './component/utility';
 
-// interface ToolsProps {
-//   handleAddElement: (elemType:string, info?:string)=>void
-// }
+interface ToolsProps {
+  handleAddElement: (elemType:string, info?:string)=>void
+}
 
-function propL2ElementL(props: KElementData[]) {
+function propL2ElementL(props:Map<number, KElementData>) {
   console.log("propl2eL called");
   const elems:React.FunctionComponentElement<KElementProps>[] = [];
-  for (let j=0; j<props.length; j++){
-    const comp:React.FC<KElementProps>|undefined = KComponents.get(props[j].name);
+  for (const [index, prop] of props.entries()){
+    const comp:React.FC<KElementProps>|undefined = KComponents.get(prop.name);
     if (comp){
-      const elem = React.createElement(comp, {eid:j, info:props[j].inner});
+      const elem = React.createElement(comp, {eid:index, info:prop.inner});
       elems.push(elem);
     } 
   }
@@ -23,22 +22,8 @@ function propL2ElementL(props: KElementData[]) {
 }
 
 
-const Tools:React.FC = () => {
+const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
   console.log("rendering tools");
-
-  const handleAddElement = (elemType:string, info?:string) => {
-    console.log("handleAddElement called");
-    const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
-    const eid = KSlideSet.numElement(KSlideSet.curFrame);
-    if (comp){
-      const elem = React.createElement(comp, {eid:eid, info:info});
-      KSlideSet.slides[KSlideSet.curFrame].elemList.push(elem);
-      KSlideSet.slides[KSlideSet.curFrame].setProp(eid, elemType);
-      const elemNode = document.createElement('div');
-      ReactDOM.render(elem, elemNode);
-      document.getElementById('view')?.appendChild(elemNode.firstChild?? elemNode);
-    }
-  };
 
   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log("handleAdd Image called");
@@ -96,44 +81,37 @@ const SlideSet: React.FC<{
   );
 };
 
-const SlideView:React.FC = () =>{
-
+const SlideView: React.FC = () => {
+  console.log("rendering ElementRenderer");
   return (
-    <div id='view' className="slideview">
-      {KSlideSet.slides[KSlideSet.curFrame].elemList?.map((element) => (
-        element
-      ))}
-    </div>
-  )
-}
-
+      <div id='slide' className="slideview">
+          {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
+              <React.Fragment key={index}>{element}</React.Fragment>
+          ))}
+      </div>
+  );
+};
 
 
 const App:React.FC = () => {
   console.log("rendering app");
-  // const [elementList, setElementList] = useState<React.ReactNode[]>([]);
+  const [elementList, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
 
-  // const handleAddElement = (elemType:string, info?:string) => {
-  //   console.log("handleAddElement called");
-  //   const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
-  //   if (comp){
-  //     const elem = React.createElement(comp, {eid:elementList.length, info:info});
-  //     // setElementList(prevList => [...prevList, elem]);
-  //     KSlideSet.slides[frameId].elemList.push(elem);
-  //     KSlideSet.slides[frameId].pushProp(elemType);
-  //   }
-  // };
+  const handleAddElement = (elemType:string, info?:string) => {
+    console.log("handleAddElement called");
+    const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
+    if (comp){
+      const elem = React.createElement(comp, {eid:elementList.length, info:info});
+      setElementList(prevList => [...prevList, elem]);
+      KSlideSet.slides[frameId].push(elemType, elem);
+    }
+  };
 
   useEffect(()=>{
     console.log("frameId effect hook");
-    const eList = [];
-    for (let i=0; i<KSlideSet.numElement(frameId); i++ ){
-      if (KSlideSet.slides[frameId]?.elemProp[i]?.name !== 'none'){
-        eList.push(KSlideSet.slides[frameId]?.elemList[i])
-      }
-    }
-    // setElementList(eList);
+    const eList = KSlideSet.slides[frameId].elements();
+    setElementList(eList);
     KSlideSet.curFrame = frameId;
   },[frameId]);
 
@@ -151,24 +129,19 @@ const App:React.FC = () => {
           );
         }
         setFrameId(0);
-        // setElementList(KSlideSet.slides[0]?.elemList.slice());
+        setElementList(KSlideSet.slides[0]?.elemList.slice());
       };
       reader.readAsText(file);
     }
   };
-  
-  const handleFullScreen = () => {
-    console.log("fullscreen called");
-    toggleFullscreen();
-  }
 
   return (
     <div className="app-container">
-      <Tools />
+      <Tools handleAddElement={handleAddElement}/>
       <SlideView />
       <SlideSet setFrameId = {setFrameId} />
       <div className='top-sect'>
-          <button onClick={() => downloadFile(defaultFileName, KSlideSet.save())}>download</button>
+          <button onClick={() => downloadFile(defaultFileName+'.scs', KSlideSet.save())}>Save</button>
           <input type="file" onChange={handleLoad}/>
           <button onClick={handleFullScreen}>FullScreen</button>
       </div>

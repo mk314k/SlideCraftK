@@ -1,14 +1,13 @@
 // import './App.css';
-// import React, { useState, useEffect } from 'react';
-// // import ReactDOM from 'react-dom';
-// import { renderToString } from 'react-dom/server';
+// import { signal, effect, Signal } from "@preact/signals-react";
+// import React, { useState} from 'react';
 // import {KComponents, KElementProps} from './component/component';
-// import {KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
-// import { downloadFile, toggleFullscreen } from './component/utility';
+// import {KElementData, KSlide, KSlideSet } from './frame';
+// import { downloadFile } from './component/utility';
 
-// // interface ToolsProps {
-// //   handleAddElement: (elemType:string, info?:string)=>void
-// // }
+// interface ToolsProps {
+//   handleAddElement: (elemType:string, info?:string)=>void
+// }
 
 // function propL2ElementL(props: KElementData[]) {
 //   console.log("propl2eL called");
@@ -24,27 +23,10 @@
 // }
 
 
-// const Tools:React.FC = () => {
-//   console.log("rendering tools");
-
-//   const handleAddElement = (elemType:string, info?:string) => {
-//     console.log("handleAddElement called");
-//     const comp = KComponents.get(elemType);
-//     const eid = KSlideSet.numElement(KSlideSet.curFrame);
-//     if (comp){
-//       const elem = comp({eid:eid, info:info})
-//       KSlideSet.slides[KSlideSet.curFrame].elemList.push(elem);
-//       KSlideSet.slides[KSlideSet.curFrame].setProp(eid, elemType);
-//       const view = document.getElementById('view');
-//       if (view){
-//         view.innerHTML += renderToString(elem);
-//       }
-//     }
-    
-//   };
+// const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
+//   console.log("rendering tool")
 
 //   const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     console.log("handleAdd Image called");
 //     const file = event.target.files?.[0];
 //     if (file) {
 //       const reader = new FileReader();
@@ -77,20 +59,19 @@
 // }
 
 // const SlideSet: React.FC<{
-//   setFrameId: React.Dispatch<React.SetStateAction<number>>
-// }> = ({ setFrameId }) => {
-//   console.log("renedring slideset");
+//   frameId: Signal<number>
+// }> = ({ frameId }) => {
+//   console.log("rendering slideset")
 
 //   const handleAddFrame = () => {
-//       console.log("addFrame called");
 //       KSlideSet.slides.push(new KSlide());
-//       setFrameId (KSlideSet.slides.length - 1);
+//       frameId.value = KSlideSet.slides.length - 1;
 //   };
 
 //   return (
 //       <div className="slideset">
 //           {Array.from({ length: KSlideSet.slides.length }, (_, i) => (
-//               <button className="mini" id={`${i}ss`} key={`${i}ss`} onClick={() => setFrameId(i)}> Frame {i}</button>
+//               <button className="mini" id={`${i}ss`} key={`${i}ss`} onClick={() => {frameId.value = i}}> Frame {i}</button>
 //           ))}
 //           <button className="mini" onClick={handleAddFrame}>
 //               Add
@@ -99,50 +80,39 @@
 //   );
 // };
 
-// const SlideView:React.FC = () =>{
-
-//   return (
-//     <div id='view' className="slideview">
-//       {KSlideSet.slides[KSlideSet.curFrame].elemList?.map((element) => (
-//         element
-//       ))}
-//     </div>
-//   )
-// }
-
 
 
 // const App:React.FC = () => {
-//   console.log("rendering app");
-//   console.log(`${<Tools />}`)
+//   console.log("rendering app")
 //   // const [elementList, setElementList] = useState<React.ReactNode[]>([]);
-//   const [frameId, setFrameId] = useState(0);
+//   const frameId = signal(0);
+//   // const setFrameId = (sth:number) =>{
+//   //   frameId.value = sth;
+//   // }
 
-//   // const handleAddElement = (elemType:string, info?:string) => {
-//   //   console.log("handleAddElement called");
-//   //   const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
-//   //   if (comp){
-//   //     const elem = React.createElement(comp, {eid:elementList.length, info:info});
-//   //     // setElementList(prevList => [...prevList, elem]);
-//   //     KSlideSet.slides[frameId].elemList.push(elem);
-//   //     KSlideSet.slides[frameId].pushProp(elemType);
-//   //   }
-//   // };
-
-//   useEffect(()=>{
-//     console.log("frameId effect hook");
-//     const eList = [];
-//     for (let i=0; i<KSlideSet.numElement(frameId); i++ ){
-//       if (KSlideSet.slides[frameId]?.elemProp[i]?.name !== 'none'){
-//         eList.push(KSlideSet.slides[frameId]?.elemList[i])
-//       }
+//   const handleAddElement = (elemType:string, info?:string) => {
+//     const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
+//     if (comp){
+//       const elem = comp({eid:KSlideSet.slides[frameId.value].elemList.length, info:info});
+//       // setElementList(prevList => [...prevList, elem]);
+//       KSlideSet.slides[frameId.value].elemList.push(elem);
+//       KSlideSet.slides[frameId.value].pushProp(elemType);
 //     }
-//     // setElementList(eList);
-//     KSlideSet.curFrame = frameId;
-//   },[frameId]);
+//     frameId.value = 0;
+//   };
+
+//   // effect(()=>{
+//   //   const eList = [];
+//   //   for (let i=0; i<KSlideSet.numElement(frameId.value); i++ ){
+//   //     if (KSlideSet.slides[frameId.value]?.elemProp[i]?.name !== 'none'){
+//   //       eList.push(KSlideSet.slides[frameId.value]?.elemList[i])
+//   //     }
+//   //   }
+//   //   setElementList(eList);
+//   //   KSlideSet.curFrame = frameId.value;
+//   // });
 
 //   const handleLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     console.log("handleLoad called");
 //     const file = event.target.files?.[0];
 //     if (file) {
 //       const reader = new FileReader();
@@ -154,7 +124,7 @@
 //             KSlideSet.slides[i].elemProp
 //           );
 //         }
-//         setFrameId(0);
+//         frameId.value = 0;
 //         // setElementList(KSlideSet.slides[0]?.elemList.slice());
 //       };
 //       reader.readAsText(file);
@@ -162,17 +132,20 @@
 //   };
   
 //   const handleFullScreen = () => {
-//     console.log("fullscreen called");
-//     toggleFullscreen();
+
 //   }
 
 //   return (
 //     <div className="app-container">
-//       <Tools />
-//       <SlideView />
-//       <SlideSet setFrameId = {setFrameId} />
+//       <Tools handleAddElement={handleAddElement}/>
+//       <div key={'slide'} className="slideview">
+//         {KSlideSet.slides[frameId.value].elemList?.map((element) => (
+//           element
+//         ))}
+//       </div>
+//       <SlideSet frameId = {frameId} />
 //       <div className='top-sect'>
-//           <button onClick={() => downloadFile(defaultFileName, KSlideSet.save())}>download</button>
+//           <button onClick={() => downloadFile('1hello.kms', KSlideSet.save())}>download</button>
 //           <input type="file" onChange={handleLoad}/>
 //           <button onClick={handleFullScreen}>FullScreen</button>
 //       </div>

@@ -5,17 +5,13 @@ import { KSlideSet, defaultSV } from '../frame';
 
 const useKElemHook = (eid:number, sv = defaultSV) => {
     console.log("Khook");
-    if (eid < KSlideSet.slides[KSlideSet.curFrame].elemProp.length){
+    if (eid < KSlideSet.slides[KSlideSet.curFrame].numElement()){
         sv = {
-            x: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].x,
-            y: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].y,
-            width: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].width,
-            height: KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].height
+            x: KSlideSet.slides[KSlideSet.curFrame].get(eid).x,
+            y: KSlideSet.slides[KSlideSet.curFrame].get(eid).y,
+            width: KSlideSet.slides[KSlideSet.curFrame].get(eid).width,
+            height: KSlideSet.slides[KSlideSet.curFrame].get(eid).height
         }
-        // const elem = document.getElementById(`${eid}`);
-        // if (elem){
-        //     elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].inner;
-        // }
     }
     const [posx, setPosX] = useState(sv.x);
     const [posy, setPosY] = useState(sv.y);
@@ -25,14 +21,14 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
 
     useEffect(()=>{
         console.log("Khook effect pos");
-        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].x = posx;
-        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].y = posy;
+        KSlideSet.slides[KSlideSet.curFrame].get(eid).x = posx;
+        KSlideSet.slides[KSlideSet.curFrame].get(eid).y = posy;
     }, [posx, posy, eid])
 
     useEffect(()=>{
         console.log("khook effect dim");
-        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].width = width;
-        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].height = height;
+        KSlideSet.slides[KSlideSet.curFrame].get(eid).width = width;
+        KSlideSet.slides[KSlideSet.curFrame].get(eid).height = height;
     }, [width, height, eid])
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

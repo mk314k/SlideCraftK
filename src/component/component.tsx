@@ -1,41 +1,43 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
-import { KElementData, KSlideSet } from "../frame";
-import React, { useEffect } from "react";
+import { KSlideSet } from "../frame";
+import React, { useEffect, useCallback } from "react";
 
 export interface KElementContainerProps {
-    eid:number,
-    childNode: React.ReactNode
-}
-export interface KElementProps {
-    eid:number,
-    info?:string
+    eid: number;
+    childNode: React.ReactNode;
 }
 
-export const KElement:React.FC<KElementContainerProps> = ({
-    eid,
-    childNode
-}) => {
+export interface KElementProps {
+    eid: number;
+    info?: string;
+}
+
+
+const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
-    const {style, handleMouseDown} = useKElemHook(eid);
-    useEffect(()=>{
+    const { style, handleMouseDown } = useKElemHook(eid);
+
+    useEffect(() => {
         console.log("KElement effect hook");
         const elem = document.getElementById(`${eid}`);
-        if (elem){
-            elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].elemProp[eid].inner;
+        if (elem) {
+            elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
         }
-    }, [eid])
+    }, [eid]);
 
-    const handleDelete = () => {
+    const handleDelete = useCallback(() => {
         console.log("handleDelete called");
-        KSlideSet.slides[KSlideSet.curFrame].elemProp[eid] = new KElementData('none');
-        const elem =document.getElementById(`${eid}div`);
-        if (elem){
-            elem.className = 'hidden';
+        if (!KSlideSet.editingMode){
+            KSlideSet.slides[KSlideSet.curFrame].del(eid);
+            const elem = document.getElementById(`${eid}div`);
+            if (elem) {
+                elem.className = 'hidden';
+            }
         }
-    }
+    }, [eid]);
 
-    const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         console.log("onkeydown called");
         switch (event.key) {
             case 'Delete':
@@ -46,7 +48,14 @@ export const KElement:React.FC<KElementContainerProps> = ({
             default:
                 break;
         }
-    };
+    }, [handleDelete]);
+    const view = document.getElementById('slide');
+    let posx= style.x; let posy =  style.y;
+    if (view){
+        const vrect = view.getBoundingClientRect();
+        posx = posx*100/vrect.width;
+        posy = posy*100/vrect.height;
+    }
 
     return (
         <div
@@ -55,8 +64,8 @@ export const KElement:React.FC<KElementContainerProps> = ({
             className='element-container'
             style={{
                 position: 'absolute',
-                left: style.x,
-                top: style.y,
+                left: `${posx}%`,
+                top: `${posy}%`,
                 width: style.width,
                 height: style.height,
                 cursor: style.cursor
@@ -67,48 +76,32 @@ export const KElement:React.FC<KElementContainerProps> = ({
         >
             {childNode}
         </div>
-    )
-}
+    );
+};
 
-export const KButton:React.FC<KElementProps> = ({eid}) => {
-    console.log("rendering kbutton");
-    return (
-        <KElement eid={eid} childNode={
-            <button
-                id={`${eid}`}
-                className='element'
-                onDoubleClick={() => {handleEditText(eid)}}
-            ></button>
-        } />
-    )
-}
+const createKElementComponent = (Component: React.ElementType, info?:string) => {
+    return ({ eid }: KElementProps) => {
+        console.log(`rendering ${Component}`);
+        return (
+            <KElement eid={eid} childNode={
+                <Component
+                    id={`${eid}`}
+                    className='element'
+                    onDoubleClick={() => { handleEditText(eid, info === 'latex') }}
+                />
+            } />
+        );
+    };
+};
 
-export const KLatex:React.FC<KElementProps> = ({eid}) => {
-    console.log("rendering klatex");
-    return (
-        <KElement eid={eid} childNode={
-            <p
-                id={`${eid}`}
-                className='element'
-                onDoubleClick={() => handleEditText(eid, true)}
-            ></p>
-        } />
-    )
-}
-export const KTextArea:React.FC<KElementProps> = ({eid}) => {
-    console.log("rendering ktext");
-    return (
-        <KElement eid={eid} childNode={
-            <textarea
-                id={`${eid}`}
-                className='element'
-            ></textarea>
-        } />
-    )
-}
+export const KButton = createKElementComponent('button');
 
-export const KImage:React.FC<KElementProps> = ({eid, info}) => {
-    console.log("rendering kimage");
+export const KLatex = createKElementComponent('p', 'latex');
+
+export const KTextArea = createKElementComponent('textarea');
+
+export const KImage = ({ eid, info }: KElementProps) => {
+    console.log("rendering KImage");
     return (
         <KElement eid={eid} childNode={
             <img
@@ -116,10 +109,11 @@ export const KImage:React.FC<KElementProps> = ({eid, info}) => {
                 className='element'
                 src={info}
                 draggable="false"
-            ></img>
+            />
         } />
-    )
-}
+    );
+};
+
 export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["button", KButton],
     ["latex", KLatex],

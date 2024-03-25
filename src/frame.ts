@@ -2,7 +2,7 @@ import React from "react";
 
 export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
-export const defaultFileName = 'untitled.scs';
+export const defaultFileName = 'untitled';
 
 export class KElementData {
     public name:string;
@@ -24,17 +24,29 @@ export class KElementData {
 
 export class KSlide {
     public elemList:React.ReactNode[] = [];
-    public elemProp:KElementData[] = [];
-    public elemProps:Map<number, KElementData> = new Map();
+    public elemProp:Map<number, KElementData> = new Map();
+    
+    public elements(){
+        return this.elemList.filter((element) => element !== null);
+    }
 
-    public pushProp(elemType:string){
-        this.elemProp.push(new KElementData(elemType));
+    public numElement():number{
+        return this.elemList.length;
     }
-    public setProp(eid:number, elemType:string){
-        this.elemProps.set(eid , new KElementData(elemType));
+
+    public push(elemType:string, elem:React.ReactNode){
+        this.set(this.numElement(), elemType);
+        this.elemList.push(elem);
     }
-    public getProp(eid:number):KElementData{
-        return this.elemProps.get(eid)?? new KElementData('none');
+    public set(eid:number, elemType:string){
+        this.elemProp.set(eid , new KElementData(elemType));
+    }
+    public get(eid:number):KElementData{
+        return this.elemProp.get(eid)?? new KElementData('none');
+    }
+    public del(eid:number){
+        this.elemProp.delete(eid);
+        this.elemList[eid] = null;
     }
 
 }
@@ -42,43 +54,46 @@ export class KSlide {
 export class KSlideSet {
     public static slides:KSlide[] = [new KSlide()];
     public static curFrame = 0;
+    public static editingMode = false;
+    public static view = {x:0, y:0};
 
     public static numElement(frame = KSlideSet.curFrame){
-        return KSlideSet.slides[frame].elemProp.length;
+        return KSlideSet.slides[frame].numElement();
     }
 
     public static getE(s:number, e:number){
         return KSlideSet.slides[s].elemList[e]
     }
 
-    public static load(data: string) {
+    public static load(data: string): void {
         // Parse the data string and update slides and everything inside
         const parsedData = JSON.parse(data);
-        // Example logic: assuming data is an array of slides
+        // Assuming data is an array of slides
         KSlideSet.slides = parsedData.map((slideData: KSlide) => {
             const slide = new KSlide();
-            slide.elemProp = slideData.elemProp.map((elemPropData: KElementData) => {
-                return new KElementData(elemPropData.name, elemPropData.x, elemPropData.y, elemPropData.width, elemPropData.height, elemPropData.inner);
+            slideData.elemProp.forEach((elemPropData: KElementData, index: number) => {
+                const { name, x, y, width, height, inner } = elemPropData;
+                slide.elemProp.set(index, new KElementData(name, x, y, width, height, inner));
             });
             return slide;
         });
     }
 
     public static save(): string {
-        // Return string of all the things inside slides
+        // Serialize slides to JSON string
         const data = this.slides.map((slide: KSlide) => {
-            return {
-                elemProp: slide.elemProp.map((elemProp: KElementData) => {
-                    return {
-                        name: elemProp.name,
-                        x: elemProp.x,
-                        y: elemProp.y,
-                        width: elemProp.width,
-                        height: elemProp.height,
-                        inner: elemProp.inner
-                    };
-                })
-            };
+            const elemPropArray: KElementData[] = [];
+            slide.elemProp.forEach((elemProp: KElementData) => {
+                elemPropArray.push({
+                    name: elemProp.name,
+                    x: elemProp.x,
+                    y: elemProp.y,
+                    width: elemProp.width,
+                    height: elemProp.height,
+                    inner: elemProp.inner
+                });
+            });
+            return { elemProp: elemPropArray };
         });
         return JSON.stringify(data);
     }

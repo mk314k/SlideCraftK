@@ -19,6 +19,7 @@ const tex2mml = (tex:string) => {
 
 export const handleEditText = (id: number, ltx = false) => {
     console.log("editing");
+    KSlideSet.editingMode = true;
     const element = document.getElementById(`${id}`);
     if (element) {
       const parentElement = element.parentElement;
@@ -36,8 +37,9 @@ export const handleEditText = (id: number, ltx = false) => {
         if (!textInput.contains(e.target as Node)) {
           const innerData = ltx ? tex2mml(textInput.value) : textInput.value;
           element.innerHTML = innerData;
-          KSlideSet.slides[KSlideSet.curFrame].elemProp[id].inner = innerData;
+          KSlideSet.slides[KSlideSet.curFrame].get(id).inner = innerData;
           parentElement?.replaceChild(element, textInput);
+          KSlideSet.editingMode = false;
           document.removeEventListener('click', handleClick);
         }
       }
@@ -67,14 +69,36 @@ export function downloadFile(fileName:string, fileContent:string) {
   document.body.removeChild(element);
 }
 
-export function toggleFullscreen() {
-  const elem = document.getElementById("slide");
+// const calculateShift = (udim:number, vdim:number, pos:number):string => {
+//   return `${pos*vdim/udim}`
+// }
+
+export function handleFullScreen() {
+  const view = document.getElementById("slide");
+  // const urect = (view as HTMLElement).getBoundingClientRect();
+  // const handleFullScreenExit = ()=> {
+  //   if (view){
+  //     const vrect = view?.getBoundingClientRect();
+  //     view.childNodes.forEach((child)=>{
+  //       if (child instanceof HTMLElement){
+  //         console.log(child.style.left, urect, vrect);
+  //         child.style.left = calculateShift(
+  //           urect?.width, vrect.width, Number(child.style.left)
+  //         );
+  //         child.style.top = calculateShift(
+  //           urect.height, vrect.height, Number(child.style.top)
+  //         );
+  //         console.log(child.style.left);
+  //       }
+  //     })
+  //   }
+  // }
 
   if (!document.fullscreenElement ) {
-    if (elem?.requestFullscreen) {
-      elem.requestFullscreen();
+    if (view?.requestFullscreen) {
+      view.requestFullscreen();
+      // document.addEventListener('fullscreenchange', handleFullScreenExit);
     }
-    // document.addEventListener(onkeydown)
     console.log("fullscrenn");
   }
 }
