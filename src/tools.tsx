@@ -1,4 +1,13 @@
 import { KSlideSet } from "./frame"
+import { globalVar } from 'statebinderk';
+
+const slideBGColr = new globalVar('red');
+slideBGColr.addBinding(
+  'slide',
+  (slide:HTMLElement, v:string)=>{
+    slide.style.background = v;
+  }
+)
 
 interface ToolsProps {
     handleAddElement: (elemType:string, info?:string)=>void
@@ -83,7 +92,15 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                 <label htmlFor="z-index">Z-Index:</label>
                 <input type="number" id="z-index" onChange={handleZIndexChange} />
             </div>
-            
+            <div>
+                <label htmlFor="z-index">Colr</label>
+                <select id="font-family" onChange={(e)=>{slideBGColr.transition(e.target.value)}}>
+                    <option value="blue">blue</option>
+                    <option value="red">red</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    {/* Add more font options here */}
+                </select>
+            </div>
         </div>
           
       </div>
