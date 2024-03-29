@@ -4,6 +4,10 @@ export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
 export const defaultFileName = 'untitled';
 
+interface styleObj{
+    [key:string]:string;
+}
+
 export class KElementData {
     public name:string;
     public constructor(
@@ -12,7 +16,8 @@ export class KElementData {
         public y:number =defaultSV.y,
         public width:number =defaultSV.width,
         public height:number =defaultSV.height,
-        public inner = ''
+        public inner = '',
+        public style:styleObj = {}
     ){
         this.name = elemType;
         if (this.inner === ''){
@@ -56,6 +61,7 @@ export class KSlideSet {
     public static curFrame = 0;
     public static editingMode = false;
     public static view = {x:0, y:0};
+    public static activeEID:number|null = null;
 
     public static numElement(frame = KSlideSet.curFrame){
         return KSlideSet.slides[frame].numElement();
@@ -90,7 +96,8 @@ export class KSlideSet {
                     y: elemProp.y,
                     width: elemProp.width,
                     height: elemProp.height,
-                    inner: elemProp.inner
+                    inner: elemProp.inner,
+                    style: elemProp.style
                 });
             });
             return { elemProp: elemPropArray };

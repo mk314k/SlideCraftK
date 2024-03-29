@@ -3,10 +3,8 @@ import React, { useState, useEffect } from 'react';
 import {KComponents, KElementProps} from './component/component';
 import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
 import {downloadFile, handleFullScreen, insertCode } from './component/utility';
+import { Tools } from './tools';
 
-interface ToolsProps {
-  handleAddElement: (elemType:string, info?:string)=>void
-}
 
 function propL2ElementL(props:Map<number, KElementData>) {
   console.log("propl2eL called");
@@ -21,42 +19,6 @@ function propL2ElementL(props:Map<number, KElementData>) {
   return elems;
 }
 
-
-const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
-  console.log("rendering tools");
-
-  const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("handleAdd Image called");
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const imageDataUrl = reader.result as string; // Cast to string
-        console.log(imageDataUrl);
-        handleAddElement('image', imageDataUrl);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="toolbar">
-        <button className="tool" onClick={()=>handleAddElement('button')}>
-          Add Button
-        </button>
-        <button className="tool" onClick={()=>handleAddElement('textarea')}>
-          Add Text
-        </button>
-        <button className="tool" onClick={()=>handleAddElement('latex')}>
-          Add latex
-        </button>
-        <label className="tool" style={{ display: 'inline-block', padding: '6px 12px', cursor: 'pointer', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}>
-          Add Image
-          <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
-        </label>
-    </div>
-  )
-}
 
 const SlideSet: React.FC<{
   setFrameId: React.Dispatch<React.SetStateAction<number>>
@@ -85,8 +47,9 @@ const SlideView: React.FC = () => {
   console.log("rendering ElementRenderer");
   // const [viewWidth, setViewWidth] = useState(0);
   // const [viewHeight, setViewHeight] = useState(0);
+  KSlideSet.activeEID = null;
   return (
-      <div id='slide' className="slideview">
+      <div id='slide' className="slideview" onClick={()=>{KSlideSet.activeEID = null;console.log(KSlideSet.activeEID)}}>
           {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
               <React.Fragment key={index}>{element}</React.Fragment>
           ))}

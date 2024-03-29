@@ -71,6 +71,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 cursor: style.cursor
             }}
             onMouseDown={e => handleMouseDown(e)}
+            onClick={(e)=>{KSlideSet.activeEID = eid; console.log(KSlideSet.activeEID);e.stopPropagation()}}
             onKeyDown={onKeyDown}
             tabIndex={0}
         >
