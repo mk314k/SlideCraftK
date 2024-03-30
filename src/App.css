@@ -42,13 +42,6 @@
   padding: 6px 12px;
 }
 
-.bot-sect {
-  position: fixed;
-  left: 2vw;
-  bottom: 2vh;
-  width: calc(1.5 * var(--tool-width));
-  background-color: #f0f0f0;
-}
 
 .slideset{
   display: flex;
@@ -60,7 +53,17 @@
   left: calc(0.5*var(--tool-width) + 30vw);
   width: 40vw;
   height: 20vh;
+  background: azure;
+  border: none;
 }
+.mini{
+  height: inherit;
+  width: min(200px, 20vw);
+  border: 1px solid black;
+  padding: 60px;
+  background: rgba(59,130,246,.5);
+}
+
 
 .slideview{
   position: fixed;
@@ -79,11 +82,7 @@
 }
 
 
-.mini{
-  height: inherit;
-  width: min(200px, 20vw);
-  border: 1px solid black;
-}
+
 
 .element {
   display: flex;
@@ -108,7 +107,12 @@
   align-items: center;
   top: 2vh;
   right: 5vw;
+  background: rgba(59,130,246,.5);
+  border-radius: 10px 0 10px 0;
 } 
+.top-sect button{
+  background: rgba(255, 255, 255, 0.1);
+}
 
 .hidden {
   display: none;
