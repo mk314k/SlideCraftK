@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import {KComponents, KElementProps} from './component/component';
 import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
-import {downloadFile, handleFullScreen, insertCode } from './component/utility';
+import {downloadFile, handleFullScreen } from './component/utility';
 import { Tools } from './tools';
 
 
@@ -111,13 +111,13 @@ const App:React.FC = () => {
       <div className='top-sect'>
           <button onClick={() => downloadFile(defaultFileName+'.scs', KSlideSet.save())}>Save</button>
           <input type="file" onChange={handleLoad}/>
-          <button onClick={handleFullScreen}>FullScreen</button>
+          <button onClick={handleFullScreen}>Presentation</button>
       </div>
-      <div className='bot-sect'>
+      {/* <div className='bot-sect'>
         <textarea name="code" id="code" cols={30} rows={12}></textarea>
         <button onClick={()=>{insertCode('style')}}>Add CSS</button>
         <button onClick={()=>{insertCode('script')}}>Add JS</button>
-      </div>
+      </div> */}
     </div>
   )
 }
