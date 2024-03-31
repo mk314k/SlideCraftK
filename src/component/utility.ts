@@ -69,6 +69,15 @@ export function downloadFile(fileName:string, fileContent:string) {
   document.body.removeChild(element);
 }
 
+
+export function insertCode(cssOrJs:string){
+  const codeText = (document.getElementById('code') as HTMLTextAreaElement).value;
+  const codeElement = document.createElement(cssOrJs);
+  codeElement.appendChild(document.createTextNode(codeText));
+  document.head.appendChild(codeElement);
+}
+
+
 // const calculateShift = (udim:number, vdim:number, pos:number):string => {
 //   return `${pos*vdim/udim}`
 // }

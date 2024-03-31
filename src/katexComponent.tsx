@@ -1,10 +1,7 @@
-import './App.css';
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import katex from 'katex';
 
-const LatexEditor: React.FC = () => {
+export const KatexEditor: React.FC = () => {
   const [latex, setLatex] = useState('Enter LaTeX here');
   const [isEditing, setIsEditing] = useState(false);
   const [editedLatex, setEditedLatex] = useState(latex);
@@ -57,25 +54,4 @@ const LatexEditor: React.FC = () => {
 };
 
 
-
-
-
-
-
-
-
-const App: React.FC = () => {
- 
-  
-  
-
-  return (
-    <>
-    <LatexEditor>
-
-    </LatexEditor>
-    </>
-  );
-};
-
-export default App;
+export default KatexEditor;
