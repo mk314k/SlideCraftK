@@ -7,8 +7,6 @@ import { Tools } from './tools';
 
 
 
-
-
 function propL2ElementL(props:Map<number, KElementData>) {
   console.log("propl2eL called");
   const elems:React.FunctionComponentElement<KElementProps>[] = [];
@@ -32,6 +30,7 @@ const SlideSet: React.FC<{
       console.log("addFrame called");
       KSlideSet.slides.push(new KSlide());
       setFrameId (KSlideSet.slides.length - 1);
+      KSlideSet.slideBG.addBinding(`slide${KSlideSet.slides.length - 1}`, 'azure');
   };
 
   return (
@@ -51,8 +50,14 @@ const SlideView: React.FC = () => {
   // const [viewWidth, setViewWidth] = useState(0);
   // const [viewHeight, setViewHeight] = useState(0);
   KSlideSet.activeEID = null;
+
   return (
-      <div id='slide' className="slideview" onClick={()=>{KSlideSet.activeEID = null;console.log(KSlideSet.activeEID)}}>
+      <div 
+        id={`slide${KSlideSet.curFrame}`} 
+        style={{background:KSlideSet.slideBG.current(KSlideSet.curFrame)}} 
+        className="slideview" 
+        onClick={()=>{KSlideSet.activeEID = null}}
+      >
           {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
               <React.Fragment key={index}>{element}</React.Fragment>
           ))}

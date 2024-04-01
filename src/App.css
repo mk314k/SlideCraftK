@@ -7,11 +7,18 @@
   --background: azure;
   background: var(--background);
 }
+button{
+  border-radius: 10px !important;
+}
 
 /* App.css */
 *{
   margin: 0;
 }
+textarea{
+  resize: none;
+}
+
 .slideset, .slideview, p {
   border: 1px solid black;
 }
@@ -82,22 +89,22 @@
 }
 
 
-
+.element-container {
+  border: none;
+  border-radius: 20%;
+}
 
 .element {
+  all:inherit;
   display: flex;
-  width: inherit;
-  height: inherit;
-  cursor: inherit;
-  z-index: 0;
+  left: initial;
+  top: initial;
   justify-content: center;
   align-items: center;
 }
 
 
-.element-container {
-  border: none;
-}
+
 
 
 .top-sect{

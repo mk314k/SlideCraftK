@@ -1,4 +1,5 @@
 import React from "react";
+import { StyleVarList } from "statebinderk";
 
 export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
@@ -62,6 +63,7 @@ export class KSlideSet {
     public static editingMode = false;
     public static view = {x:0, y:0};
     public static activeEID:number|null = null;
+    public static slideBG = new StyleVarList([{id:`slide0`, state:'azure'}],'background');
 
     public static numElement(frame = KSlideSet.curFrame){
         return KSlideSet.slides[frame].numElement();

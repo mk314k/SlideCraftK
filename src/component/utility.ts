@@ -83,7 +83,7 @@ export function insertCode(cssOrJs:string){
 // }
 
 export function handleFullScreen() {
-  const view = document.getElementById("slide");
+  const view = document.getElementById(`slide${KSlideSet.curFrame}`);
   // const urect = (view as HTMLElement).getBoundingClientRect();
   // const handleFullScreenExit = ()=> {
   //   if (view){
