@@ -68,7 +68,8 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 top: `${posy}%`,
                 width: style.width,
                 height: style.height,
-                cursor: style.cursor
+                cursor: style.cursor,
+                ...KSlideSet.slides[KSlideSet.curFrame].get(eid).style
             }}
             onMouseDown={e => handleMouseDown(e)}
             onClick={(e)=>{KSlideSet.activeEID = eid; console.log(KSlideSet.activeEID);e.stopPropagation()}}

@@ -1,50 +1,60 @@
 import { insertCode } from "./component/utility";
 import { KSlideSet } from "./frame"
-import { globalVar } from 'statebinderk';
-
-const slideBGColr = new globalVar('red');
-slideBGColr.addBinding(
-  'slide',
-  (slide:HTMLElement, v:string)=>{
-    slide.style.background = v;
-  }
-)
 
 interface ToolsProps {
     handleAddElement: (elemType:string, info?:string)=>void
 }
-const handleStyleChange = (e:React.ChangeEvent<HTMLInputElement>, funct:CallableFunction, styName:string) => {
+
+
+const handleStyleChange = (styName:string, value:string) =>{
     if (KSlideSet.activeEID != null){
         const elemP = KSlideSet.slides[KSlideSet.curFrame].elemProp.get(KSlideSet.activeEID);
-        if (elemP){
-            elemP.style[styName] = e.target.value;
+        const elem = document.getElementById(`${KSlideSet.activeEID}div`);
+        if (elemP && elem){
+            elemP.style[styName] = value;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (elem.style as any)[styName] = value;   
         }
     }
-    funct(e);
 }
 
-const handleFontFamilyChange = () =>{
-
-}
-// const handleFontSizeChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
-//     const elem = document.getElementById(`${KSlideSet.activeEID}div`);
-//     if (elem){
-//         console.log(elem.style.fontSize);
-//         elem.style.fontSize = e.target.value+'em';
-//         console.log(elem.style.fontSize);
-//     }
-// }
-
-const handleBgColorChange = () =>{
-
-}
-const handleTextColorChange = (e:React.ChangeEvent<HTMLInputElement>) =>{
-    console.log(e.target.value)
-    const elem = document.getElementById(`${KSlideSet.activeEID}div`);
-    if (elem){
-        elem.style.color = e.target.value;
+const handleFontSize = (change: number) => {
+    if (KSlideSet.activeEID != null){
+        const elem = document.getElementById(`${KSlideSet.activeEID}div`);
+        if (elem) {
+            const fontSize = window.getComputedStyle(elem).fontSize;
+            const newFontSize = parseFloat(fontSize) + change;
+            handleStyleChange('fontSize', `${newFontSize}px`);
+        }
     }
+}
 
+const handleBold = () => {
+    if (KSlideSet.activeEID != null){
+        const elemP = KSlideSet.slides[KSlideSet.curFrame].elemProp.get(KSlideSet.activeEID);
+        if (elemP) {
+            const fontWeight = elemP.style['fontWeight'];
+            if (fontWeight === 'bold') {
+                handleStyleChange('fontWeight', 'normal');
+            } else {
+                handleStyleChange('fontWeight', 'bold');
+            }
+        }
+    }
+}
+
+const handleItalic = () => {
+    if (KSlideSet.activeEID != null){
+        const elemP = KSlideSet.slides[KSlideSet.curFrame].elemProp.get(KSlideSet.activeEID);
+        if (elemP) {
+            const fontStyle = elemP.style['fontStyle'];
+            if (fontStyle === 'italic') {
+                handleStyleChange('fontStyle', 'normal');
+            } else {
+                handleStyleChange('fontStyle', 'italic');
+            }
+        }
+    }
 }
 // const handleZIndexChange = () =>{
 
@@ -59,7 +69,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          const imageDataUrl = reader.result as string; // Cast to string
+          const imageDataUrl = reader.result as string; 
           console.log(imageDataUrl);
           handleAddElement('image', imageDataUrl);
         };
@@ -92,22 +102,22 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         <div className="toolset">
             <div className="tool">
                 <i className="material-icons">text_fields</i>
-                <select id="font-family" onChange={handleFontFamilyChange}>
+                <select id="font-family" onChange={(e)=>{handleStyleChange('fontFamily', e.target.value)}}>
                     <option value="Arial">Arial</option>
                     <option value="Helvetica">Helvetica</option>
                     <option value="Times New Roman">Times New Roman</option>
                 </select>
             </div>
-            <label className="tool">
+            <label className="tool" onClick={()=>{handleFontSize(5)}}>
                 <i className="material-icons">text_increase</i>
             </label>
-            <label className="tool">
+            <label className="tool" onClick={()=>{handleFontSize(-5)}}>
                 <i className="material-icons">text_decrease</i>
             </label>
-            <label className="tool">
+            <label className="tool" onClick={handleBold}>
                 <i className="material-icons">format_bold</i>
             </label>
-            <label className="tool">
+            <label className="tool" onClick={handleItalic}>
                 <i className="material-icons">format_italic</i>
             </label>
             {/* <div>
@@ -116,18 +126,18 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             </div> */}
             <label className="tool">
                 <i className="material-icons">format_color_text</i>
-                <input type="color" id="text-color" onChange={(e)=>{handleStyleChange(e, handleTextColorChange, 'color')}} />
+                <input type="color" id="text-color" onChange={(e)=>{handleStyleChange('color', e.target.value)}} />
             </label>
             <label className="tool">
                 <i className="material-icons">format_color_fill</i>
-                <input type="color" id="background-color" onChange={(e)=>{handleStyleChange(e, handleBgColorChange, 'background-color')}} />
+                <input type="color" id="background-color" onChange={(e)=>{handleStyleChange('background', e.target.value)}} />
             </label>
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">
             <label className="tool">
                 <i className="material-icons">palette</i>
-                <input type="color" id="background-color" onChange={(e)=>{slideBGColr.transition(e.target.value)}} />
+                <input type="color" id="background-color" onChange={(e)=>{KSlideSet.slideBG.transition(KSlideSet.curFrame, e.target.value)}} />
             </label>
         </div>
         <span>Add CSS/JS</span>
@@ -136,6 +146,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             <label className="tool" onClick={()=>{insertCode('style')}}>CSS</label>
             <label className="tool" onClick={()=>{insertCode('script')}}>JS</label>
         </div>
+        {/* <span>{KSlideSet.activeEID}</span> */}
       </div>
     )
   }
