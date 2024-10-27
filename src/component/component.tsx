@@ -49,13 +49,13 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 break;
         }
     }, [handleDelete]);
-    const view = document.getElementById('slide');
+    // const view = document.getElementById('slide');
     let posx= style.x; let posy =  style.y;
-    if (view){
-        const vrect = view.getBoundingClientRect();
-        posx = posx*100/vrect.width;
-        posy = posy*100/vrect.height;
-    }
+    // if (view){
+    //     const vrect = view.getBoundingClientRect();
+    //     posx = posx*100/vrect.width;
+    //     posy = posy*100/vrect.height;
+    // }
 
     return (
         <div
@@ -64,10 +64,11 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
             className='element-container'
             style={{
                 position: 'absolute',
-                left: `${posx}%`,
-                top: `${posy}%`,
+                left: `${posx}px`,
+                top: `${posy}px`,
                 width: style.width,
                 height: style.height,
+                background: 'var(--background)' ,
                 cursor: style.cursor,
                 ...KSlideSet.slides[KSlideSet.curFrame].get(eid).style
             }}

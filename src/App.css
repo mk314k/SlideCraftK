@@ -4,7 +4,8 @@
   width: 100vw;
   height: 100vh;
   --tool-width: min(25vw, 200px);
-  --background: azure;
+  --background: #e6ccc4;
+  --foreground: rgba(0, 0, 0, 0.5);
   background: var(--background);
 }
 button{
@@ -36,7 +37,7 @@ textarea{
   left: 2vw;
   width: var(--tool-width);
   height: 96vh;
-  background-color: rgba(59,130,246,.5);
+  background-color: var(--foreground);
   border-radius: 30px;
 }
 .toolset{
@@ -47,6 +48,10 @@ textarea{
 .tool{
   cursor: pointer;
   padding: 6px 12px;
+}
+#code{
+  height: 40vh !important;
+  border-radius: 10px;
 }
 
 
@@ -60,7 +65,7 @@ textarea{
   left: calc(0.5*var(--tool-width) + 30vw);
   width: 40vw;
   height: 20vh;
-  background: azure;
+  background: var(--background);
   border: none;
 }
 .mini{
@@ -68,7 +73,7 @@ textarea{
   width: min(200px, 20vw);
   border: 1px solid black;
   padding: 60px;
-  background: rgba(59,130,246,.5);
+  background: var(--foreground);
 }
 
 
@@ -114,7 +119,7 @@ textarea{
   align-items: center;
   top: 2vh;
   right: 5vw;
-  background: rgba(59,130,246,.5);
+  background: var(--foreground);
   border-radius: 10px 0 10px 0;
 } 
 .top-sect button{

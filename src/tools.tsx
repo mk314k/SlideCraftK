@@ -142,7 +142,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         </div>
         <span>Add CSS/JS</span>
         <div className='toolset'>
-            <textarea name="code" id="code" cols={20} rows={30}></textarea>
+            <textarea name="code" id="code" cols={20} rows={20}></textarea>
             <label className="tool" onClick={()=>{insertCode('style')}}>CSS</label>
             <label className="tool" onClick={()=>{insertCode('script')}}>JS</label>
         </div>
