@@ -8,7 +8,7 @@ import { Tools } from './tools';
 
 
 function propL2ElementL(props:Map<number, KElementData>) {
-  console.log("propl2eL called");
+  console.log("propl2eL called with " + props.size + " elements");
   const elems:React.FunctionComponentElement<KElementProps>[] = [];
   for (const [index, prop] of props.entries()){
     const comp:React.FC<KElementProps>|undefined = KComponents.get(prop.name);
