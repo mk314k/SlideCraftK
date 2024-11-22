@@ -50,7 +50,8 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         }
     }, [handleDelete]);
     // const view = document.getElementById('slide');
-    let posx= style.x; let posy =  style.y;
+    const posx = style.x;
+    const posy = style.y;
     // if (view){
     //     const vrect = view.getBoundingClientRect();
     //     posx = posx*100/vrect.width;
