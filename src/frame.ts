@@ -31,6 +31,7 @@ export class KElementData {
 export class KSlide {
     public elemList:React.ReactNode[] = [];
     public elemProp:Map<number, KElementData> = new Map();
+    public background = 'azure';
     
     public elements(){
         return this.elemList.filter((element) => element !== null);
@@ -77,8 +78,9 @@ export class KSlideSet {
         // Parse the data string and update slides and everything inside
         const parsedData = JSON.parse(data);
         // Assuming data is an array of slides
-        KSlideSet.slides = parsedData.map((slideData: KSlide) => {
+        KSlideSet.slides = parsedData.map((slideData: KSlide & { background?: string }) => {
             const slide = new KSlide();
+            slide.background = slideData.background ?? 'azure';
             slideData.elemProp.forEach((elemPropData: KElementData & { id?: number }, index: number) => {
                 const { name, x, y, width, height, inner, style } = elemPropData;
                 const eid = typeof elemPropData.id === 'number' ? elemPropData.id : index;
@@ -86,11 +88,18 @@ export class KSlideSet {
             });
             return slide;
         });
+        KSlideSet.slideBG = new StyleVarList(
+            KSlideSet.slides.map((slide, index) => ({
+                id: `slide${index}`,
+                state: slide.background
+            })),
+            'background'
+        );
     }
 
     public static save(): string {
         // Serialize slides to JSON string
-        const data = this.slides.map((slide: KSlide) => {
+        const data = this.slides.map((slide: KSlide, slideIndex: number) => {
             const elemPropArray: (KElementData & { id: number })[] = [];
             slide.elemProp.forEach((elemProp: KElementData, eid: number) => {
                 elemPropArray.push({
@@ -104,7 +113,13 @@ export class KSlideSet {
                     style: { ...elemProp.style }
                 });
             });
-            return { elemProp: elemPropArray };
+            let background = slide.background;
+            try {
+                background = KSlideSet.slideBG.current(slideIndex) ?? slide.background;
+            } catch {
+                background = slide.background;
+            }
+            return { background, elemProp: elemPropArray };
         });
         return JSON.stringify(data);
     }
