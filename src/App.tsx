@@ -9,12 +9,13 @@ import { Tools } from './tools';
 
 function propL2ElementL(props:Map<number, KElementData>) {
   console.log("propl2eL called with " + props.size + " elements");
-  const elems:React.FunctionComponentElement<KElementProps>[] = [];
+  const maxIndex = props.size > 0 ? Math.max(...props.keys()) : -1;
+  const elems:React.ReactNode[] = Array.from({ length: maxIndex + 1 }, () => null);
   for (const [index, prop] of props.entries()){
     const comp:React.FC<KElementProps>|undefined = KComponents.get(prop.name);
     if (comp){
       const elem = React.createElement(comp, {eid:index, info:prop.inner});
-      elems.push(elem);
+      elems[index] = elem;
     } 
   }
   return elems;
@@ -68,14 +69,15 @@ const SlideView: React.FC = () => {
 
 const App:React.FC = () => {
   console.log("rendering app");
-  const [elementList, setElementList] = useState<React.ReactNode[]>([]);
+  const [, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
 
   const handleAddElement = (elemType:string, info?:string) => {
     console.log("handleAddElement called");
     const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
     if (comp){
-      const elem = React.createElement(comp, {eid:elementList.length, info:info});
+      const nextEid = KSlideSet.slides[frameId].numElement();
+      const elem = React.createElement(comp, {eid:nextEid, info:info});
       setElementList(prevList => [...prevList, elem]);
       KSlideSet.slides[frameId].push(elemType, elem);
     }

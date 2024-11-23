@@ -79,9 +79,10 @@ export class KSlideSet {
         // Assuming data is an array of slides
         KSlideSet.slides = parsedData.map((slideData: KSlide) => {
             const slide = new KSlide();
-            slideData.elemProp.forEach((elemPropData: KElementData, index: number) => {
-                const { name, x, y, width, height, inner } = elemPropData;
-                slide.elemProp.set(index, new KElementData(name, x, y, width, height, inner));
+            slideData.elemProp.forEach((elemPropData: KElementData & { id?: number }, index: number) => {
+                const { name, x, y, width, height, inner, style } = elemPropData;
+                const eid = typeof elemPropData.id === 'number' ? elemPropData.id : index;
+                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style ? { ...style } : {}));
             });
             return slide;
         });
@@ -90,16 +91,17 @@ export class KSlideSet {
     public static save(): string {
         // Serialize slides to JSON string
         const data = this.slides.map((slide: KSlide) => {
-            const elemPropArray: KElementData[] = [];
-            slide.elemProp.forEach((elemProp: KElementData) => {
+            const elemPropArray: (KElementData & { id: number })[] = [];
+            slide.elemProp.forEach((elemProp: KElementData, eid: number) => {
                 elemPropArray.push({
+                    id: eid,
                     name: elemProp.name,
                     x: elemProp.x,
                     y: elemProp.y,
                     width: elemProp.width,
                     height: elemProp.height,
                     inner: elemProp.inner,
-                    style: elemProp.style
+                    style: { ...elemProp.style }
                 });
             });
             return { elemProp: elemPropArray };
