@@ -22,7 +22,12 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         console.log("KElement effect hook");
         const elem = document.getElementById(`${eid}`);
         if (elem) {
-            elem.innerHTML = KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+            const inner = KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+            if (elem instanceof HTMLImageElement) {
+                elem.src = inner;
+            } else {
+                elem.innerHTML = inner;
+            }
         }
     }, [eid]);
 
@@ -106,12 +111,14 @@ export const KTextArea = createKElementComponent('textarea');
 
 export const KImage = ({ eid, info }: KElementProps) => {
     console.log("rendering KImage");
+    const imageSrc = info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
     return (
         <KElement eid={eid} childNode={
             <img
                 id={`${eid}`}
                 className='element'
-                src={info}
+                src={imageSrc}
+                alt={`slide-element-${eid}`}
                 draggable="false"
             />
         } />

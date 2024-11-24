@@ -79,7 +79,7 @@ const App:React.FC = () => {
       const nextEid = KSlideSet.slides[frameId].numElement();
       const elem = React.createElement(comp, {eid:nextEid, info:info});
       setElementList(prevList => [...prevList, elem]);
-      KSlideSet.slides[frameId].push(elemType, elem);
+      KSlideSet.slides[frameId].push(elemType, elem, info);
     }
   };
 

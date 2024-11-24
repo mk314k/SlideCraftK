@@ -41,12 +41,12 @@ export class KSlide {
         return this.elemList.length;
     }
 
-    public push(elemType:string, elem:React.ReactNode){
-        this.set(this.numElement(), elemType);
+    public push(elemType:string, elem:React.ReactNode, info = ''){
+        this.set(this.numElement(), elemType, info);
         this.elemList.push(elem);
     }
-    public set(eid:number, elemType:string){
-        this.elemProp.set(eid , new KElementData(elemType));
+    public set(eid:number, elemType:string, info = ''){
+        this.elemProp.set(eid, new KElementData(elemType, defaultSV.x, defaultSV.y, defaultSV.width, defaultSV.height, info));
     }
     public get(eid:number):KElementData{
         return this.elemProp.get(eid)?? new KElementData('none');
