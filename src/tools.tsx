@@ -88,7 +88,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         <div className="toolset">
             {elementTools.map(
                 (tool)=>(
-                    <label className="tool" onClick={()=>{handleAddElement(tool.name)}}>
+                    <label key={tool.name} className="tool" onClick={()=>{handleAddElement(tool.name)}}>
                         <i className="material-icons">{tool.icon}</i>
                     </label>
                 )
@@ -130,14 +130,14 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             </label>
             <label className="tool">
                 <i className="material-icons">format_color_fill</i>
-                <input type="color" id="background-color" onChange={(e)=>{handleStyleChange('background', e.target.value)}} />
+                <input type="color" id="element-bg-color" onChange={(e)=>{handleStyleChange('background', e.target.value)}} />
             </label>
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">
             <label className="tool">
                 <i className="material-icons">palette</i>
-                <input type="color" id="background-color" onChange={(e)=>{KSlideSet.slideBG.transition(KSlideSet.curFrame, e.target.value)}} />
+                <input type="color" id="slide-bg-color" onChange={(e)=>{KSlideSet.slideBG.transition(KSlideSet.curFrame, e.target.value)}} />
             </label>
         </div>
         <span>Add CSS/JS</span>
