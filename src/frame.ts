@@ -5,9 +5,27 @@ export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
 export const defaultFileName = 'untitled';
 
-interface styleObj{
+export interface StyleMap {
     [key:string]:string;
 }
+
+export interface SerializedElement {
+    id?: number;
+    name: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    inner: string;
+    style?: StyleMap;
+}
+
+export interface SerializedSlide {
+    background?: string;
+    elemProp: SerializedElement[];
+}
+
+export type SerializedDeck = SerializedSlide[];
 
 export class KElementData {
     public name:string;
@@ -18,7 +36,7 @@ export class KElementData {
         public width:number =defaultSV.width,
         public height:number =defaultSV.height,
         public inner = '',
-        public style:styleObj = {}
+        public style:StyleMap = {}
     ){
         this.name = elemType;
         if (this.inner === ''){
@@ -76,12 +94,12 @@ export class KSlideSet {
 
     public static load(data: string): void {
         // Parse the data string and update slides and everything inside
-        const parsedData = JSON.parse(data);
+        const parsedData = JSON.parse(data) as SerializedDeck;
         // Assuming data is an array of slides
-        KSlideSet.slides = parsedData.map((slideData: KSlide & { background?: string }) => {
+        KSlideSet.slides = parsedData.map((slideData: SerializedSlide) => {
             const slide = new KSlide();
             slide.background = slideData.background ?? 'azure';
-            slideData.elemProp.forEach((elemPropData: KElementData & { id?: number }, index: number) => {
+            slideData.elemProp.forEach((elemPropData: SerializedElement, index: number) => {
                 const { name, x, y, width, height, inner, style } = elemPropData;
                 const eid = typeof elemPropData.id === 'number' ? elemPropData.id : index;
                 slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style ? { ...style } : {}));
@@ -99,8 +117,8 @@ export class KSlideSet {
 
     public static save(): string {
         // Serialize slides to JSON string
-        const data = this.slides.map((slide: KSlide, slideIndex: number) => {
-            const elemPropArray: (KElementData & { id: number })[] = [];
+        const data: SerializedDeck = this.slides.map((slide: KSlide, slideIndex: number) => {
+            const elemPropArray: SerializedElement[] = [];
             slide.elemProp.forEach((elemProp: KElementData, eid: number) => {
                 elemPropArray.push({
                     id: eid,
