@@ -93,19 +93,56 @@ export class KSlideSet {
     }
 
     public static load(data: string): void {
-        // Parse the data string and update slides and everything inside
-        const parsedData = JSON.parse(data) as SerializedDeck;
-        // Assuming data is an array of slides
-        KSlideSet.slides = parsedData.map((slideData: SerializedSlide) => {
+        let parsedData: unknown;
+        try {
+            parsedData = JSON.parse(data);
+        } catch {
+            throw new Error('Invalid .scs file: malformed JSON.');
+        }
+
+        if (!Array.isArray(parsedData) || parsedData.length === 0) {
+            throw new Error('Invalid .scs file: expected a non-empty array of slides.');
+        }
+
+        const loadedSlides = parsedData.map((rawSlide: unknown, slideIdx: number) => {
+            if (!rawSlide || typeof rawSlide !== 'object') {
+                throw new Error(`Invalid .scs file: slide ${slideIdx} is not an object.`);
+            }
+            const slideData = rawSlide as Partial<SerializedSlide>;
+            if (!Array.isArray(slideData.elemProp)) {
+                throw new Error(`Invalid .scs file: slide ${slideIdx} is missing elemProp array.`);
+            }
+
             const slide = new KSlide();
-            slide.background = slideData.background ?? 'azure';
-            slideData.elemProp.forEach((elemPropData: SerializedElement, index: number) => {
-                const { name, x, y, width, height, inner, style } = elemPropData;
-                const eid = typeof elemPropData.id === 'number' ? elemPropData.id : index;
-                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style ? { ...style } : {}));
+            slide.background = typeof slideData.background === 'string' && slideData.background.trim() !== ''
+                ? slideData.background
+                : 'azure';
+
+            slideData.elemProp.forEach((rawElem: unknown, index: number) => {
+                if (!rawElem || typeof rawElem !== 'object') {
+                    return;
+                }
+                const elemPropData = rawElem as Partial<SerializedElement>;
+                const name = typeof elemPropData.name === 'string' ? elemPropData.name : 'button';
+                const x = typeof elemPropData.x === 'number' && Number.isFinite(elemPropData.x) ? elemPropData.x : defaultSV.x;
+                const y = typeof elemPropData.y === 'number' && Number.isFinite(elemPropData.y) ? elemPropData.y : defaultSV.y;
+                const width = typeof elemPropData.width === 'number' && Number.isFinite(elemPropData.width) ? elemPropData.width : defaultSV.width;
+                const height = typeof elemPropData.height === 'number' && Number.isFinite(elemPropData.height) ? elemPropData.height : defaultSV.height;
+                const inner = typeof elemPropData.inner === 'string' ? elemPropData.inner : '';
+                const style: StyleMap = elemPropData.style && typeof elemPropData.style === 'object'
+                    ? { ...elemPropData.style }
+                    : {};
+                const eid = typeof elemPropData.id === 'number' && Number.isInteger(elemPropData.id) && elemPropData.id >= 0
+                    ? elemPropData.id
+                    : index;
+                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style));
             });
             return slide;
         });
+
+        KSlideSet.slides = loadedSlides;
+        KSlideSet.curFrame = 0;
+        KSlideSet.activeEID = null;
         KSlideSet.slideBG = new StyleVarList(
             KSlideSet.slides.map((slide, index) => ({
                 id: `slide${index}`,

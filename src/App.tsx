@@ -71,6 +71,7 @@ const App:React.FC = () => {
   console.log("rendering app");
   const [, setElementList] = useState<React.ReactNode[]>([]);
   const [frameId, setFrameId] = useState(0);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const handleAddElement = (elemType:string, info?:string) => {
     console.log("handleAddElement called");
@@ -97,16 +98,24 @@ const App:React.FC = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
-        KSlideSet.load(content);
-        for (let i=0; i<KSlideSet.slides.length; i++){
-          KSlideSet.slides[i].elemList = propL2ElementL(
-            KSlideSet.slides[i].elemProp
-          );
+        try {
+          KSlideSet.load(content);
+          for (let i=0; i<KSlideSet.slides.length; i++){
+            KSlideSet.slides[i].elemList = propL2ElementL(
+              KSlideSet.slides[i].elemProp
+            );
+          }
+          setLoadError(null);
+          setFrameId(0);
+          setElementList(KSlideSet.slides[0]?.elemList.slice());
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Failed to load .scs file.';
+          console.error(message);
+          setLoadError(message);
         }
-        setFrameId(0);
-        setElementList(KSlideSet.slides[0]?.elemList.slice());
       };
       reader.readAsText(file);
+      event.target.value = '';
     }
   };
 
@@ -117,8 +126,13 @@ const App:React.FC = () => {
       <SlideSet setFrameId = {setFrameId} />
       <div className='top-sect'>
           <button onClick={() => downloadFile(defaultFileName+'.scs', KSlideSet.save())}>Save</button>
-          <input type="file" onChange={handleLoad}/>
+          <input type="file" accept=".scs,application/json" onChange={handleLoad}/>
           <button onClick={handleFullScreen}>Presentation</button>
+          {loadError && (
+            <span className="load-error" role="alert" onClick={() => setLoadError(null)}>
+              {loadError}
+            </span>
+          )}
       </div>
       {/* <div className='bot-sect'>
         <textarea name="code" id="code" cols={30} rows={12}></textarea>

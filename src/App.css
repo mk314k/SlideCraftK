@@ -129,3 +129,13 @@ textarea{
 .hidden {
   display: none;
 }
+
+.load-error {
+  color: #ffb4ab;
+  background: rgba(147, 0, 10, 0.85);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
