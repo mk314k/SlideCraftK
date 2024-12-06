@@ -1,26 +1,9 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {KComponents, KElementProps} from './component/component';
-import { KElementData, KSlide, KSlideSet, defaultFileName } from './frame';
+import {KComponents} from './component/component';
+import { KSlide, KSlideSet, defaultFileName } from './frame';
 import {downloadFile, handleFullScreen } from './component/utility';
 import { Tools } from './tools';
-
-
-
-function propL2ElementL(props:Map<number, KElementData>) {
-  console.log("propl2eL called with " + props.size + " elements");
-  const maxIndex = props.size > 0 ? Math.max(...props.keys()) : -1;
-  const elems:React.ReactNode[] = Array.from({ length: maxIndex + 1 }, () => null);
-  for (const [index, prop] of props.entries()){
-    const comp:React.FC<KElementProps>|undefined = KComponents.get(prop.name);
-    if (comp){
-      const elem = React.createElement(comp, {eid:index, info:prop.inner});
-      elems[index] = elem;
-    } 
-  }
-  return elems;
-}
-
 
 const SlideSet: React.FC<{
   setFrameId: React.Dispatch<React.SetStateAction<number>>
@@ -48,9 +31,8 @@ const SlideSet: React.FC<{
 
 const SlideView: React.FC = () => {
   console.log("rendering ElementRenderer");
-  // const [viewWidth, setViewWidth] = useState(0);
-  // const [viewHeight, setViewHeight] = useState(0);
   KSlideSet.activeEID = null;
+  const currentSlide = KSlideSet.slides[KSlideSet.curFrame];
 
   return (
       <div 
@@ -59,9 +41,11 @@ const SlideView: React.FC = () => {
         className="slideview" 
         onClick={()=>{KSlideSet.activeEID = null}}
       >
-          {KSlideSet.slides[KSlideSet.curFrame].elemList.map((element, index) => (
-              <React.Fragment key={index}>{element}</React.Fragment>
-          ))}
+          {currentSlide.elements().map(([eid, elemData]) => {
+              const Comp = KComponents.get(elemData.name);
+              if (!Comp) return null;
+              return <Comp key={`${KSlideSet.curFrame}-${eid}`} eid={eid} info={elemData.inner} />;
+          })}
       </div>
   );
 };
@@ -69,26 +53,22 @@ const SlideView: React.FC = () => {
 
 const App:React.FC = () => {
   console.log("rendering app");
-  const [, setElementList] = useState<React.ReactNode[]>([]);
+  const [, setRenderTick] = useState(0);
   const [frameId, setFrameId] = useState(0);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const handleAddElement = (elemType:string, info?:string) => {
     console.log("handleAddElement called");
-    const comp:React.FC<KElementProps>|undefined = KComponents.get(elemType);
-    if (comp){
-      const nextEid = KSlideSet.slides[frameId].numElement();
-      const elem = React.createElement(comp, {eid:nextEid, info:info});
-      setElementList(prevList => [...prevList, elem]);
-      KSlideSet.slides[frameId].push(elemType, elem, info);
+    if (KComponents.has(elemType)){
+      KSlideSet.slides[frameId].push(elemType, info);
+      setRenderTick(tick => tick + 1);
     }
   };
 
   useEffect(()=>{
     console.log("frameId effect hook");
-    const eList = KSlideSet.slides[frameId].elements();
-    setElementList(eList);
     KSlideSet.curFrame = frameId;
+    setRenderTick(tick => tick + 1);
   },[frameId]);
 
   const handleLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,14 +80,9 @@ const App:React.FC = () => {
         const content = e.target?.result as string;
         try {
           KSlideSet.load(content);
-          for (let i=0; i<KSlideSet.slides.length; i++){
-            KSlideSet.slides[i].elemList = propL2ElementL(
-              KSlideSet.slides[i].elemProp
-            );
-          }
           setLoadError(null);
           setFrameId(0);
-          setElementList(KSlideSet.slides[0]?.elemList.slice());
+          setRenderTick(tick => tick + 1);
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Failed to load .scs file.';
           console.error(message);

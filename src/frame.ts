@@ -1,4 +1,3 @@
-import React from "react";
 import { StyleVarList } from "statebinderk";
 
 export const defaultSV = {x:0, y:0, width:100, height:100};
@@ -47,31 +46,41 @@ export class KElementData {
 
 
 export class KSlide {
-    public elemList:React.ReactNode[] = [];
     public elemProp:Map<number, KElementData> = new Map();
     public background = 'azure';
+    private nextEid = 0;
     
-    public elements(){
-        return this.elemList.filter((element) => element !== null);
+    public elements(): [number, KElementData][] {
+        return Array.from(this.elemProp.entries());
     }
 
     public numElement():number{
-        return this.elemList.length;
+        if (this.elemProp.size > 0) {
+            const maxKey = Math.max(...this.elemProp.keys());
+            if (maxKey + 1 > this.nextEid) {
+                this.nextEid = maxKey + 1;
+            }
+        }
+        return this.nextEid;
     }
 
-    public push(elemType:string, elem:React.ReactNode, info = ''){
-        this.set(this.numElement(), elemType, info);
-        this.elemList.push(elem);
+    public push(elemType:string, info = ''): number {
+        const eid = this.numElement();
+        this.set(eid, elemType, info);
+        this.nextEid = eid + 1;
+        return eid;
     }
     public set(eid:number, elemType:string, info = ''){
         this.elemProp.set(eid, new KElementData(elemType, defaultSV.x, defaultSV.y, defaultSV.width, defaultSV.height, info));
+        if (eid >= this.nextEid) {
+            this.nextEid = eid + 1;
+        }
     }
     public get(eid:number):KElementData{
         return this.elemProp.get(eid)?? new KElementData('none');
     }
     public del(eid:number){
         this.elemProp.delete(eid);
-        this.elemList[eid] = null;
     }
 
 }
@@ -89,7 +98,7 @@ export class KSlideSet {
     }
 
     public static getE(s:number, e:number){
-        return KSlideSet.slides[s].elemList[e]
+        return KSlideSet.slides[s].get(e);
     }
 
     public static load(data: string): void {
