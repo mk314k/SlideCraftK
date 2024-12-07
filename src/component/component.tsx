@@ -1,6 +1,7 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
 import { KSlideSet } from "../frame";
+import { useDeck } from "../context/DeckContext";
 import React, { useCallback } from "react";
 
 export interface KElementContainerProps {
@@ -17,17 +18,14 @@ export interface KElementProps {
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown } = useKElemHook(eid);
+    const { state, deleteElement, setActiveEID } = useDeck();
 
     const handleDelete = useCallback(() => {
         console.log("handleDelete called");
-        if (!KSlideSet.editingMode){
-            KSlideSet.slides[KSlideSet.curFrame].del(eid);
-            const elem = document.getElementById(`${eid}div`);
-            if (elem) {
-                elem.className = 'hidden';
-            }
+        if (!state.editingMode && !KSlideSet.editingMode) {
+            deleteElement(eid);
         }
-    }, [eid]);
+    }, [eid, state.editingMode, deleteElement]);
 
     const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         console.log("onkeydown called");
@@ -66,7 +64,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 ...KSlideSet.slides[KSlideSet.curFrame].get(eid).style
             }}
             onMouseDown={e => handleMouseDown(e)}
-            onClick={(e)=>{KSlideSet.activeEID = eid; console.log(KSlideSet.activeEID);e.stopPropagation()}}
+            onClick={(e)=>{setActiveEID(eid); e.stopPropagation()}}
             onKeyDown={onKeyDown}
             tabIndex={0}
         >
