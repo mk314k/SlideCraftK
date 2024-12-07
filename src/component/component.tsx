@@ -1,7 +1,7 @@
 import useKElemHook from "./hook";
 import { handleEditText } from "./utility";
 import { KSlideSet } from "../frame";
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 
 export interface KElementContainerProps {
     eid: number;
@@ -17,19 +17,6 @@ export interface KElementProps {
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown } = useKElemHook(eid);
-
-    useEffect(() => {
-        console.log("KElement effect hook");
-        const elem = document.getElementById(`${eid}`);
-        if (elem) {
-            const inner = KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
-            if (elem instanceof HTMLImageElement) {
-                elem.src = inner;
-            } else {
-                elem.innerHTML = inner;
-            }
-        }
-    }, [eid]);
 
     const handleDelete = useCallback(() => {
         console.log("handleDelete called");
@@ -88,15 +75,29 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     );
 };
 
-const createKElementComponent = (Component: React.ElementType, info?:string) => {
-    return ({ eid }: KElementProps) => {
+const createKElementComponent = (Component: React.ElementType, mode?:string) => {
+    return ({ eid, info }: KElementProps) => {
         console.log(`rendering ${Component}`);
+        const content = info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+        if (Component === 'textarea') {
+            return (
+                <KElement eid={eid} childNode={
+                    <textarea
+                        id={`${eid}`}
+                        className='element'
+                        defaultValue={content}
+                        onDoubleClick={() => { handleEditText(eid, false) }}
+                    />
+                } />
+            );
+        }
         return (
             <KElement eid={eid} childNode={
                 <Component
                     id={`${eid}`}
                     className='element'
-                    onDoubleClick={() => { handleEditText(eid, info === 'latex') }}
+                    onDoubleClick={() => { handleEditText(eid, mode === 'latex') }}
+                    dangerouslySetInnerHTML={{ __html: content }}
                 />
             } />
         );
