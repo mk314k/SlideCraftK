@@ -18,7 +18,8 @@ export interface KElementProps {
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown } = useKElemHook(eid);
-    const { state, deleteElement, setActiveEID } = useDeck();
+    const { state, currentSlide, deleteElement, setActiveEID } = useDeck();
+    const elemStyle = currentSlide.elements.find((el) => el.id === eid)?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
 
     const handleDelete = useCallback(() => {
         console.log("handleDelete called");
@@ -61,7 +62,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 height: style.height,
                 background: 'var(--background)' ,
                 cursor: style.cursor,
-                ...KSlideSet.slides[KSlideSet.curFrame].get(eid).style
+                ...elemStyle
             }}
             onMouseDown={e => handleMouseDown(e)}
             onClick={(e)=>{setActiveEID(eid); e.stopPropagation()}}
