@@ -1,6 +1,5 @@
 import { KSlideSet } from "../frame";
 
-
 interface KWindow extends Window {
   MathJax?: {
     typeset: () => void;
@@ -8,53 +7,13 @@ interface KWindow extends Window {
   };
 }
 
-
-const tex2mml = (tex:string) => {
-    let res = tex;
-    if (window !== undefined){
-      res = (window as KWindow).MathJax?.tex2mml(res)??'';
-    }
-    return res;
+export const tex2mml = (tex:string) => {
+  let res = tex;
+  if (typeof window !== 'undefined') {
+    res = (window as KWindow).MathJax?.tex2mml(res) ?? tex;
   }
-
-export const handleEditText = (id: number, ltx = false) => {
-    console.log("editing");
-    KSlideSet.editingMode = true;
-    const element = document.getElementById(`${id}`);
-    if (element) {
-      const parentElement = element.parentElement;
-      const textInput = document.createElement('input');
-      
-      // Set initial input value to button's text
-      textInput.value = element.innerText;
-  
-      // Set input styles
-      textInput.style.width = `${element.clientWidth}px`;
-      textInput.style.height = `${element.clientHeight}px`;
-      textInput.style.zIndex = '2';
-  
-      const handleClick = (e:MouseEvent) => {
-        if (!textInput.contains(e.target as Node)) {
-          const innerData = ltx ? tex2mml(textInput.value) : textInput.value;
-          element.innerHTML = innerData;
-          KSlideSet.slides[KSlideSet.curFrame].get(id).inner = innerData;
-          parentElement?.replaceChild(element, textInput);
-          KSlideSet.editingMode = false;
-          document.removeEventListener('click', handleClick);
-        }
-      }
-  
-      // Handle click outside of input to update button text
-      document.addEventListener('click', handleClick);
-  
-      // Replace button with input
-      parentElement?.replaceChild(textInput, element);
-  
-      // Set focus to input
-      textInput.focus();
-    }
-  };
-
+  return res;
+};
 
 export function downloadFile(fileName:string, fileContent:string) {
   const element = document.createElement('a');
@@ -69,7 +28,6 @@ export function downloadFile(fileName:string, fileContent:string) {
   document.body.removeChild(element);
 }
 
-
 export function insertCode(cssOrJs:string){
   const codeText = (document.getElementById('code') as HTMLTextAreaElement).value;
   const codeElement = document.createElement(cssOrJs);
@@ -77,36 +35,11 @@ export function insertCode(cssOrJs:string){
   document.head.appendChild(codeElement);
 }
 
-
-// const calculateShift = (udim:number, vdim:number, pos:number):string => {
-//   return `${pos*vdim/udim}`
-// }
-
 export function handleFullScreen() {
   const view = document.getElementById(`slide${KSlideSet.curFrame}`);
-  // const urect = (view as HTMLElement).getBoundingClientRect();
-  // const handleFullScreenExit = ()=> {
-  //   if (view){
-  //     const vrect = view?.getBoundingClientRect();
-  //     view.childNodes.forEach((child)=>{
-  //       if (child instanceof HTMLElement){
-  //         console.log(child.style.left, urect, vrect);
-  //         child.style.left = calculateShift(
-  //           urect?.width, vrect.width, Number(child.style.left)
-  //         );
-  //         child.style.top = calculateShift(
-  //           urect.height, vrect.height, Number(child.style.top)
-  //         );
-  //         console.log(child.style.left);
-  //       }
-  //     })
-  //   }
-  // }
-
   if (!document.fullscreenElement ) {
     if (view?.requestFullscreen) {
       view.requestFullscreen();
-      // document.addEventListener('fullscreenchange', handleFullScreenExit);
     }
     console.log("fullscrenn");
   }

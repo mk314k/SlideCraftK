@@ -1,8 +1,8 @@
 import useKElemHook from "./hook";
-import { handleEditText } from "./utility";
+import { tex2mml } from "./utility";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 
 export interface KElementContainerProps {
     eid: number;
@@ -13,7 +13,6 @@ export interface KElementProps {
     eid: number;
     info?: string;
 }
-
 
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
@@ -30,6 +29,9 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
 
     const onKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         console.log("onkeydown called");
+        if (state.editingMode || KSlideSet.editingMode) {
+            return;
+        }
         switch (event.key) {
             case 'Delete':
             case 'Backspace':
@@ -39,15 +41,10 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
             default:
                 break;
         }
-    }, [handleDelete]);
-    // const view = document.getElementById('slide');
+    }, [handleDelete, state.editingMode]);
+
     const posx = style.x;
     const posy = style.y;
-    // if (view){
-    //     const vrect = view.getBoundingClientRect();
-    //     posx = posx*100/vrect.width;
-    //     posy = posy*100/vrect.height;
-    // }
 
     return (
         <div
@@ -74,30 +71,83 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     );
 };
 
-const createKElementComponent = (Component: React.ElementType, mode?:string) => {
+const createKElementComponent = (Component: React.ElementType, mode?: string) => {
     return ({ eid, info }: KElementProps) => {
-        console.log(`rendering ${Component}`);
-        const content = info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+        const { currentSlide, updateElement, setEditingMode } = useDeck();
+        const elemState = currentSlide.elements.find((el) => el.id === eid);
+        const content = elemState?.inner ?? info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+        const [isEditing, setIsEditing] = useState(false);
+        const [draftText, setDraftText] = useState(content);
+
+        const startEditing = () => {
+            setDraftText(content);
+            setIsEditing(true);
+            setEditingMode(true);
+        };
+
+        const commitEdit = () => {
+            const nextInner = mode === 'latex' ? tex2mml(draftText) : draftText;
+            updateElement(eid, (el) => {
+                el.inner = nextInner;
+            });
+            setIsEditing(false);
+            setEditingMode(false);
+        };
+
+        const cancelEdit = () => {
+            setDraftText(content);
+            setIsEditing(false);
+            setEditingMode(false);
+        };
+
         if (Component === 'textarea') {
             return (
                 <KElement eid={eid} childNode={
                     <textarea
                         id={`${eid}`}
                         className='element'
-                        defaultValue={content}
-                        onDoubleClick={() => { handleEditText(eid, false) }}
+                        value={content}
+                        onFocus={() => setEditingMode(true)}
+                        onBlur={() => setEditingMode(false)}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            updateElement(eid, (el) => {
+                                el.inner = val;
+                            });
+                        }}
                     />
                 } />
             );
         }
+
         return (
             <KElement eid={eid} childNode={
-                <Component
-                    id={`${eid}`}
-                    className='element'
-                    onDoubleClick={() => { handleEditText(eid, mode === 'latex') }}
-                    dangerouslySetInnerHTML={{ __html: content }}
-                />
+                isEditing ? (
+                    <input
+                        id={`${eid}`}
+                        type="text"
+                        className="element"
+                        value={draftText}
+                        autoFocus
+                        onChange={(e) => setDraftText(e.target.value)}
+                        onBlur={commitEdit}
+                        onKeyDown={(e) => {
+                            e.stopPropagation();
+                            if (e.key === 'Enter') {
+                                commitEdit();
+                            } else if (e.key === 'Escape') {
+                                cancelEdit();
+                            }
+                        }}
+                    />
+                ) : (
+                    <Component
+                        id={`${eid}`}
+                        className='element'
+                        onDoubleClick={startEditing}
+                        dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                )
             } />
         );
     };
@@ -111,7 +161,9 @@ export const KTextArea = createKElementComponent('textarea');
 
 export const KImage = ({ eid, info }: KElementProps) => {
     console.log("rendering KImage");
-    const imageSrc = info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
+    const { currentSlide } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const imageSrc = elemState?.inner ?? info ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).inner;
     return (
         <KElement eid={eid} childNode={
             <img
