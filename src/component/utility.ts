@@ -1,11 +1,55 @@
 import { KSlideSet } from "../frame";
+import {
+  StateVar,
+  StyleVar,
+  MultiStateVar,
+  MultiStyleVar,
+  StateVarList,
+  StyleVarList,
+} from "statebinderk";
 
 interface KWindow extends Window {
   MathJax?: {
     typeset: () => void;
     tex2mml: (tex:string) => string;
   };
+  StateBinder?: {
+    StateVar: typeof StateVar;
+    StyleVar: typeof StyleVar;
+    MultiStateVar: typeof MultiStateVar;
+    MultiStyleVar: typeof MultiStyleVar;
+    StateVarList: typeof StateVarList;
+    StyleVarList: typeof StyleVarList;
+  };
+  StateVar?: typeof StateVar;
+  StyleVar?: typeof StyleVar;
+  MultiStateVar?: typeof MultiStateVar;
+  MultiStyleVar?: typeof MultiStyleVar;
+  StateVarList?: typeof StateVarList;
+  StyleVarList?: typeof StyleVarList;
 }
+
+export function registerSlideRuntime() {
+  if (typeof window !== 'undefined') {
+    const win = window as KWindow;
+    win.StateBinder = {
+      StateVar,
+      StyleVar,
+      MultiStateVar,
+      MultiStyleVar,
+      StateVarList,
+      StyleVarList,
+    };
+    win.StateVar = StateVar;
+    win.StyleVar = StyleVar;
+    win.MultiStateVar = MultiStateVar;
+    win.MultiStyleVar = MultiStyleVar;
+    win.StateVarList = StateVarList;
+    win.StyleVarList = StyleVarList;
+  }
+}
+
+registerSlideRuntime();
 
 export const tex2mml = (tex:string) => {
   let res = tex;

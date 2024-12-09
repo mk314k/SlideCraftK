@@ -43,17 +43,11 @@ export interface DeckContextValue {
 }
 
 function syncFromKSlideSet(): DeckState {
-    const slides: SlideState[] = KSlideSet.slides.map((slide, idx) => {
+    const slides: SlideState[] = KSlideSet.slides.map((slide) => {
         const entries = slide.elements();
         const maxId = entries.length > 0 ? Math.max(...entries.map(([id]) => id)) : -1;
-        let bg = slide.background;
-        try {
-            bg = KSlideSet.slideBG.current(idx) ?? slide.background;
-        } catch {
-            bg = slide.background;
-        }
         return {
-            background: bg,
+            background: slide.background,
             elements: entries.map(([id, data]) => ({
                 id,
                 name: data.name,
@@ -121,11 +115,6 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             draft.slides.push({ background: 'azure', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
-            try {
-                KSlideSet.slideBG.addBinding(`slide${newIdx}`, 'azure');
-            } catch {
-                // ignore if binding already exists
-            }
         });
     }, [updateDeck]);
 
@@ -134,11 +123,6 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const target = frameId ?? draft.curFrame;
             if (draft.slides[target]) {
                 draft.slides[target].background = color;
-            }
-            try {
-                KSlideSet.slideBG.transition(target, color);
-            } catch {
-                // ignore if binding out of range
             }
         });
     }, [updateDeck]);

@@ -1,5 +1,3 @@
-import { StyleVarList } from "statebinderk";
-
 export const defaultSV = {x:0, y:0, width:100, height:100};
 export type SV = typeof defaultSV;
 export const defaultFileName = 'untitled';
@@ -91,7 +89,6 @@ export class KSlideSet {
     public static editingMode = false;
     public static view = {x:0, y:0};
     public static activeEID:number|null = null;
-    public static slideBG = new StyleVarList([{id:`slide0`, state:'azure'}],'background');
 
     public static numElement(frame = KSlideSet.curFrame){
         return KSlideSet.slides[frame].numElement();
@@ -152,18 +149,11 @@ export class KSlideSet {
         KSlideSet.slides = loadedSlides;
         KSlideSet.curFrame = 0;
         KSlideSet.activeEID = null;
-        KSlideSet.slideBG = new StyleVarList(
-            KSlideSet.slides.map((slide, index) => ({
-                id: `slide${index}`,
-                state: slide.background
-            })),
-            'background'
-        );
     }
 
     public static save(): string {
         // Serialize slides to JSON string
-        const data: SerializedDeck = this.slides.map((slide: KSlide, slideIndex: number) => {
+        const data: SerializedDeck = this.slides.map((slide: KSlide) => {
             const elemPropArray: SerializedElement[] = [];
             slide.elemProp.forEach((elemProp: KElementData, eid: number) => {
                 elemPropArray.push({
@@ -177,13 +167,7 @@ export class KSlideSet {
                     style: { ...elemProp.style }
                 });
             });
-            let background = slide.background;
-            try {
-                background = KSlideSet.slideBG.current(slideIndex) ?? slide.background;
-            } catch {
-                background = slide.background;
-            }
-            return { background, elemProp: elemPropArray };
+            return { background: slide.background, elemProp: elemPropArray };
         });
         return JSON.stringify(data);
     }
