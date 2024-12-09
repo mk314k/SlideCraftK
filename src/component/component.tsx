@@ -45,12 +45,13 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
 
     const posx = style.x;
     const posy = style.y;
+    const isActive = state.activeEID === eid;
 
     return (
         <div
             id={`${eid}div`}
             key={eid}
-            className='element-container'
+            className={`element-container${isActive ? ' active-element' : ''}`}
             style={{
                 position: 'absolute',
                 left: `${posx}px`,
@@ -61,7 +62,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 cursor: style.cursor,
                 ...elemStyle
             }}
-            onMouseDown={e => handleMouseDown(e)}
+            onMouseDown={e => { setActiveEID(eid); handleMouseDown(e); }}
             onClick={(e)=>{setActiveEID(eid); e.stopPropagation()}}
             onKeyDown={onKeyDown}
             tabIndex={0}

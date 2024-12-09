@@ -84,7 +84,12 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         <div className="toolset">
             <div className="tool">
                 <i className="material-icons">text_fields</i>
-                <select id="font-family" onChange={(e)=>{handleStyleChange('fontFamily', e.target.value)}}>
+                <select
+                    id="font-family"
+                    value={activeElem?.style['fontFamily'] ?? 'Arial'}
+                    disabled={!activeElem}
+                    onChange={(e)=>{handleStyleChange('fontFamily', e.target.value)}}
+                >
                     <option value="Arial">Arial</option>
                     <option value="Helvetica">Helvetica</option>
                     <option value="Times New Roman">Times New Roman</option>
@@ -96,26 +101,49 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             <label className="tool" onClick={()=>{handleFontSize(-5)}}>
                 <i className="material-icons">text_decrease</i>
             </label>
-            <label className="tool" onClick={handleBold}>
+            <label
+                className={`tool${activeElem?.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
+                onClick={handleBold}
+            >
                 <i className="material-icons">format_bold</i>
             </label>
-            <label className="tool" onClick={handleItalic}>
+            <label
+                className={`tool${activeElem?.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
+                onClick={handleItalic}
+            >
                 <i className="material-icons">format_italic</i>
             </label>
             <label className="tool">
                 <i className="material-icons">format_color_text</i>
-                <input type="color" id="text-color" onChange={(e)=>{handleStyleChange('color', e.target.value)}} />
+                <input
+                    type="color"
+                    id="text-color"
+                    value={activeElem?.style['color']?.startsWith('#') ? activeElem.style['color'] : '#000000'}
+                    disabled={!activeElem}
+                    onChange={(e)=>{handleStyleChange('color', e.target.value)}}
+                />
             </label>
             <label className="tool">
                 <i className="material-icons">format_color_fill</i>
-                <input type="color" id="element-bg-color" onChange={(e)=>{handleStyleChange('background', e.target.value)}} />
+                <input
+                    type="color"
+                    id="element-bg-color"
+                    value={activeElem?.style['background']?.startsWith('#') ? activeElem.style['background'] : '#e6ccc4'}
+                    disabled={!activeElem}
+                    onChange={(e)=>{handleStyleChange('background', e.target.value)}}
+                />
             </label>
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">
             <label className="tool">
                 <i className="material-icons">palette</i>
-                <input type="color" id="slide-bg-color" onChange={(e)=>{setSlideBackground(e.target.value)}} />
+                <input
+                    type="color"
+                    id="slide-bg-color"
+                    value={currentSlide.background.startsWith('#') ? currentSlide.background : '#f0ffff'}
+                    onChange={(e)=>{setSlideBackground(e.target.value)}}
+                />
             </label>
         </div>
         <span>Add CSS/JS</span>

@@ -99,6 +99,16 @@ textarea{
   border-radius: 20%;
 }
 
+.element-container.active-element {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.tool-active {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+}
+
 .element {
   all:inherit;
   display: flex;
