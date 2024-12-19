@@ -79,25 +79,49 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
         const scale = KSlideSet.scale > 0 ? KSlideSet.scale : 1;
+        const MIN_SIZE = 24;
 
-        let latestW = width;
-        let latestH = height;
+        const startX = posx;
+        const startY = posy;
+        const startW = width;
+        const startH = height;
+
+        let latestX = startX;
+        let latestY = startY;
+        let latestW = startW;
+        let latestH = startH;
 
         const handleResizeMouseMove = (e: MouseEvent) => {
             const dx = (e.clientX - mouseX) / scale;
             const dy = (e.clientY - mouseY) / scale;
+
             if (direction.includes('e')) {
-                latestW = Math.max(24, Math.round(width + dx));
+                latestW = Math.max(MIN_SIZE, Math.round(startW + dx));
+            }
+            if (direction.includes('w')) {
+                const clampedDx = Math.min(dx, startW - MIN_SIZE);
+                latestX = Math.round(startX + clampedDx);
+                latestW = Math.round(startW - clampedDx);
             }
             if (direction.includes('s')) {
-                latestH = Math.max(24, Math.round(height + dy));
+                latestH = Math.max(MIN_SIZE, Math.round(startH + dy));
             }
+            if (direction.includes('n')) {
+                const clampedDy = Math.min(dy, startH - MIN_SIZE);
+                latestY = Math.round(startY + clampedDy);
+                latestH = Math.round(startH - clampedDy);
+            }
+
+            setPosX(latestX);
+            setPosY(latestY);
             setWidth(latestW);
             setHeight(latestH);
         };
 
         const handleResizeMouseUp = () => {
             updateElement(eid, (el) => {
+                el.x = latestX;
+                el.y = latestY;
                 el.width = latestW;
                 el.height = latestH;
             });
