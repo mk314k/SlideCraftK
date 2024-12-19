@@ -137,6 +137,26 @@ textarea{
 .resize-handle-sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
 .resize-handle-w  { top: calc(50% - 5px); left: -6px; cursor: ew-resize; }
 
+.alignment-guide {
+  position: absolute;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.alignment-guide-vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-left: 1px dashed #ec4899;
+}
+
+.alignment-guide-horizontal {
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-top: 1px dashed #ec4899;
+}
+
 .tool-active {
   background-color: rgba(255, 255, 255, 0.25);
   border-radius: 8px;

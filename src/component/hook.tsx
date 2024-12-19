@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { KSlideSet, defaultSV } from '../frame';
-import { useDeck } from '../context/DeckContext';
+import { KSlideSet, defaultSV, SLIDE_WIDTH, SLIDE_HEIGHT } from '../frame';
+import { useDeck, AlignmentGuide } from '../context/DeckContext';
 
 export type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 
+const SNAP_THRESHOLD = 6;
+const GRID_SIZE = 10;
+
 const useKElemHook = (eid:number, sv = defaultSV) => {
-    const { currentSlide, updateElement } = useDeck();
+    const { currentSlide, updateElement, setGuides } = useDeck();
     const elemState = currentSlide.elements.find((el) => el.id === eid);
 
     const initialX = elemState?.x ?? sv.x;
@@ -50,14 +53,54 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
         const handleMouseMove = (e: MouseEvent) => {
             const dx = (e.clientX - mouseX) / scale;
             const dy = (e.clientY - mouseY) / scale;
-            latestX = Math.round(posx + dx);
-            latestY = Math.round(posy + dy);
+            let nextX = Math.round(posx + dx);
+            let nextY = Math.round(posy + dy);
+            const activeGuides: AlignmentGuide[] = [];
+
+            if (e.shiftKey) {
+                nextX = Math.round(nextX / GRID_SIZE) * GRID_SIZE;
+                nextY = Math.round(nextY / GRID_SIZE) * GRID_SIZE;
+            } else {
+                const centerX = nextX + width / 2;
+                const centerY = nextY + height / 2;
+                if (Math.abs(centerX - SLIDE_WIDTH / 2) <= SNAP_THRESHOLD) {
+                    nextX = Math.round(SLIDE_WIDTH / 2 - width / 2);
+                    activeGuides.push({ axis: 'vertical', position: SLIDE_WIDTH / 2 });
+                }
+                if (Math.abs(centerY - SLIDE_HEIGHT / 2) <= SNAP_THRESHOLD) {
+                    nextY = Math.round(SLIDE_HEIGHT / 2 - height / 2);
+                    activeGuides.push({ axis: 'horizontal', position: SLIDE_HEIGHT / 2 });
+                }
+
+                for (const other of currentSlide.elements) {
+                    if (other.id === eid) continue;
+                    if (Math.abs(nextX - other.x) <= SNAP_THRESHOLD) {
+                        nextX = other.x;
+                        activeGuides.push({ axis: 'vertical', position: other.x });
+                    } else if (Math.abs(nextX + width - (other.x + other.width)) <= SNAP_THRESHOLD) {
+                        nextX = other.x + other.width - width;
+                        activeGuides.push({ axis: 'vertical', position: other.x + other.width });
+                    }
+                    if (Math.abs(nextY - other.y) <= SNAP_THRESHOLD) {
+                        nextY = other.y;
+                        activeGuides.push({ axis: 'horizontal', position: other.y });
+                    } else if (Math.abs(nextY + height - (other.y + other.height)) <= SNAP_THRESHOLD) {
+                        nextY = other.y + other.height - height;
+                        activeGuides.push({ axis: 'horizontal', position: other.y + other.height });
+                    }
+                }
+            }
+
+            latestX = nextX;
+            latestY = nextY;
             setPosX(latestX);
             setPosY(latestY);
+            setGuides(activeGuides);
         };
 
         const handleMouseUp = () => {
             setCursorStyle('move');
+            setGuides([]);
             updateElement(eid, (el) => {
                 el.x = latestX;
                 el.y = latestY;

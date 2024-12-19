@@ -79,6 +79,17 @@ const SlideView: React.FC = () => {
             />
           );
         })}
+        {state.guides.map((g, idx) => (
+          <div
+            key={`${g.axis}-${g.position}-${idx}`}
+            className={`alignment-guide alignment-guide-${g.axis}`}
+            style={
+              g.axis === 'vertical'
+                ? { left: `${g.position}px` }
+                : { top: `${g.position}px` }
+            }
+          />
+        ))}
       </div>
     </div>
   );

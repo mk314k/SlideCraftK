@@ -19,11 +19,17 @@ export interface SlideState {
     nextEid: number;
 }
 
+export interface AlignmentGuide {
+    axis: 'vertical' | 'horizontal';
+    position: number;
+}
+
 export interface DeckState {
     slides: SlideState[];
     curFrame: number;
     activeEID: number | null;
     editingMode: boolean;
+    guides: AlignmentGuide[];
 }
 
 export interface DeckContextValue {
@@ -38,6 +44,7 @@ export interface DeckContextValue {
     deleteElement: (eid: number) => void;
     setActiveEID: (eid: number | null) => void;
     setEditingMode: (editing: boolean) => void;
+    setGuides: (guides: AlignmentGuide[]) => void;
     saveDeck: () => string;
     loadDeck: (rawJson: string) => void;
 }
@@ -66,6 +73,7 @@ function syncFromKSlideSet(): DeckState {
         curFrame: KSlideSet.curFrame,
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
+        guides: [],
     };
 }
 
@@ -193,6 +201,13 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [updateDeck]);
 
+    const setGuides = useCallback((guides: AlignmentGuide[]) => {
+        setState((prev) => ({
+            ...prev,
+            guides,
+        }));
+    }, []);
+
     const saveDeck = useCallback(() => {
         syncToKSlideSet(state);
         return KSlideSet.save();
@@ -219,6 +234,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 deleteElement,
                 setActiveEID,
                 setEditingMode,
+                setGuides,
                 saveDeck,
                 loadDeck,
             }}
