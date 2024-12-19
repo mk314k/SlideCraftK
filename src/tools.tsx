@@ -44,6 +44,34 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         }
     };
 
+    const getElementZ = (zRaw?: string) => {
+        const parsed = parseInt(zRaw ?? '1', 10);
+        return Number.isFinite(parsed) ? parsed : 1;
+    };
+
+    const handleZIndexStep = (delta: number) => {
+        if (state.activeEID != null && activeElem) {
+            const nextZ = Math.max(0, getElementZ(activeElem.style['zIndex']) + delta);
+            handleStyleChange('zIndex', String(nextZ));
+        }
+    };
+
+    const handleBringToFront = () => {
+        if (state.activeEID != null && activeElem) {
+            const maxZ = currentSlide.elements.reduce(
+                (acc, el) => Math.max(acc, getElementZ(el.style['zIndex'])),
+                1
+            );
+            handleStyleChange('zIndex', String(maxZ + 1));
+        }
+    };
+
+    const handleSendToBack = () => {
+        if (state.activeEID != null && activeElem) {
+            handleStyleChange('zIndex', '0');
+        }
+    };
+
     const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
       console.log("handleAdd Image called");
       const file = event.target.files?.[0];
@@ -132,6 +160,18 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     disabled={!activeElem}
                     onChange={(e)=>{handleStyleChange('background', e.target.value)}}
                 />
+            </label>
+            <label className="tool" title="Bring Forward" onClick={() => handleZIndexStep(1)}>
+                <i className="material-icons">flip_to_front</i>
+            </label>
+            <label className="tool" title="Send Backward" onClick={() => handleZIndexStep(-1)}>
+                <i className="material-icons">flip_to_back</i>
+            </label>
+            <label className="tool" title="Bring to Front" onClick={handleBringToFront}>
+                <i className="material-icons">vertical_align_top</i>
+            </label>
+            <label className="tool" title="Send to Back" onClick={handleSendToBack}>
+                <i className="material-icons">vertical_align_bottom</i>
             </label>
         </div>
         <span>Slide Formatting</span>
