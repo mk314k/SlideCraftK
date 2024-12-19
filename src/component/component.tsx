@@ -19,7 +19,7 @@ export interface KElementProps {
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown, handleResizeStart } = useKElemHook(eid);
-    const { state, currentSlide, deleteElement, setActiveEID } = useDeck();
+    const { state, currentSlide, updateElement, deleteElement, setActiveEID } = useDeck();
     const elemStyle = currentSlide.elements.find((el) => el.id === eid)?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
 
     const handleDelete = useCallback(() => {
@@ -34,16 +34,33 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         if (state.editingMode || KSlideSet.editingMode) {
             return;
         }
+        const step = event.shiftKey ? 10 : 1;
         switch (event.key) {
             case 'Delete':
             case 'Backspace':
             case 'Escape':
                 handleDelete();
                 break;
+            case 'ArrowUp':
+                event.preventDefault();
+                updateElement(eid, (el) => { el.y -= step; });
+                break;
+            case 'ArrowDown':
+                event.preventDefault();
+                updateElement(eid, (el) => { el.y += step; });
+                break;
+            case 'ArrowLeft':
+                event.preventDefault();
+                updateElement(eid, (el) => { el.x -= step; });
+                break;
+            case 'ArrowRight':
+                event.preventDefault();
+                updateElement(eid, (el) => { el.x += step; });
+                break;
             default:
                 break;
         }
-    }, [handleDelete, state.editingMode]);
+    }, [eid, handleDelete, state.editingMode, updateElement]);
 
     const posx = style.x;
     const posy = style.y;
