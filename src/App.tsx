@@ -1,7 +1,7 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { KComponents } from './component/component';
-import { defaultFileName } from './frame';
+import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
 import { downloadFile, handleFullScreen } from './component/utility';
 import { Tools } from './tools';
 import { DeckProvider, useDeck } from './context/DeckContext';
@@ -30,25 +30,56 @@ const SlideSet: React.FC = () => {
 
 const SlideView: React.FC = () => {
   const { state, currentSlide, setActiveEID } = useDeck();
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!stageRef.current) return;
+      const rect = stageRef.current.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        const nextScale = Math.min(rect.width / SLIDE_WIDTH, rect.height / SLIDE_HEIGHT);
+        setScale(nextScale);
+        KSlideSet.scale = nextScale;
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    document.addEventListener('fullscreenchange', updateScale);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      document.removeEventListener('fullscreenchange', updateScale);
+    };
+  }, []);
 
   return (
-    <div
-      id={`slide${state.curFrame}`}
-      style={{ background: currentSlide.background }}
-      className="slideview"
-      onClick={() => setActiveEID(null)}
-    >
-      {currentSlide.elements.map((elemData) => {
-        const Comp = KComponents.get(elemData.name);
-        if (!Comp) return null;
-        return (
-          <Comp
-            key={`${state.curFrame}-${elemData.id}`}
-            eid={elemData.id}
-            info={elemData.inner}
-          />
-        );
-      })}
+    <div ref={stageRef} className="slide-stage" onClick={() => setActiveEID(null)}>
+      <div
+        id={`slide${state.curFrame}`}
+        style={{
+          background: currentSlide.background,
+          width: `${SLIDE_WIDTH}px`,
+          height: `${SLIDE_HEIGHT}px`,
+          transform: `scale(${scale})`,
+        }}
+        className="slideview"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActiveEID(null);
+        }}
+      >
+        {currentSlide.elements.map((elemData) => {
+          const Comp = KComponents.get(elemData.name);
+          if (!Comp) return null;
+          return (
+            <Comp
+              key={`${state.curFrame}-${elemData.id}`}
+              eid={elemData.id}
+              info={elemData.inner}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 };

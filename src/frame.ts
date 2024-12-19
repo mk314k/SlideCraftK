@@ -1,4 +1,6 @@
-export const defaultSV = {x:0, y:0, width:100, height:100};
+export const SLIDE_WIDTH = 1280;
+export const SLIDE_HEIGHT = 720;
+export const defaultSV = {x: 120, y: 120, width: 220, height: 110};
 export type SV = typeof defaultSV;
 export const defaultFileName = 'untitled';
 
@@ -88,6 +90,7 @@ export class KSlideSet {
     public static curFrame = 0;
     public static editingMode = false;
     public static view = {x:0, y:0};
+    public static scale = 1;
     public static activeEID:number|null = null;
 
     public static numElement(frame = KSlideSet.curFrame){

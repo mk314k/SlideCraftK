@@ -77,13 +77,26 @@ textarea{
 }
 
 
-.slideview{
+.slide-stage {
   position: fixed;
   left: calc(0.5*var(--tool-width) + 20vw);
-  top: 15vh;
-  width: 60vw;
-  height: 55vh;
+  top: 12vh;
+  width: 64vw;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slideview{
+  position: relative;
+  width: 1280px;
+  height: 720px;
   border-radius: 20px;
+  transform-origin: center center;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
 }
 .slideview-full{
   position: fixed;
