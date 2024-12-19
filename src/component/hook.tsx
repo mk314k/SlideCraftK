@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { KSlideSet, defaultSV } from '../frame';
 import { useDeck } from '../context/DeckContext';
 
+export type ResizeDirection = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
 const useKElemHook = (eid:number, sv = defaultSV) => {
     const { currentSlide, updateElement } = useDeck();
     const elemState = currentSlide.elements.find((el) => el.id === eid);
@@ -15,7 +17,7 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
     const [posy, setPosY] = useState(initialY);
     const [width, setWidth] = useState(initialWidth);
     const [height, setHeight] = useState(initialHeight);
-    const [cursorStyle, setCursorStyle] = useState('auto');
+    const [cursorStyle, setCursorStyle] = useState('move');
 
     useEffect(() => {
         if (elemState) {
@@ -37,65 +39,74 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
     }, [width, height, eid]);
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        const rect = event.currentTarget.getBoundingClientRect();
         const mouseX = event.clientX;
         const mouseY = event.clientY;
         const scale = KSlideSet.scale > 0 ? KSlideSet.scale : 1;
-        const borderThreshold = 8 * scale;
 
-        if ((rect.x + borderThreshold <= mouseX) && 
-            (mouseX <= rect.x + rect.width - borderThreshold) &&
-            (rect.y + borderThreshold <= mouseY) && 
-            (mouseY <= rect.y + rect.height - borderThreshold)
-        ){
-            let latestX = posx;
-            let latestY = posy;
-            const handleMouseMove = (e: MouseEvent) => {
-                const dx = (e.clientX - mouseX) / scale;
-                const dy = (e.clientY - mouseY) / scale;
-                latestX = Math.round(posx + dx);
-                latestY = Math.round(posy + dy);
-                setPosX(latestX);
-                setPosY(latestY);
-            };
-        
-            const handleMouseUp = () => {
-                updateElement(eid, (el) => {
-                    el.x = latestX;
-                    el.y = latestY;
-                });
-                document.removeEventListener('mousemove', handleMouseMove);
-                document.removeEventListener('mouseup', handleMouseUp);
-            };
-        
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        } else {
-            setCursorStyle('nwse-resize');
-            let latestW = width;
-            let latestH = height;
-            const handleResizeMouseMove = (e: MouseEvent) => {
-                const dx = (e.clientX - mouseX) / scale;
-                const dy = (e.clientY - mouseY) / scale;
+        let latestX = posx;
+        let latestY = posy;
+        setCursorStyle('grabbing');
+
+        const handleMouseMove = (e: MouseEvent) => {
+            const dx = (e.clientX - mouseX) / scale;
+            const dy = (e.clientY - mouseY) / scale;
+            latestX = Math.round(posx + dx);
+            latestY = Math.round(posy + dy);
+            setPosX(latestX);
+            setPosY(latestY);
+        };
+
+        const handleMouseUp = () => {
+            setCursorStyle('move');
+            updateElement(eid, (el) => {
+                el.x = latestX;
+                el.y = latestY;
+            });
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    };
+
+    const handleResizeStart = (
+        direction: ResizeDirection,
+        event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    ) => {
+        event.stopPropagation();
+        event.preventDefault();
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+        const scale = KSlideSet.scale > 0 ? KSlideSet.scale : 1;
+
+        let latestW = width;
+        let latestH = height;
+
+        const handleResizeMouseMove = (e: MouseEvent) => {
+            const dx = (e.clientX - mouseX) / scale;
+            const dy = (e.clientY - mouseY) / scale;
+            if (direction.includes('e')) {
                 latestW = Math.max(24, Math.round(width + dx));
+            }
+            if (direction.includes('s')) {
                 latestH = Math.max(24, Math.round(height + dy));
-                setWidth(latestW);
-                setHeight(latestH);
-            };
-        
-            const handleResizeMouseUp = () => {
-                setCursorStyle('auto');
-                updateElement(eid, (el) => {
-                    el.width = latestW;
-                    el.height = latestH;
-                });
-                document.removeEventListener('mousemove', handleResizeMouseMove);
-                document.removeEventListener('mouseup', handleResizeMouseUp);
-            };
-        
-            document.addEventListener('mousemove', handleResizeMouseMove);
-            document.addEventListener('mouseup', handleResizeMouseUp);
-        }
+            }
+            setWidth(latestW);
+            setHeight(latestH);
+        };
+
+        const handleResizeMouseUp = () => {
+            updateElement(eid, (el) => {
+                el.width = latestW;
+                el.height = latestH;
+            });
+            document.removeEventListener('mousemove', handleResizeMouseMove);
+            document.removeEventListener('mouseup', handleResizeMouseUp);
+        };
+
+        document.addEventListener('mousemove', handleResizeMouseMove);
+        document.addEventListener('mouseup', handleResizeMouseUp);
     };
 
     const style = {
@@ -108,7 +119,8 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
 
     return {
         style,
-        handleMouseDown
+        handleMouseDown,
+        handleResizeStart
     };
 };
 

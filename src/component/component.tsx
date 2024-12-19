@@ -1,8 +1,10 @@
-import useKElemHook from "./hook";
+import useKElemHook, { ResizeDirection } from "./hook";
 import { tex2mml } from "./utility";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
 import React, { useState, useCallback } from "react";
+
+const RESIZE_DIRECTIONS: ResizeDirection[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
 export interface KElementContainerProps {
     eid: number;
@@ -16,7 +18,7 @@ export interface KElementProps {
 
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
-    const { style, handleMouseDown } = useKElemHook(eid);
+    const { style, handleMouseDown, handleResizeStart } = useKElemHook(eid);
     const { state, currentSlide, deleteElement, setActiveEID } = useDeck();
     const elemStyle = currentSlide.elements.find((el) => el.id === eid)?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
 
@@ -68,6 +70,13 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
             tabIndex={0}
         >
             {childNode}
+            {isActive && !state.editingMode && RESIZE_DIRECTIONS.map((dir) => (
+                <div
+                    key={dir}
+                    className={`resize-handle resize-handle-${dir}`}
+                    onMouseDown={(e) => handleResizeStart(dir, e)}
+                />
+            ))}
         </div>
     );
 };

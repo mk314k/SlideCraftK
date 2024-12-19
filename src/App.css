@@ -117,6 +117,26 @@ textarea{
   outline-offset: 2px;
 }
 
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border: 2px solid #4f46e5;
+  border-radius: 50%;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.resize-handle-nw { top: -6px; left: -6px; cursor: nwse-resize; }
+.resize-handle-n  { top: -6px; left: calc(50% - 5px); cursor: ns-resize; }
+.resize-handle-ne { top: -6px; right: -6px; cursor: nesw-resize; }
+.resize-handle-e  { top: calc(50% - 5px); right: -6px; cursor: ew-resize; }
+.resize-handle-se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+.resize-handle-s  { bottom: -6px; left: calc(50% - 5px); cursor: ns-resize; }
+.resize-handle-sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+.resize-handle-w  { top: calc(50% - 5px); left: -6px; cursor: ew-resize; }
+
 .tool-active {
   background-color: rgba(255, 255, 255, 0.25);
   border-radius: 8px;
