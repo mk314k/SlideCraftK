@@ -30,6 +30,7 @@ export interface DeckState {
     activeEID: number | null;
     editingMode: boolean;
     guides: AlignmentGuide[];
+    clipboard: Omit<SlideElementState, 'id'> | null;
 }
 
 export interface DeckContextValue {
@@ -42,6 +43,9 @@ export interface DeckContextValue {
     updateElement: (eid: number, updater: (elem: SlideElementState) => void) => void;
     updateElementStyle: (eid: number, prop: string, value: string) => void;
     deleteElement: (eid: number) => void;
+    duplicateActiveElement: () => void;
+    copyActiveElement: () => void;
+    pasteClipboardElement: () => void;
     setActiveEID: (eid: number | null) => void;
     setEditingMode: (editing: boolean) => void;
     setGuides: (guides: AlignmentGuide[]) => void;
@@ -74,6 +78,7 @@ function syncFromKSlideSet(): DeckState {
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
         guides: [],
+        clipboard: null,
     };
 }
 
@@ -189,6 +194,69 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [updateDeck]);
 
+    const duplicateActiveElement = useCallback(() => {
+        updateDeck((draft) => {
+            if (draft.activeEID == null) return;
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            const source = slide.elements.find((el) => el.id === draft.activeEID);
+            if (!source) return;
+            const newId = slide.nextEid;
+            slide.elements.push({
+                id: newId,
+                name: source.name,
+                x: source.x + 24,
+                y: source.y + 24,
+                width: source.width,
+                height: source.height,
+                inner: source.inner,
+                style: { ...source.style },
+            });
+            slide.nextEid = newId + 1;
+            draft.activeEID = newId;
+        });
+    }, [updateDeck]);
+
+    const copyActiveElement = useCallback(() => {
+        updateDeck((draft) => {
+            if (draft.activeEID == null) return;
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            const source = slide.elements.find((el) => el.id === draft.activeEID);
+            if (!source) return;
+            draft.clipboard = {
+                name: source.name,
+                x: source.x,
+                y: source.y,
+                width: source.width,
+                height: source.height,
+                inner: source.inner,
+                style: { ...source.style },
+            };
+        });
+    }, [updateDeck]);
+
+    const pasteClipboardElement = useCallback(() => {
+        updateDeck((draft) => {
+            if (!draft.clipboard) return;
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            const newId = slide.nextEid;
+            slide.elements.push({
+                id: newId,
+                name: draft.clipboard.name,
+                x: draft.clipboard.x + 24,
+                y: draft.clipboard.y + 24,
+                width: draft.clipboard.width,
+                height: draft.clipboard.height,
+                inner: draft.clipboard.inner,
+                style: { ...draft.clipboard.style },
+            });
+            slide.nextEid = newId + 1;
+            draft.activeEID = newId;
+        });
+    }, [updateDeck]);
+
     const setActiveEID = useCallback((eid: number | null) => {
         updateDeck((draft) => {
             draft.activeEID = eid;
@@ -232,6 +300,9 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 updateElement,
                 updateElementStyle,
                 deleteElement,
+                duplicateActiveElement,
+                copyActiveElement,
+                pasteClipboardElement,
                 setActiveEID,
                 setEditingMode,
                 setGuides,

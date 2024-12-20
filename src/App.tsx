@@ -96,8 +96,41 @@ const SlideView: React.FC = () => {
 };
 
 const EditorWorkspace: React.FC = () => {
-  const { addElement, saveDeck, loadDeck } = useDeck();
+  const {
+    state,
+    addElement,
+    duplicateActiveElement,
+    copyActiveElement,
+    pasteClipboardElement,
+    saveDeck,
+    loadDeck,
+  } = useDeck();
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      if (state.editingMode) return;
+      const target = event.target as HTMLElement | null;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        return;
+      }
+      const isMod = event.metaKey || event.ctrlKey;
+      if (!isMod) return;
+      const key = event.key.toLowerCase();
+      if (key === 'd') {
+        event.preventDefault();
+        duplicateActiveElement();
+      } else if (key === 'c') {
+        event.preventDefault();
+        copyActiveElement();
+      } else if (key === 'v') {
+        event.preventDefault();
+        pasteClipboardElement();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [state.editingMode, duplicateActiveElement, copyActiveElement, pasteClipboardElement]);
 
   const handleAddElement = (elemType: string, info?: string) => {
     if (KComponents.has(elemType)) {
