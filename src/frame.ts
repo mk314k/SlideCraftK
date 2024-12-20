@@ -15,6 +15,7 @@ export interface SerializedElement {
     y: number;
     width: number;
     height: number;
+    rotation?: number;
     inner: string;
     style?: StyleMap;
 }
@@ -35,7 +36,8 @@ export class KElementData {
         public width:number =defaultSV.width,
         public height:number =defaultSV.height,
         public inner = '',
-        public style:StyleMap = {}
+        public style:StyleMap = {},
+        public rotation = 0
     ){
         this.name = elemType;
         if (this.inner === ''){
@@ -137,6 +139,7 @@ export class KSlideSet {
                 const y = typeof elemPropData.y === 'number' && Number.isFinite(elemPropData.y) ? elemPropData.y : defaultSV.y;
                 const width = typeof elemPropData.width === 'number' && Number.isFinite(elemPropData.width) ? elemPropData.width : defaultSV.width;
                 const height = typeof elemPropData.height === 'number' && Number.isFinite(elemPropData.height) ? elemPropData.height : defaultSV.height;
+                const rotation = typeof elemPropData.rotation === 'number' && Number.isFinite(elemPropData.rotation) ? elemPropData.rotation : 0;
                 const inner = typeof elemPropData.inner === 'string' ? elemPropData.inner : '';
                 const style: StyleMap = elemPropData.style && typeof elemPropData.style === 'object'
                     ? { ...elemPropData.style }
@@ -144,7 +147,7 @@ export class KSlideSet {
                 const eid = typeof elemPropData.id === 'number' && Number.isInteger(elemPropData.id) && elemPropData.id >= 0
                     ? elemPropData.id
                     : index;
-                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style));
+                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style, rotation));
             });
             return slide;
         });
@@ -166,6 +169,7 @@ export class KSlideSet {
                     y: elemProp.y,
                     width: elemProp.width,
                     height: elemProp.height,
+                    rotation: elemProp.rotation,
                     inner: elemProp.inner,
                     style: { ...elemProp.style }
                 });

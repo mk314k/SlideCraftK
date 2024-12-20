@@ -137,6 +137,20 @@ textarea{
 .resize-handle-sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
 .resize-handle-w  { top: calc(50% - 5px); left: -6px; cursor: ew-resize; }
 
+.rotate-handle {
+  position: absolute;
+  top: -26px;
+  left: calc(50% - 6px);
+  width: 12px;
+  height: 12px;
+  background: #4f46e5;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  cursor: grab;
+  z-index: 12;
+  box-sizing: border-box;
+}
+
 .alignment-guide {
   position: absolute;
   pointer-events: none;

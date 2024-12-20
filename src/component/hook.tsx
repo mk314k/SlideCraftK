@@ -15,11 +15,13 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
     const initialY = elemState?.y ?? sv.y;
     const initialWidth = elemState?.width ?? sv.width;
     const initialHeight = elemState?.height ?? sv.height;
+    const initialRotation = elemState?.rotation ?? 0;
 
     const [posx, setPosX] = useState(initialX);
     const [posy, setPosY] = useState(initialY);
     const [width, setWidth] = useState(initialWidth);
     const [height, setHeight] = useState(initialHeight);
+    const [rotation, setRotation] = useState(initialRotation);
     const [cursorStyle, setCursorStyle] = useState('move');
 
     useEffect(() => {
@@ -28,8 +30,9 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
             setPosY(elemState.y);
             setWidth(elemState.width);
             setHeight(elemState.height);
+            setRotation(elemState.rotation ?? 0);
         }
-    }, [elemState?.x, elemState?.y, elemState?.width, elemState?.height, elemState]);
+    }, [elemState?.x, elemState?.y, elemState?.width, elemState?.height, elemState?.rotation, elemState]);
 
     useEffect(()=>{
         KSlideSet.slides[KSlideSet.curFrame].get(eid).x = posx;
@@ -176,18 +179,54 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
         document.addEventListener('mouseup', handleResizeMouseUp);
     };
 
+    const handleRotateStart = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+        event.preventDefault();
+        const container = event.currentTarget.parentElement;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        let latestRotation = rotation;
+
+        const handleRotateMove = (e: MouseEvent) => {
+            const rad = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+            let deg = Math.round((rad * 180) / Math.PI + 90);
+            if (deg < 0) deg += 360;
+            if (e.shiftKey) {
+                deg = Math.round(deg / 15) * 15;
+            }
+            latestRotation = deg % 360;
+            setRotation(latestRotation);
+        };
+
+        const handleRotateUp = () => {
+            updateElement(eid, (el) => {
+                el.rotation = latestRotation;
+            });
+            document.removeEventListener('mousemove', handleRotateMove);
+            document.removeEventListener('mouseup', handleRotateUp);
+        };
+
+        document.addEventListener('mousemove', handleRotateMove);
+        document.addEventListener('mouseup', handleRotateUp);
+    };
+
     const style = {
         x: posx,
         y: posy,
         width: width,
         height: height,
+        rotation: rotation,
         cursor: cursorStyle
     };
 
     return {
         style,
         handleMouseDown,
-        handleResizeStart
+        handleResizeStart,
+        handleRotateStart
     };
 };
 

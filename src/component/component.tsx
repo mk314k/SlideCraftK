@@ -18,7 +18,7 @@ export interface KElementProps {
 
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
-    const { style, handleMouseDown, handleResizeStart } = useKElemHook(eid);
+    const { style, handleMouseDown, handleResizeStart, handleRotateStart } = useKElemHook(eid);
     const { state, currentSlide, updateElement, deleteElement, setActiveEID } = useDeck();
     const elemStyle = currentSlide.elements.find((el) => el.id === eid)?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
 
@@ -77,6 +77,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 top: `${posy}px`,
                 width: style.width,
                 height: style.height,
+                transform: style.rotation ? `rotate(${style.rotation}deg)` : undefined,
                 background: 'var(--background)' ,
                 cursor: style.cursor,
                 ...elemStyle
@@ -87,13 +88,22 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
             tabIndex={0}
         >
             {childNode}
-            {isActive && !state.editingMode && RESIZE_DIRECTIONS.map((dir) => (
-                <div
-                    key={dir}
-                    className={`resize-handle resize-handle-${dir}`}
-                    onMouseDown={(e) => handleResizeStart(dir, e)}
-                />
-            ))}
+            {isActive && !state.editingMode && (
+                <>
+                    <div
+                        className="rotate-handle"
+                        title="Rotate (hold Shift for 15° steps)"
+                        onMouseDown={handleRotateStart}
+                    />
+                    {RESIZE_DIRECTIONS.map((dir) => (
+                        <div
+                            key={dir}
+                            className={`resize-handle resize-handle-${dir}`}
+                            onMouseDown={(e) => handleResizeStart(dir, e)}
+                        />
+                    ))}
+                </>
+            )}
         </div>
     );
 };

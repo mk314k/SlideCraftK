@@ -9,6 +9,7 @@ export interface SlideElementState {
     y: number;
     width: number;
     height: number;
+    rotation: number;
     inner: string;
     style: StyleMap;
 }
@@ -66,6 +67,7 @@ function syncFromKSlideSet(): DeckState {
                 y: data.y,
                 width: data.width,
                 height: data.height,
+                rotation: data.rotation ?? 0,
                 inner: data.inner,
                 style: { ...data.style },
             })),
@@ -92,7 +94,7 @@ function syncToKSlideSet(deck: DeckState): void {
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
-                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style })
+                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation)
             );
         });
         return kSlide;
@@ -153,6 +155,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 y: defaultSV.y,
                 width: defaultSV.width,
                 height: defaultSV.height,
+                rotation: 0,
                 inner,
                 style: {},
             });
@@ -209,6 +212,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 y: source.y + 24,
                 width: source.width,
                 height: source.height,
+                rotation: source.rotation,
                 inner: source.inner,
                 style: { ...source.style },
             });
@@ -230,6 +234,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 y: source.y,
                 width: source.width,
                 height: source.height,
+                rotation: source.rotation,
                 inner: source.inner,
                 style: { ...source.style },
             };
@@ -249,6 +254,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 y: draft.clipboard.y + 24,
                 width: draft.clipboard.width,
                 height: draft.clipboard.height,
+                rotation: draft.clipboard.rotation,
                 inner: draft.clipboard.inner,
                 style: { ...draft.clipboard.style },
             });
