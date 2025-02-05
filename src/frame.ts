@@ -41,7 +41,9 @@ export class KElementData {
     ){
         this.name = elemType;
         if (this.inner === ''){
-            this.inner = elemType;
+            this.inner = elemType === 'latex'
+                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                : elemType;
         }
     }
 }

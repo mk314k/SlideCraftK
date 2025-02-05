@@ -1,5 +1,4 @@
 import useKElemHook, { ResizeDirection } from "./hook";
-import { tex2mml } from "./utility";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
 import { KatexRenderer } from "../katexComponent";
@@ -118,15 +117,17 @@ const createKElementComponent = (Component: React.ElementType, mode?: string) =>
         const [draftText, setDraftText] = useState(content);
 
         const startEditing = () => {
-            setDraftText(content);
+            const initialDraft = mode === 'latex' && content === 'latex'
+                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                : content;
+            setDraftText(initialDraft);
             setIsEditing(true);
             setEditingMode(true);
         };
 
         const commitEdit = () => {
-            const nextInner = mode === 'latex' ? tex2mml(draftText) : draftText;
             updateElement(eid, (el) => {
-                el.inner = nextInner;
+                el.inner = draftText;
             });
             setIsEditing(false);
             setEditingMode(false);

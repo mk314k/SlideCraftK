@@ -147,7 +147,10 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const slide = draft.slides[draft.curFrame];
             if (!slide) return;
             const eid = slide.nextEid;
-            const inner = info && info !== '' ? info : elemType;
+            const defaultInner = elemType === 'latex'
+                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                : elemType;
+            const inner = info && info !== '' ? info : defaultInner;
             slide.elements.push({
                 id: eid,
                 name: elemType,
