@@ -1,57 +1,37 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import katex from 'katex';
 
-export const KatexEditor: React.FC = () => {
-  const [latex, setLatex] = useState('Enter LaTeX here');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedLatex, setEditedLatex] = useState(latex);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+export interface KatexRendererProps {
+  latex: string;
+  id?: string;
+  onDoubleClick?: () => void;
+}
 
-  useEffect(() => {
-    renderLatex(latex);
+export const KatexRenderer: React.FC<KatexRendererProps> = ({
+  latex,
+  id,
+  onDoubleClick,
+}) => {
+  const html = useMemo(() => {
+    const expr = latex && latex !== 'latex' ? latex : '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
+    try {
+      return katex.renderToString(expr, {
+        throwOnError: false,
+        displayMode: true,
+      });
+    } catch {
+      return expr;
+    }
   }, [latex]);
 
-  const handleDoubleClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    setLatex(editedLatex);
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEditedLatex(event.target.value);
-  };
-
-  // Render LaTeX content
-  const renderLatex = (latex: string) => {
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-      const el = document.createElement('div');
-      katex.render(latex, el);
-      containerRef.current.appendChild(el);
-    }
-  };
-
   return (
-    <div>
-      {isEditing ? (
-        <input
-          type="text"
-          value={editedLatex}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          autoFocus
-        />
-      ) : (
-        <div onDoubleClick={handleDoubleClick} ref={containerRef}>
-          Enter LaTeX here
-        </div>
-      )}
-    </div>
+    <div
+      id={id}
+      className="element katex-element"
+      onDoubleClick={onDoubleClick}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 };
 
-
-export default KatexEditor;
+export default KatexRenderer;

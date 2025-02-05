@@ -1,4 +1,5 @@
 import { KSlideSet } from "../frame";
+import katex from "katex";
 import {
   StateVar,
   StyleVar,
@@ -9,10 +10,6 @@ import {
 } from "statebinderk";
 
 interface KWindow extends Window {
-  MathJax?: {
-    typeset: () => void;
-    tex2mml: (tex:string) => string;
-  };
   StateBinder?: {
     StateVar: typeof StateVar;
     StyleVar: typeof StyleVar;
@@ -52,11 +49,14 @@ export function registerSlideRuntime() {
 registerSlideRuntime();
 
 export const tex2mml = (tex:string) => {
-  let res = tex;
-  if (typeof window !== 'undefined') {
-    res = (window as KWindow).MathJax?.tex2mml(res) ?? tex;
+  try {
+    return katex.renderToString(tex, {
+      throwOnError: false,
+      displayMode: true,
+    });
+  } catch {
+    return tex;
   }
-  return res;
 };
 
 export function downloadFile(fileName:string, fileContent:string) {

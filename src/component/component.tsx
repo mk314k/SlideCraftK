@@ -2,6 +2,7 @@ import useKElemHook, { ResizeDirection } from "./hook";
 import { tex2mml } from "./utility";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
+import { KatexRenderer } from "../katexComponent";
 import React, { useState, useCallback } from "react";
 
 const RESIZE_DIRECTIONS: ResizeDirection[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -176,6 +177,12 @@ const createKElementComponent = (Component: React.ElementType, mode?: string) =>
                                 cancelEdit();
                             }
                         }}
+                    />
+                ) : mode === 'latex' ? (
+                    <KatexRenderer
+                        id={`${eid}`}
+                        latex={content}
+                        onDoubleClick={startEditing}
                     />
                 ) : (
                     <Component
