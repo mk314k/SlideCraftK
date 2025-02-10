@@ -41,9 +41,13 @@ export class KElementData {
     ){
         this.name = elemType;
         if (this.inner === ''){
-            this.inner = elemType === 'latex'
-                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
-                : elemType;
+            if (elemType === 'latex') {
+                this.inner = '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
+            } else if (elemType === 'code') {
+                this.inner = 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}';
+            } else {
+                this.inner = elemType;
+            }
         }
     }
 }

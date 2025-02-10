@@ -149,6 +149,8 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const eid = slide.nextEid;
             const defaultInner = elemType === 'latex'
                 ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                : elemType === 'code'
+                ? 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}'
                 : elemType;
             const inner = info && info !== '' ? info : defaultInner;
             slide.elements.push({

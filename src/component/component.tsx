@@ -235,6 +235,57 @@ export const KLatex = createKElementComponent('p', 'latex');
 
 export const KTextArea = createKElementComponent('textarea');
 
+export const KCodeBlock = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const content = elemState?.inner ?? info ?? 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}';
+    const [isEditing, setIsEditing] = useState(false);
+    const [draftCode, setDraftCode] = useState(content);
+
+    const startEditing = () => {
+        setDraftCode(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draftCode;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element code-block-editor"
+                    value={draftCode}
+                    autoFocus
+                    onChange={(e) => setDraftCode(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <pre
+                    id={`${eid}`}
+                    className="element code-block-view"
+                    onDoubleClick={startEditing}
+                >
+                    <code>{content}</code>
+                </pre>
+            )
+        } />
+    );
+};
+
 export const KImage = ({ eid, info }: KElementProps) => {
     console.log("rendering KImage");
     const { currentSlide } = useDeck();
@@ -257,6 +308,7 @@ export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["button", KButton],
     ["latex", KLatex],
     ["textarea", KTextArea],
+    ["code", KCodeBlock],
     ["image", KImage]
 ]);
 

@@ -259,4 +259,25 @@ textarea{
   text-overflow: ellipsis;
 }
 
+.code-block-view,
+.code-block-editor {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #1e1e2e !important;
+  color: #cdd6f4 !important;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: left;
+  justify-content: flex-start;
+  align-items: flex-start;
+  border-radius: 10px;
+  overflow: auto;
+  white-space: pre;
+}
+
+
 
