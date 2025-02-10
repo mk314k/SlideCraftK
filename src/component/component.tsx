@@ -1,7 +1,7 @@
 import useKElemHook, { ResizeDirection } from "./hook";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
-import { KatexRenderer } from "../katexComponent";
+import { KatexRenderer, renderKatexWithStatus } from "../katexComponent";
 import React, { useState, useCallback } from "react";
 
 const RESIZE_DIRECTIONS: ResizeDirection[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
@@ -162,23 +162,54 @@ const createKElementComponent = (Component: React.ElementType, mode?: string) =>
         return (
             <KElement eid={eid} childNode={
                 isEditing ? (
-                    <input
-                        id={`${eid}`}
-                        type="text"
-                        className="element"
-                        value={draftText}
-                        autoFocus
-                        onChange={(e) => setDraftText(e.target.value)}
-                        onBlur={commitEdit}
-                        onKeyDown={(e) => {
-                            e.stopPropagation();
-                            if (e.key === 'Enter') {
-                                commitEdit();
-                            } else if (e.key === 'Escape') {
-                                cancelEdit();
-                            }
-                        }}
-                    />
+                    mode === 'latex' ? (
+                        <div className="latex-edit-wrapper">
+                            <input
+                                id={`${eid}`}
+                                type="text"
+                                className="latex-input"
+                                value={draftText}
+                                autoFocus
+                                onChange={(e) => setDraftText(e.target.value)}
+                                onBlur={commitEdit}
+                                onKeyDown={(e) => {
+                                    e.stopPropagation();
+                                    if (e.key === 'Enter') {
+                                        commitEdit();
+                                    } else if (e.key === 'Escape') {
+                                        cancelEdit();
+                                    }
+                                }}
+                            />
+                            <div
+                                className="latex-live-preview"
+                                dangerouslySetInnerHTML={{ __html: renderKatexWithStatus(draftText).html }}
+                            />
+                            {renderKatexWithStatus(draftText).error && (
+                                <div className="latex-error-badge">
+                                    {renderKatexWithStatus(draftText).error}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <input
+                            id={`${eid}`}
+                            type="text"
+                            className="element"
+                            value={draftText}
+                            autoFocus
+                            onChange={(e) => setDraftText(e.target.value)}
+                            onBlur={commitEdit}
+                            onKeyDown={(e) => {
+                                e.stopPropagation();
+                                if (e.key === 'Enter') {
+                                    commitEdit();
+                                } else if (e.key === 'Escape') {
+                                    cancelEdit();
+                                }
+                            }}
+                        />
+                    )
                 ) : mode === 'latex' ? (
                     <KatexRenderer
                         id={`${eid}`}

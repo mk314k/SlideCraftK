@@ -7,22 +7,39 @@ export interface KatexRendererProps {
   onDoubleClick?: () => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function renderKatexWithStatus(latex: string): { html: string; error: string | null } {
+  const expr = latex && latex !== 'latex' ? latex : '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
+  try {
+    katex.renderToString(expr, {
+      throwOnError: true,
+      displayMode: true,
+    });
+    return {
+      html: katex.renderToString(expr, {
+        throwOnError: false,
+        displayMode: true,
+      }),
+      error: null,
+    };
+  } catch (err) {
+    const message = err instanceof Error ? err.message.replace(/^KaTeX parse error:\s*/, '') : 'Invalid LaTeX syntax';
+    return {
+      html: katex.renderToString(expr, {
+        throwOnError: false,
+        displayMode: true,
+      }),
+      error: message,
+    };
+  }
+}
+
 export const KatexRenderer: React.FC<KatexRendererProps> = ({
   latex,
   id,
   onDoubleClick,
 }) => {
-  const html = useMemo(() => {
-    const expr = latex && latex !== 'latex' ? latex : '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
-    try {
-      return katex.renderToString(expr, {
-        throwOnError: false,
-        displayMode: true,
-      });
-    } catch {
-      return expr;
-    }
-  }, [latex]);
+  const { html } = useMemo(() => renderKatexWithStatus(latex), [latex]);
 
   return (
     <div

@@ -216,3 +216,47 @@ textarea{
   cursor: pointer;
 }
 
+.latex-edit-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 4px;
+  padding: 6px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 8px;
+}
+
+.latex-input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 4px 6px;
+  border: 1px solid #4f46e5;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.latex-live-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  color: #111827;
+}
+
+.latex-error-badge {
+  font-size: 0.72rem;
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
