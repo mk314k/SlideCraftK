@@ -45,6 +45,8 @@ export class KElementData {
                 this.inner = '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
             } else if (elemType === 'code') {
                 this.inner = 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}';
+            } else if (elemType === 'markdown') {
+                this.inner = '## Slide Heading\n- First key point\n- Second `inline` point';
             } else {
                 this.inner = elemType;
             }

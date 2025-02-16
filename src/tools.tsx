@@ -89,6 +89,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     const elementTools = [
         {name:'button', icon:'crop_16_9'},
         {name:'textarea', icon:'edit_note'},
+        {name:'markdown', icon:'article'},
         {name:'latex', icon:'functions'},
         {name:'code', icon:'code'}
     ]

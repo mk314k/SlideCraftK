@@ -151,6 +151,8 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
                 : elemType === 'code'
                 ? 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}'
+                : elemType === 'markdown'
+                ? '## Slide Heading\n- First key point\n- Second `inline` point'
                 : elemType;
             const inner = info && info !== '' ? info : defaultInner;
             slide.elements.push({

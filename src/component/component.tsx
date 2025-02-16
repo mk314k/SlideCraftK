@@ -1,4 +1,5 @@
 import useKElemHook, { ResizeDirection } from "./hook";
+import { renderMarkdownToHtml } from "./utility";
 import { KSlideSet } from "../frame";
 import { useDeck } from "../context/DeckContext";
 import { KatexRenderer, renderKatexWithStatus } from "../katexComponent";
@@ -286,6 +287,56 @@ export const KCodeBlock = ({ eid, info }: KElementProps) => {
     );
 };
 
+export const KMarkdown = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const content = elemState?.inner ?? info ?? '## Slide Heading\n- First key point\n- Second `inline` point';
+    const [isEditing, setIsEditing] = useState(false);
+    const [draftMd, setDraftMd] = useState(content);
+
+    const startEditing = () => {
+        setDraftMd(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draftMd;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element markdown-editor"
+                    value={draftMd}
+                    autoFocus
+                    onChange={(e) => setDraftMd(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <div
+                    id={`${eid}`}
+                    className="element markdown-view"
+                    onDoubleClick={startEditing}
+                    dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(content) }}
+                />
+            )
+        } />
+    );
+};
+
 export const KImage = ({ eid, info }: KElementProps) => {
     console.log("rendering KImage");
     const { currentSlide } = useDeck();
@@ -309,6 +360,7 @@ export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["latex", KLatex],
     ["textarea", KTextArea],
     ["code", KCodeBlock],
+    ["markdown", KMarkdown],
     ["image", KImage]
 ]);
 

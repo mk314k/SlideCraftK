@@ -59,6 +59,59 @@ export const tex2mml = (tex:string) => {
   }
 };
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function formatInlineMarkdown(line: string): string {
+  return escapeHtml(line)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+export function renderMarkdownToHtml(markdown: string): string {
+  const lines = markdown.split('\n');
+  const htmlParts: string[] = [];
+  let inList = false;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (!inList) {
+        htmlParts.push('<ul>');
+        inList = true;
+      }
+      htmlParts.push(`<li>${formatInlineMarkdown(line.slice(2))}</li>`);
+      continue;
+    }
+
+    if (inList) {
+      htmlParts.push('</ul>');
+      inList = false;
+    }
+
+    if (line.startsWith('### ')) {
+      htmlParts.push(`<h3>${formatInlineMarkdown(line.slice(4))}</h3>`);
+    } else if (line.startsWith('## ')) {
+      htmlParts.push(`<h2>${formatInlineMarkdown(line.slice(3))}</h2>`);
+    } else if (line.startsWith('# ')) {
+      htmlParts.push(`<h1>${formatInlineMarkdown(line.slice(2))}</h1>`);
+    } else if (line !== '') {
+      htmlParts.push(`<p>${formatInlineMarkdown(line)}</p>`);
+    }
+  }
+
+  if (inList) {
+    htmlParts.push('</ul>');
+  }
+
+  return htmlParts.join('');
+}
+
 export function downloadFile(fileName:string, fileContent:string) {
   const element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(fileContent));
