@@ -355,12 +355,57 @@ export const KImage = ({ eid, info }: KElementProps) => {
     );
 };
 
+const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line') => {
+    return ({ eid }: KElementProps) => {
+        const { currentSlide } = useDeck();
+        const elemState = currentSlide.elements.find((el) => el.id === eid);
+        const strokeColor = elemState?.style['color'] ?? '#312e81';
+        const fillColor = elemState?.style['background'] ?? 'rgba(79, 70, 229, 0.18)';
+
+        return (
+            <KElement eid={eid} childNode={
+                <svg
+                    id={`${eid}`}
+                    className="element shape-svg"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                >
+                    {shapeType === 'rect' && (
+                        <rect x="4" y="4" width="92" height="92" rx="8" fill={fillColor} stroke={strokeColor} strokeWidth="4" />
+                    )}
+                    {shapeType === 'circle' && (
+                        <ellipse cx="50" cy="50" rx="46" ry="46" fill={fillColor} stroke={strokeColor} strokeWidth="4" />
+                    )}
+                    {shapeType === 'line' && (
+                        <line x1="6" y1="50" x2="94" y2="50" stroke={strokeColor} strokeWidth="6" strokeLinecap="round" />
+                    )}
+                    {shapeType === 'arrow' && (
+                        <>
+                            <line x1="6" y1="50" x2="82" y2="50" stroke={strokeColor} strokeWidth="6" strokeLinecap="round" />
+                            <polygon points="96,50 76,36 76,64" fill={strokeColor} />
+                        </>
+                    )}
+                </svg>
+            } />
+        );
+    };
+};
+
+export const KShapeRect = createShapeComponent('rect');
+export const KShapeCircle = createShapeComponent('circle');
+export const KShapeArrow = createShapeComponent('arrow');
+export const KShapeLine = createShapeComponent('line');
+
 export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["button", KButton],
     ["latex", KLatex],
     ["textarea", KTextArea],
     ["code", KCodeBlock],
     ["markdown", KMarkdown],
+    ["rect", KShapeRect],
+    ["circle", KShapeCircle],
+    ["arrow", KShapeArrow],
+    ["line", KShapeLine],
     ["image", KImage]
 ]);
 

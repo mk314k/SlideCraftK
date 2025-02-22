@@ -91,7 +91,11 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         {name:'textarea', icon:'edit_note'},
         {name:'markdown', icon:'article'},
         {name:'latex', icon:'functions'},
-        {name:'code', icon:'code'}
+        {name:'code', icon:'code'},
+        {name:'rect', icon:'check_box_outline_blank'},
+        {name:'circle', icon:'radio_button_unchecked'},
+        {name:'arrow', icon:'trending_flat'},
+        {name:'line', icon:'horizontal_rule'}
     ]
   
     return (
