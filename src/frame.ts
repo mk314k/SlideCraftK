@@ -22,6 +22,8 @@ export interface SerializedElement {
 
 export interface SerializedSlide {
     background?: string;
+    customCss?: string;
+    customJs?: string;
     elemProp: SerializedElement[];
 }
 
@@ -58,6 +60,8 @@ export class KElementData {
 export class KSlide {
     public elemProp:Map<number, KElementData> = new Map();
     public background = 'azure';
+    public customCss = '';
+    public customJs = '';
     private nextEid = 0;
     
     public elements(): [number, KElementData][] {
@@ -136,6 +140,8 @@ export class KSlideSet {
             slide.background = typeof slideData.background === 'string' && slideData.background.trim() !== ''
                 ? slideData.background
                 : 'azure';
+            slide.customCss = typeof slideData.customCss === 'string' ? slideData.customCss : '';
+            slide.customJs = typeof slideData.customJs === 'string' ? slideData.customJs : '';
 
             slideData.elemProp.forEach((rawElem: unknown, index: number) => {
                 if (!rawElem || typeof rawElem !== 'object') {
@@ -182,7 +188,12 @@ export class KSlideSet {
                     style: { ...elemProp.style }
                 });
             });
-            return { background: slide.background, elemProp: elemPropArray };
+            return {
+                background: slide.background,
+                customCss: slide.customCss || undefined,
+                customJs: slide.customJs || undefined,
+                elemProp: elemPropArray,
+            };
         });
         return JSON.stringify(data);
     }

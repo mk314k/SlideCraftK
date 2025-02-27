@@ -125,11 +125,45 @@ export function downloadFile(fileName:string, fileContent:string) {
   document.body.removeChild(element);
 }
 
+export function applySlideCustomCode(frameId: number, customCss: string, customJs: string) {
+  if (typeof document === 'undefined') return;
+  const styleId = `slidecraftk-custom-style-${frameId}`;
+  let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+  if (customCss.trim() !== '') {
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = styleId;
+      document.head.appendChild(styleEl);
+    }
+    styleEl.textContent = customCss;
+  } else if (styleEl) {
+    styleEl.remove();
+  }
+
+  if (customJs.trim() !== '') {
+    try {
+      const runner = new Function(customJs);
+      runner();
+    } catch (err) {
+      console.error('Slide script error:', err);
+    }
+  }
+}
+
 export function insertCode(cssOrJs:string){
-  const codeText = (document.getElementById('code') as HTMLTextAreaElement).value;
-  const codeElement = document.createElement(cssOrJs);
-  codeElement.appendChild(document.createTextNode(codeText));
-  document.head.appendChild(codeElement);
+  const codeInput = document.getElementById('code') as HTMLTextAreaElement | null;
+  if (!codeInput) return;
+  const codeText = codeInput.value;
+  const slide = KSlideSet.slides[KSlideSet.curFrame];
+  if (slide) {
+    if (cssOrJs === 'style') {
+      slide.customCss = codeText;
+      applySlideCustomCode(KSlideSet.curFrame, codeText, '');
+    } else if (cssOrJs === 'script') {
+      slide.customJs = codeText;
+      applySlideCustomCode(KSlideSet.curFrame, slide.customCss, codeText);
+    }
+  }
 }
 
 export function handleFullScreen() {

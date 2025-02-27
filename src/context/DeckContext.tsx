@@ -16,6 +16,8 @@ export interface SlideElementState {
 
 export interface SlideState {
     background: string;
+    customCss: string;
+    customJs: string;
     elements: SlideElementState[];
     nextEid: number;
 }
@@ -40,6 +42,7 @@ export interface DeckContextValue {
     setFrameId: (frameId: number) => void;
     addSlide: () => void;
     setSlideBackground: (color: string, frameId?: number) => void;
+    setSlideCustomCode: (kind: 'style' | 'script', code: string) => void;
     addElement: (elemType: string, info?: string) => void;
     updateElement: (eid: number, updater: (elem: SlideElementState) => void) => void;
     updateElementStyle: (eid: number, prop: string, value: string) => void;
@@ -60,6 +63,8 @@ function syncFromKSlideSet(): DeckState {
         const maxId = entries.length > 0 ? Math.max(...entries.map(([id]) => id)) : -1;
         return {
             background: slide.background,
+            customCss: slide.customCss ?? '',
+            customJs: slide.customJs ?? '',
             elements: entries.map(([id, data]) => ({
                 id,
                 name: data.name,
@@ -75,7 +80,7 @@ function syncFromKSlideSet(): DeckState {
         };
     });
     return {
-        slides: slides.length > 0 ? slides : [{ background: 'azure', elements: [], nextEid: 0 }],
+        slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 }],
         curFrame: KSlideSet.curFrame,
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
@@ -91,6 +96,8 @@ function syncToKSlideSet(deck: DeckState): void {
     KSlideSet.slides = deck.slides.map((s) => {
         const kSlide = new KSlide();
         kSlide.background = s.background;
+        kSlide.customCss = s.customCss;
+        kSlide.customJs = s.customJs;
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
@@ -127,7 +134,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const addSlide = useCallback(() => {
         updateDeck((draft) => {
             const newIdx = draft.slides.length;
-            draft.slides.push({ background: 'azure', elements: [], nextEid: 0 });
+            draft.slides.push({ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
         });
@@ -138,6 +145,18 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const target = frameId ?? draft.curFrame;
             if (draft.slides[target]) {
                 draft.slides[target].background = color;
+            }
+        });
+    }, [updateDeck]);
+
+    const setSlideCustomCode = useCallback((kind: 'style' | 'script', code: string) => {
+        updateDeck((draft) => {
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            if (kind === 'style') {
+                slide.customCss = code;
+            } else {
+                slide.customJs = code;
             }
         });
     }, [updateDeck]);
@@ -309,6 +328,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setFrameId,
                 addSlide,
                 setSlideBackground,
+                setSlideCustomCode,
                 addElement,
                 updateElement,
                 updateElementStyle,

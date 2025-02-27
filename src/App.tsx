@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useRef, useEffect } from 'react';
 import { KComponents } from './component/component';
 import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
-import { downloadFile, handleFullScreen } from './component/utility';
+import { downloadFile, handleFullScreen, applySlideCustomCode } from './component/utility';
 import { Tools } from './tools';
 import { DeckProvider, useDeck } from './context/DeckContext';
 
@@ -51,6 +51,10 @@ const SlideView: React.FC = () => {
       document.removeEventListener('fullscreenchange', updateScale);
     };
   }, []);
+
+  useEffect(() => {
+    applySlideCustomCode(state.curFrame, currentSlide.customCss, currentSlide.customJs);
+  }, [state.curFrame, currentSlide.customCss, currentSlide.customJs]);
 
   return (
     <div ref={stageRef} className="slide-stage" onClick={() => setActiveEID(null)}>
