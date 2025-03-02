@@ -58,22 +58,61 @@ textarea{
 .slideset{
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
   flex-wrap: nowrap;
-  overflow-x: scroll;
+  overflow-x: auto;
   position: fixed;
   bottom: 3vh;
-  left: calc(0.5*var(--tool-width) + 30vw);
-  width: 40vw;
-  height: 20vh;
+  left: calc(0.5*var(--tool-width) + 22vw);
+  width: 60vw;
+  height: 18vh;
+  padding: 6px 10px;
   background: var(--background);
   border: none;
 }
 .mini{
-  height: inherit;
-  width: min(200px, 20vw);
+  height: 100%;
+  min-width: 120px;
   border: 1px solid black;
-  padding: 60px;
+  padding: 16px;
   background: var(--foreground);
+}
+
+.mini-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 150px;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background: var(--foreground);
+  cursor: pointer;
+}
+
+.mini-card-active {
+  border-color: #4f46e5;
+}
+
+.mini-card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.mini-card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-action-btn {
+  padding: 2px 6px !important;
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
 

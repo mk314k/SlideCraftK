@@ -7,22 +7,58 @@ import { Tools } from './tools';
 import { DeckProvider, useDeck } from './context/DeckContext';
 
 const SlideSet: React.FC = () => {
-  const { state, setFrameId, addSlide } = useDeck();
+  const { state, setFrameId, addSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
 
   return (
     <div className="slideset">
       {state.slides.map((_, i) => (
-        <button
-          className="mini"
-          id={`${i}ss`}
+        <div
           key={`${i}ss`}
+          className={`mini-card${state.curFrame === i ? ' mini-card-active' : ''}`}
           onClick={() => setFrameId(i)}
         >
-          Frame {i}
-        </button>
+          <span className="mini-card-label">Slide {i + 1}</span>
+          <div className="mini-card-actions" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="mini-action-btn"
+              title="Move Left"
+              disabled={i === 0}
+              onClick={() => moveSlide(i, i - 1)}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              className="mini-action-btn"
+              title="Duplicate Slide"
+              onClick={() => duplicateSlide(i)}
+            >
+              ⧉
+            </button>
+            <button
+              type="button"
+              className="mini-action-btn"
+              title="Delete Slide"
+              disabled={state.slides.length <= 1}
+              onClick={() => deleteSlide(i)}
+            >
+              ×
+            </button>
+            <button
+              type="button"
+              className="mini-action-btn"
+              title="Move Right"
+              disabled={i === state.slides.length - 1}
+              onClick={() => moveSlide(i, i + 1)}
+            >
+              ›
+            </button>
+          </div>
+        </div>
       ))}
       <button className="mini" onClick={addSlide}>
-        Add
+        + Add
       </button>
     </div>
   );

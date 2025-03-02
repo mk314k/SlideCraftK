@@ -41,6 +41,9 @@ export interface DeckContextValue {
     currentSlide: SlideState;
     setFrameId: (frameId: number) => void;
     addSlide: () => void;
+    deleteSlide: (frameId?: number) => void;
+    duplicateSlide: (frameId?: number) => void;
+    moveSlide: (fromIdx: number, toIdx: number) => void;
     setSlideBackground: (color: string, frameId?: number) => void;
     setSlideCustomCode: (kind: 'style' | 'script', code: string) => void;
     addElement: (elemType: string, info?: string) => void;
@@ -137,6 +140,59 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             draft.slides.push({ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
+        });
+    }, [updateDeck]);
+
+    const deleteSlide = useCallback((frameId?: number) => {
+        updateDeck((draft) => {
+            if (draft.slides.length <= 1) return;
+            const target = frameId ?? draft.curFrame;
+            if (target < 0 || target >= draft.slides.length) return;
+            draft.slides.splice(target, 1);
+            if (draft.curFrame >= draft.slides.length) {
+                draft.curFrame = draft.slides.length - 1;
+            } else if (draft.curFrame > target) {
+                draft.curFrame -= 1;
+            }
+            draft.activeEID = null;
+        });
+    }, [updateDeck]);
+
+    const duplicateSlide = useCallback((frameId?: number) => {
+        updateDeck((draft) => {
+            const target = frameId ?? draft.curFrame;
+            const source = draft.slides[target];
+            if (!source) return;
+            const cloned: SlideState = {
+                background: source.background,
+                customCss: source.customCss,
+                customJs: source.customJs,
+                nextEid: source.nextEid,
+                elements: source.elements.map((el) => ({
+                    ...el,
+                    style: { ...el.style },
+                })),
+            };
+            draft.slides.splice(target + 1, 0, cloned);
+            draft.curFrame = target + 1;
+            draft.activeEID = null;
+        });
+    }, [updateDeck]);
+
+    const moveSlide = useCallback((fromIdx: number, toIdx: number) => {
+        updateDeck((draft) => {
+            if (
+                fromIdx < 0 ||
+                fromIdx >= draft.slides.length ||
+                toIdx < 0 ||
+                toIdx >= draft.slides.length ||
+                fromIdx === toIdx
+            ) {
+                return;
+            }
+            const [moved] = draft.slides.splice(fromIdx, 1);
+            draft.slides.splice(toIdx, 0, moved);
+            draft.curFrame = toIdx;
         });
     }, [updateDeck]);
 
@@ -327,6 +383,9 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 currentSlide,
                 setFrameId,
                 addSlide,
+                deleteSlide,
+                duplicateSlide,
+                moveSlide,
                 setSlideBackground,
                 setSlideCustomCode,
                 addElement,
