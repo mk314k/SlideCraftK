@@ -11,49 +11,83 @@ const SlideSet: React.FC = () => {
 
   return (
     <div className="slideset">
-      {state.slides.map((_, i) => (
+      {state.slides.map((slide, i) => (
         <div
           key={`${i}ss`}
           className={`mini-card${state.curFrame === i ? ' mini-card-active' : ''}`}
           onClick={() => setFrameId(i)}
         >
-          <span className="mini-card-label">Slide {i + 1}</span>
-          <div className="mini-card-actions" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="mini-action-btn"
-              title="Move Left"
-              disabled={i === 0}
-              onClick={() => moveSlide(i, i - 1)}
+          <div className="mini-thumb-viewport">
+            <div
+              className="mini-thumb-canvas"
+              style={{
+                background: slide.background,
+                width: `${SLIDE_WIDTH}px`,
+                height: `${SLIDE_HEIGHT}px`,
+              }}
             >
-              ‹
-            </button>
-            <button
-              type="button"
-              className="mini-action-btn"
-              title="Duplicate Slide"
-              onClick={() => duplicateSlide(i)}
-            >
-              ⧉
-            </button>
-            <button
-              type="button"
-              className="mini-action-btn"
-              title="Delete Slide"
-              disabled={state.slides.length <= 1}
-              onClick={() => deleteSlide(i)}
-            >
-              ×
-            </button>
-            <button
-              type="button"
-              className="mini-action-btn"
-              title="Move Right"
-              disabled={i === state.slides.length - 1}
-              onClick={() => moveSlide(i, i + 1)}
-            >
-              ›
-            </button>
+              {slide.elements.map((el) => (
+                <div
+                  key={el.id}
+                  className="mini-thumb-element"
+                  style={{
+                    left: `${el.x}px`,
+                    top: `${el.y}px`,
+                    width: `${el.width}px`,
+                    height: `${el.height}px`,
+                    transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
+                    background: el.style['background'] ?? 'var(--background)',
+                    color: el.style['color'] ?? '#111827',
+                  }}
+                >
+                  {el.name === 'image' ? (
+                    <img src={el.inner} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span>{el.name === 'latex' ? '∑ Math' : el.inner.slice(0, 24)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mini-card-footer">
+            <span className="mini-card-label">{i + 1}</span>
+            <div className="mini-card-actions" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className="mini-action-btn"
+                title="Move Left"
+                disabled={i === 0}
+                onClick={() => moveSlide(i, i - 1)}
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="mini-action-btn"
+                title="Duplicate Slide"
+                onClick={() => duplicateSlide(i)}
+              >
+                ⧉
+              </button>
+              <button
+                type="button"
+                className="mini-action-btn"
+                title="Delete Slide"
+                disabled={state.slides.length <= 1}
+                onClick={() => deleteSlide(i)}
+              >
+                ×
+              </button>
+              <button
+                type="button"
+                className="mini-action-btn"
+                title="Move Right"
+                disabled={i === state.slides.length - 1}
+                onClick={() => moveSlide(i, i + 1)}
+              >
+                ›
+              </button>
+            </div>
           </div>
         </div>
       ))}

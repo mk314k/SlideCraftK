@@ -84,10 +84,10 @@ textarea{
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  min-width: 150px;
+  align-items: stretch;
+  min-width: 164px;
   height: 100%;
-  padding: 8px;
+  padding: 6px;
   box-sizing: border-box;
   border-radius: 10px;
   border: 2px solid transparent;
@@ -99,8 +99,46 @@ textarea{
   border-color: #4f46e5;
 }
 
+.mini-thumb-viewport {
+  position: relative;
+  width: 144px;
+  height: 81px;
+  overflow: hidden;
+  border-radius: 6px;
+  margin: 0 auto;
+  background: #ffffff;
+}
+
+.mini-thumb-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: scale(0.1125);
+  transform-origin: top left;
+  pointer-events: none;
+}
+
+.mini-thumb-element {
+  position: absolute;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.mini-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
 .mini-card-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
