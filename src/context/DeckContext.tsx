@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { produce } from 'immer';
 import { KElementData, KSlide, KSlideSet, StyleMap, defaultSV } from '../frame';
+
+const STORAGE_KEY = 'slidecraftk.autosave.v1';
 
 export interface SlideElementState {
     id: number;
@@ -120,9 +122,31 @@ const DeckContext = createContext<DeckContextValue | null>(null);
 const MAX_HISTORY = 40;
 
 export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [state, setState] = useState<DeckState>(() => syncFromKSlideSet());
+    const [state, setState] = useState<DeckState>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const cached = window.localStorage.getItem(STORAGE_KEY);
+                if (cached) {
+                    KSlideSet.load(cached);
+                }
+            } catch {
+                // ignore malformed or unavailable localStorage
+            }
+        }
+        return syncFromKSlideSet();
+    });
     const [past, setPast] = useState<SlideState[][]>([]);
     const [future, setFuture] = useState<SlideState[][]>([]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            syncToKSlideSet(state);
+            window.localStorage.setItem(STORAGE_KEY, KSlideSet.save());
+        } catch {
+            // ignore storage quota errors
+        }
+    }, [state]);
 
     const updateDeck = useCallback((recipe: (draft: DeckState) => void, recordHistory = true) => {
         setState((prev) => {
