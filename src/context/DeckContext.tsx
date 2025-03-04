@@ -53,6 +53,10 @@ export interface DeckContextValue {
     duplicateActiveElement: () => void;
     copyActiveElement: () => void;
     pasteClipboardElement: () => void;
+    undo: () => void;
+    redo: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
     setActiveEID: (eid: number | null) => void;
     setEditingMode: (editing: boolean) => void;
     setGuides: (guides: AlignmentGuide[]) => void;
@@ -113,14 +117,62 @@ function syncToKSlideSet(deck: DeckState): void {
 
 const DeckContext = createContext<DeckContextValue | null>(null);
 
+const MAX_HISTORY = 40;
+
 export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, setState] = useState<DeckState>(() => syncFromKSlideSet());
+    const [past, setPast] = useState<SlideState[][]>([]);
+    const [future, setFuture] = useState<SlideState[][]>([]);
 
-    const updateDeck = useCallback((recipe: (draft: DeckState) => void) => {
+    const updateDeck = useCallback((recipe: (draft: DeckState) => void, recordHistory = true) => {
         setState((prev) => {
             const next = produce(prev, recipe);
+            if (recordHistory && prev.slides !== next.slides) {
+                setPast((oldPast) => [...oldPast.slice(-(MAX_HISTORY - 1)), prev.slides]);
+                setFuture([]);
+            }
             syncToKSlideSet(next);
             return next;
+        });
+    }, []);
+
+    const undo = useCallback(() => {
+        setPast((oldPast) => {
+            if (oldPast.length === 0) return oldPast;
+            const previousSlides = oldPast[oldPast.length - 1];
+            setState((prev) => {
+                setFuture((oldFuture) => [prev.slides, ...oldFuture.slice(0, MAX_HISTORY - 1)]);
+                const clampedFrame = Math.min(prev.curFrame, previousSlides.length - 1);
+                const next: DeckState = {
+                    ...prev,
+                    slides: previousSlides,
+                    curFrame: clampedFrame,
+                    activeEID: null,
+                };
+                syncToKSlideSet(next);
+                return next;
+            });
+            return oldPast.slice(0, -1);
+        });
+    }, []);
+
+    const redo = useCallback(() => {
+        setFuture((oldFuture) => {
+            if (oldFuture.length === 0) return oldFuture;
+            const nextSlides = oldFuture[0];
+            setState((prev) => {
+                setPast((oldPast) => [...oldPast.slice(-(MAX_HISTORY - 1)), prev.slides]);
+                const clampedFrame = Math.min(prev.curFrame, nextSlides.length - 1);
+                const next: DeckState = {
+                    ...prev,
+                    slides: nextSlides,
+                    curFrame: clampedFrame,
+                    activeEID: null,
+                };
+                syncToKSlideSet(next);
+                return next;
+            });
+            return oldFuture.slice(1);
         });
     }, []);
 
@@ -131,7 +183,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 draft.activeEID = null;
                 draft.editingMode = false;
             }
-        });
+        }, false);
     }, [updateDeck]);
 
     const addSlide = useCallback(() => {
@@ -348,13 +400,13 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const setActiveEID = useCallback((eid: number | null) => {
         updateDeck((draft) => {
             draft.activeEID = eid;
-        });
+        }, false);
     }, [updateDeck]);
 
     const setEditingMode = useCallback((editing: boolean) => {
         updateDeck((draft) => {
             draft.editingMode = editing;
-        });
+        }, false);
     }, [updateDeck]);
 
     const setGuides = useCallback((guides: AlignmentGuide[]) => {
@@ -395,6 +447,10 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 duplicateActiveElement,
                 copyActiveElement,
                 pasteClipboardElement,
+                undo,
+                redo,
+                canUndo: past.length > 0,
+                canRedo: future.length > 0,
                 setActiveEID,
                 setEditingMode,
                 setGuides,

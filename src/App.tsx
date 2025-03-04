@@ -176,6 +176,10 @@ const EditorWorkspace: React.FC = () => {
     duplicateActiveElement,
     copyActiveElement,
     pasteClipboardElement,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
     saveDeck,
     loadDeck,
   } = useDeck();
@@ -191,7 +195,17 @@ const EditorWorkspace: React.FC = () => {
       const isMod = event.metaKey || event.ctrlKey;
       if (!isMod) return;
       const key = event.key.toLowerCase();
-      if (key === 'd') {
+      if (key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      } else if (key === 'y') {
+        event.preventDefault();
+        redo();
+      } else if (key === 'd') {
         event.preventDefault();
         duplicateActiveElement();
       } else if (key === 'c') {
@@ -204,7 +218,7 @@ const EditorWorkspace: React.FC = () => {
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [state.editingMode, duplicateActiveElement, copyActiveElement, pasteClipboardElement]);
+  }, [state.editingMode, duplicateActiveElement, copyActiveElement, pasteClipboardElement, undo, redo]);
 
   const handleAddElement = (elemType: string, info?: string) => {
     if (KComponents.has(elemType)) {
@@ -238,6 +252,12 @@ const EditorWorkspace: React.FC = () => {
       <SlideView />
       <SlideSet />
       <div className="top-sect">
+        <button onClick={undo} disabled={!canUndo} title="Undo (Cmd/Ctrl+Z)">
+          Undo
+        </button>
+        <button onClick={redo} disabled={!canRedo} title="Redo (Cmd/Ctrl+Shift+Z)">
+          Redo
+        </button>
         <button onClick={() => downloadFile(defaultFileName + '.scs', saveDeck())}>
           Save
         </button>
