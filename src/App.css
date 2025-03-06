@@ -280,6 +280,17 @@ textarea{
   background: rgba(255, 255, 255, 0.1);
 }
 
+.deck-title-input {
+  width: 140px;
+  padding: 5px 8px;
+  margin-left: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: inherit;
+  font-size: 0.85rem;
+}
+
 .hidden {
   display: none;
 }

@@ -172,6 +172,7 @@ const SlideView: React.FC = () => {
 const EditorWorkspace: React.FC = () => {
   const {
     state,
+    setDeckTitle,
     addElement,
     duplicateActiveElement,
     copyActiveElement,
@@ -229,11 +230,15 @@ const EditorWorkspace: React.FC = () => {
   const handleLoad = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const baseName = file.name.replace(/\.scs$/i, '');
       const reader = new FileReader();
       reader.onload = (e) => {
         const content = e.target?.result as string;
         try {
           loadDeck(content);
+          if (baseName) {
+            setDeckTitle(baseName);
+          }
           setLoadError(null);
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Failed to load .scs file.';
@@ -252,13 +257,27 @@ const EditorWorkspace: React.FC = () => {
       <SlideView />
       <SlideSet />
       <div className="top-sect">
+        <input
+          type="text"
+          className="deck-title-input"
+          value={state.title}
+          placeholder="Presentation title"
+          onChange={(e) => setDeckTitle(e.target.value)}
+        />
         <button onClick={undo} disabled={!canUndo} title="Undo (Cmd/Ctrl+Z)">
           Undo
         </button>
         <button onClick={redo} disabled={!canRedo} title="Redo (Cmd/Ctrl+Shift+Z)">
           Redo
         </button>
-        <button onClick={() => downloadFile(defaultFileName + '.scs', saveDeck())}>
+        <button
+          onClick={() =>
+            downloadFile(
+              (state.title.trim() || defaultFileName) + '.scs',
+              saveDeck()
+            )
+          }
+        >
           Save
         </button>
         <input type="file" accept=".scs,application/json" onChange={handleLoad} />

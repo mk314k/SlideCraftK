@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { produce } from 'immer';
-import { KElementData, KSlide, KSlideSet, StyleMap, defaultSV } from '../frame';
+import { KElementData, KSlide, KSlideSet, StyleMap, defaultSV, defaultFileName } from '../frame';
 
 const STORAGE_KEY = 'slidecraftk.autosave.v1';
 
@@ -30,6 +30,7 @@ export interface AlignmentGuide {
 }
 
 export interface DeckState {
+    title: string;
     slides: SlideState[];
     curFrame: number;
     activeEID: number | null;
@@ -41,6 +42,7 @@ export interface DeckState {
 export interface DeckContextValue {
     state: DeckState;
     currentSlide: SlideState;
+    setDeckTitle: (title: string) => void;
     setFrameId: (frameId: number) => void;
     addSlide: () => void;
     deleteSlide: (frameId?: number) => void;
@@ -89,6 +91,7 @@ function syncFromKSlideSet(): DeckState {
         };
     });
     return {
+        title: defaultFileName,
         slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 }],
         curFrame: KSlideSet.curFrame,
         activeEID: KSlideSet.activeEID,
@@ -199,6 +202,12 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return oldFuture.slice(1);
         });
     }, []);
+
+    const setDeckTitle = useCallback((title: string) => {
+        updateDeck((draft) => {
+            draft.title = title;
+        }, false);
+    }, [updateDeck]);
 
     const setFrameId = useCallback((frameId: number) => {
         updateDeck((draft) => {
@@ -457,6 +466,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             value={{
                 state,
                 currentSlide,
+                setDeckTitle,
                 setFrameId,
                 addSlide,
                 deleteSlide,
