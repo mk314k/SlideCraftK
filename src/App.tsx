@@ -4,10 +4,10 @@ import { KComponents } from './component/component';
 import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
 import { downloadFile, handleFullScreen, applySlideCustomCode } from './component/utility';
 import { Tools } from './tools';
-import { DeckProvider, useDeck } from './context/DeckContext';
+import { DeckProvider, useDeck, SlideTemplateType } from './context/DeckContext';
 
 const SlideSet: React.FC = () => {
-  const { state, setFrameId, addSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
+  const { state, setFrameId, addSlide, addTemplateSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
 
   return (
     <div className="slideset">
@@ -92,8 +92,26 @@ const SlideSet: React.FC = () => {
         </div>
       ))}
       <button className="mini" onClick={addSlide}>
-        + Add
+        + Blank
       </button>
+      <select
+        className="template-select"
+        defaultValue=""
+        onChange={(e) => {
+          if (e.target.value) {
+            addTemplateSlide(e.target.value as SlideTemplateType);
+            e.target.value = '';
+          }
+        }}
+      >
+        <option value="" disabled>
+          + Template…
+        </option>
+        <option value="title">Title Slide</option>
+        <option value="two-column">Two-Column</option>
+        <option value="math-proof">Math Proof</option>
+        <option value="interactive">Interactive Demo</option>
+      </select>
     </div>
   );
 };

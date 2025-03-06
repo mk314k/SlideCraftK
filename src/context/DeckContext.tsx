@@ -39,12 +39,15 @@ export interface DeckState {
     clipboard: Omit<SlideElementState, 'id'> | null;
 }
 
+export type SlideTemplateType = 'title' | 'two-column' | 'math-proof' | 'interactive';
+
 export interface DeckContextValue {
     state: DeckState;
     currentSlide: SlideState;
     setDeckTitle: (title: string) => void;
     setFrameId: (frameId: number) => void;
     addSlide: () => void;
+    addTemplateSlide: (template: SlideTemplateType) => void;
     deleteSlide: (frameId?: number) => void;
     duplicateSlide: (frameId?: number) => void;
     moveSlide: (fromIdx: number, toIdx: number) => void;
@@ -66,6 +69,168 @@ export interface DeckContextValue {
     setGuides: (guides: AlignmentGuide[]) => void;
     saveDeck: () => string;
     loadDeck: (rawJson: string) => void;
+}
+
+function buildTemplateSlide(template: SlideTemplateType): SlideState {
+    if (template === 'title') {
+        return {
+            background: '#eef2ff',
+            customCss: '',
+            customJs: '',
+            nextEid: 2,
+            elements: [
+                {
+                    id: 0,
+                    name: 'markdown',
+                    x: 200,
+                    y: 210,
+                    width: 880,
+                    height: 160,
+                    rotation: 0,
+                    inner: '# Presentation Title\n### Subtitle & Author Name',
+                    style: { background: 'transparent', fontSize: '28px' },
+                },
+                {
+                    id: 1,
+                    name: 'line',
+                    x: 340,
+                    y: 400,
+                    width: 600,
+                    height: 36,
+                    rotation: 0,
+                    inner: 'line',
+                    style: { color: '#4f46e5' },
+                },
+            ],
+        };
+    }
+    if (template === 'two-column') {
+        return {
+            background: '#f8fafc',
+            customCss: '',
+            customJs: '',
+            nextEid: 3,
+            elements: [
+                {
+                    id: 0,
+                    name: 'markdown',
+                    x: 80,
+                    y: 50,
+                    width: 1120,
+                    height: 90,
+                    rotation: 0,
+                    inner: '## Two-Column Comparison',
+                    style: { background: 'transparent', fontSize: '24px' },
+                },
+                {
+                    id: 1,
+                    name: 'markdown',
+                    x: 80,
+                    y: 170,
+                    width: 530,
+                    height: 460,
+                    rotation: 0,
+                    inner: '### Left Column\n- Key concept A\n- Supporting detail\n- Summary metric',
+                    style: { background: '#e0e7ff' },
+                },
+                {
+                    id: 2,
+                    name: 'markdown',
+                    x: 670,
+                    y: 170,
+                    width: 530,
+                    height: 460,
+                    rotation: 0,
+                    inner: '### Right Column\n- Key concept B\n- Implementation note\n- Next steps',
+                    style: { background: '#dcfce7' },
+                },
+            ],
+        };
+    }
+    if (template === 'math-proof') {
+        return {
+            background: '#fffbeb',
+            customCss: '',
+            customJs: '',
+            nextEid: 3,
+            elements: [
+                {
+                    id: 0,
+                    name: 'markdown',
+                    x: 90,
+                    y: 60,
+                    width: 1100,
+                    height: 100,
+                    rotation: 0,
+                    inner: '## Gaussian Integral Identity',
+                    style: { background: 'transparent', fontSize: '24px' },
+                },
+                {
+                    id: 1,
+                    name: 'latex',
+                    x: 180,
+                    y: 200,
+                    width: 920,
+                    height: 200,
+                    rotation: 0,
+                    inner: '\\left(\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx\\right)^2 = \\int_{0}^{2\\pi}\\int_{0}^{\\infty} r e^{-r^2}\\,dr\\,d\\theta = \\pi',
+                    style: { background: '#ffffff', fontSize: '24px' },
+                },
+                {
+                    id: 2,
+                    name: 'markdown',
+                    x: 180,
+                    y: 440,
+                    width: 920,
+                    height: 160,
+                    rotation: 0,
+                    inner: '- Convert Cartesian product integral into polar coordinates `(r, \\theta)`\n- Evaluate radial substitution `u = r^2`',
+                    style: { background: 'transparent', fontSize: '20px' },
+                },
+            ],
+        };
+    }
+    return {
+        background: '#f0fdf4',
+        customCss: '',
+        customJs: '',
+        nextEid: 3,
+        elements: [
+            {
+                id: 0,
+                name: 'markdown',
+                x: 90,
+                y: 60,
+                width: 1100,
+                height: 100,
+                rotation: 0,
+                inner: '## Interactive StateBinder Demo',
+                style: { background: 'transparent', fontSize: '24px' },
+            },
+            {
+                id: 1,
+                name: 'code',
+                x: 90,
+                y: 190,
+                width: 680,
+                height: 360,
+                rotation: 0,
+                inner: '// Bind reactive state to slide DOM elements\nconst colorState = new window.StyleVar(\n  "#4f46e5",\n  "2div",\n  "background"\n);\ncolorState.transition("#10b981");',
+                style: {},
+            },
+            {
+                id: 2,
+                name: 'button',
+                x: 830,
+                y: 290,
+                width: 320,
+                height: 140,
+                rotation: 0,
+                inner: 'Interactive Target (#2div)',
+                style: { background: '#c7d2fe', fontSize: '20px', fontWeight: 'bold' },
+            },
+        ],
+    };
 }
 
 function syncFromKSlideSet(): DeckState {
@@ -223,6 +388,15 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateDeck((draft) => {
             const newIdx = draft.slides.length;
             draft.slides.push({ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 });
+            draft.curFrame = newIdx;
+            draft.activeEID = null;
+        });
+    }, [updateDeck]);
+
+    const addTemplateSlide = useCallback((template: SlideTemplateType) => {
+        updateDeck((draft) => {
+            const newIdx = draft.slides.length;
+            draft.slides.push(buildTemplateSlide(template));
             draft.curFrame = newIdx;
             draft.activeEID = null;
         });
@@ -469,6 +643,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setDeckTitle,
                 setFrameId,
                 addSlide,
+                addTemplateSlide,
                 deleteSlide,
                 duplicateSlide,
                 moveSlide,

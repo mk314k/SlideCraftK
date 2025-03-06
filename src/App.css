@@ -153,6 +153,16 @@ textarea{
   line-height: 1;
 }
 
+.template-select {
+  height: 44px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--foreground);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
 
 .slide-stage {
   position: fixed;
