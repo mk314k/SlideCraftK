@@ -20,6 +20,7 @@ export interface SlideState {
     background: string;
     customCss: string;
     customJs: string;
+    notes: string;
     elements: SlideElementState[];
     nextEid: number;
 }
@@ -53,6 +54,7 @@ export interface DeckContextValue {
     moveSlide: (fromIdx: number, toIdx: number) => void;
     setSlideBackground: (color: string, frameId?: number) => void;
     setSlideCustomCode: (kind: 'style' | 'script', code: string) => void;
+    setSlideNotes: (notes: string) => void;
     addElement: (elemType: string, info?: string) => void;
     updateElement: (eid: number, updater: (elem: SlideElementState) => void) => void;
     updateElementStyle: (eid: number, prop: string, value: string) => void;
@@ -77,6 +79,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
             background: '#eef2ff',
             customCss: '',
             customJs: '',
+            notes: 'Welcome the audience and introduce the core problem statement.',
             nextEid: 2,
             elements: [
                 {
@@ -109,6 +112,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
             background: '#f8fafc',
             customCss: '',
             customJs: '',
+            notes: 'Contrast the trade-offs between the left and right approaches.',
             nextEid: 3,
             elements: [
                 {
@@ -152,6 +156,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
             background: '#fffbeb',
             customCss: '',
             customJs: '',
+            notes: 'Walk through the polar coordinate Jacobian r dr dtheta step.',
             nextEid: 3,
             elements: [
                 {
@@ -194,6 +199,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
         background: '#f0fdf4',
         customCss: '',
         customJs: '',
+        notes: 'Run the StateBinder JS snippet to show live DOM state binding.',
         nextEid: 3,
         elements: [
             {
@@ -241,6 +247,7 @@ function syncFromKSlideSet(): DeckState {
             background: slide.background,
             customCss: slide.customCss ?? '',
             customJs: slide.customJs ?? '',
+            notes: slide.notes ?? '',
             elements: entries.map(([id, data]) => ({
                 id,
                 name: data.name,
@@ -257,7 +264,7 @@ function syncFromKSlideSet(): DeckState {
     });
     return {
         title: defaultFileName,
-        slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 }],
+        slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 }],
         curFrame: KSlideSet.curFrame,
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
@@ -275,6 +282,7 @@ function syncToKSlideSet(deck: DeckState): void {
         kSlide.background = s.background;
         kSlide.customCss = s.customCss;
         kSlide.customJs = s.customJs;
+        kSlide.notes = s.notes;
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
@@ -387,7 +395,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const addSlide = useCallback(() => {
         updateDeck((draft) => {
             const newIdx = draft.slides.length;
-            draft.slides.push({ background: 'azure', customCss: '', customJs: '', elements: [], nextEid: 0 });
+            draft.slides.push({ background: 'azure', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
         });
@@ -426,6 +434,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 background: source.background,
                 customCss: source.customCss,
                 customJs: source.customJs,
+                notes: source.notes,
                 nextEid: source.nextEid,
                 elements: source.elements.map((el) => ({
                     ...el,
@@ -474,6 +483,14 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 slide.customJs = code;
             }
         });
+    }, [updateDeck]);
+
+    const setSlideNotes = useCallback((notes: string) => {
+        updateDeck((draft) => {
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            slide.notes = notes;
+        }, false);
     }, [updateDeck]);
 
     const addElement = useCallback((elemType: string, info?: string) => {
@@ -649,6 +666,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 moveSlide,
                 setSlideBackground,
                 setSlideCustomCode,
+                setSlideNotes,
                 addElement,
                 updateElement,
                 updateElementStyle,

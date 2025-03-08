@@ -190,7 +190,9 @@ const SlideView: React.FC = () => {
 const EditorWorkspace: React.FC = () => {
   const {
     state,
+    currentSlide,
     setDeckTitle,
+    setSlideNotes,
     addElement,
     duplicateActiveElement,
     copyActiveElement,
@@ -203,6 +205,7 @@ const EditorWorkspace: React.FC = () => {
     loadDeck,
   } = useDeck();
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showNotes, setShowNotes] = useState(false);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -299,6 +302,9 @@ const EditorWorkspace: React.FC = () => {
           Save
         </button>
         <input type="file" accept=".scs,application/json" onChange={handleLoad} />
+        <button onClick={() => setShowNotes((v) => !v)} title="Toggle Speaker Notes">
+          Notes
+        </button>
         <button onClick={handleFullScreen}>Presentation</button>
         {loadError && (
           <span className="load-error" role="alert" onClick={() => setLoadError(null)}>
@@ -306,6 +312,22 @@ const EditorWorkspace: React.FC = () => {
           </span>
         )}
       </div>
+      {showNotes && (
+        <div className="speaker-notes-panel">
+          <div className="speaker-notes-header">
+            <span>Speaker Notes — Slide {state.curFrame + 1}</span>
+            <button type="button" onClick={() => setShowNotes(false)}>
+              ×
+            </button>
+          </div>
+          <textarea
+            className="speaker-notes-textarea"
+            placeholder="Add speaker notes for this slide..."
+            value={currentSlide.notes}
+            onChange={(e) => setSlideNotes(e.target.value)}
+          />
+        </div>
+      )}
     </div>
   );
 };

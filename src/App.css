@@ -416,6 +416,44 @@ textarea{
   background: transparent !important;
 }
 
+.speaker-notes-panel {
+  position: fixed;
+  right: 2vw;
+  bottom: 22vh;
+  width: 280px;
+  height: 180px;
+  background: rgba(24, 24, 37, 0.94);
+  color: #f8fafc;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 35;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.speaker-notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.speaker-notes-textarea {
+  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 8px;
+  font-size: 0.82rem;
+}
+
+
 
 
 
