@@ -65,7 +65,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
 
     const posx = style.x;
     const posy = style.y;
-    const isActive = state.activeEID === eid;
+    const isActive = !state.presenting && state.activeEID === eid;
 
     return (
         <div
@@ -80,11 +80,11 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 height: style.height,
                 transform: style.rotation ? `rotate(${style.rotation}deg)` : undefined,
                 background: 'var(--background)' ,
-                cursor: style.cursor,
+                cursor: state.presenting ? 'default' : style.cursor,
                 ...elemStyle
             }}
-            onMouseDown={e => { setActiveEID(eid); handleMouseDown(e); }}
-            onClick={(e)=>{setActiveEID(eid); e.stopPropagation()}}
+            onMouseDown={e => { if (!state.presenting) { setActiveEID(eid); handleMouseDown(e); } }}
+            onClick={(e)=>{ if (!state.presenting) { setActiveEID(eid); e.stopPropagation(); } }}
             onKeyDown={onKeyDown}
             tabIndex={0}
         >

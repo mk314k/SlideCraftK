@@ -117,12 +117,14 @@ const SlideSet: React.FC = () => {
 };
 
 const SlideView: React.FC = () => {
-  const { state, currentSlide, setActiveEID } = useDeck();
+  const { state, currentSlide, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const updateScale = () => {
+      const isFs = Boolean(document.fullscreenElement);
+      setPresenting(isFs);
       if (!stageRef.current) return;
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
@@ -138,14 +140,19 @@ const SlideView: React.FC = () => {
       window.removeEventListener('resize', updateScale);
       document.removeEventListener('fullscreenchange', updateScale);
     };
-  }, []);
+  }, [setPresenting]);
 
   useEffect(() => {
     applySlideCustomCode(state.curFrame, currentSlide.customCss, currentSlide.customJs);
   }, [state.curFrame, currentSlide.customCss, currentSlide.customJs]);
 
   return (
-    <div ref={stageRef} className="slide-stage" onClick={() => setActiveEID(null)}>
+    <div
+      id="presentation-stage"
+      ref={stageRef}
+      className={`slide-stage${state.presenting ? ' slide-stage-presenting' : ''}`}
+      onClick={() => setActiveEID(null)}
+    >
       <div
         id={`slide${state.curFrame}`}
         style={{

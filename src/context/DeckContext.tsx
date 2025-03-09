@@ -36,6 +36,7 @@ export interface DeckState {
     curFrame: number;
     activeEID: number | null;
     editingMode: boolean;
+    presenting: boolean;
     guides: AlignmentGuide[];
     clipboard: Omit<SlideElementState, 'id'> | null;
 }
@@ -47,6 +48,7 @@ export interface DeckContextValue {
     currentSlide: SlideState;
     setDeckTitle: (title: string) => void;
     setFrameId: (frameId: number) => void;
+    setPresenting: (presenting: boolean) => void;
     addSlide: () => void;
     addTemplateSlide: (template: SlideTemplateType) => void;
     deleteSlide: (frameId?: number) => void;
@@ -268,6 +270,7 @@ function syncFromKSlideSet(): DeckState {
         curFrame: KSlideSet.curFrame,
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
+        presenting: false,
         guides: [],
         clipboard: null,
     };
@@ -386,6 +389,16 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateDeck((draft) => {
             if (frameId >= 0 && frameId < draft.slides.length) {
                 draft.curFrame = frameId;
+                draft.activeEID = null;
+                draft.editingMode = false;
+            }
+        }, false);
+    }, [updateDeck]);
+
+    const setPresenting = useCallback((presenting: boolean) => {
+        updateDeck((draft) => {
+            draft.presenting = presenting;
+            if (presenting) {
                 draft.activeEID = null;
                 draft.editingMode = false;
             }
@@ -659,6 +672,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 currentSlide,
                 setDeckTitle,
                 setFrameId,
+                setPresenting,
                 addSlide,
                 addTemplateSlide,
                 deleteSlide,

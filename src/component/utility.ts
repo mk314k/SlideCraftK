@@ -167,12 +167,13 @@ export function insertCode(cssOrJs:string){
 }
 
 export function handleFullScreen() {
-  const view = document.getElementById(`slide${KSlideSet.curFrame}`);
-  if (!document.fullscreenElement ) {
-    if (view?.requestFullscreen) {
-      view.requestFullscreen();
+  const stage = document.getElementById('presentation-stage') ?? document.getElementById(`slide${KSlideSet.curFrame}`);
+  if (!document.fullscreenElement) {
+    if (stage?.requestFullscreen) {
+      stage.requestFullscreen();
     }
-    console.log("fullscrenn");
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen();
   }
 }
 

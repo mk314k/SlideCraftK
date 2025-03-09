@@ -8,7 +8,7 @@ const SNAP_THRESHOLD = 6;
 const GRID_SIZE = 10;
 
 const useKElemHook = (eid:number, sv = defaultSV) => {
-    const { currentSlide, updateElement, setGuides } = useDeck();
+    const { state, currentSlide, updateElement, setGuides } = useDeck();
     const elemState = currentSlide.elements.find((el) => el.id === eid);
 
     const initialX = elemState?.x ?? sv.x;
@@ -45,6 +45,7 @@ const useKElemHook = (eid:number, sv = defaultSV) => {
     }, [width, height, eid]);
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if (state.presenting) return;
         const mouseX = event.clientX;
         const mouseY = event.clientY;
         const scale = KSlideSet.scale > 0 ? KSlideSet.scale : 1;

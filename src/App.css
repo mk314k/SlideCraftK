@@ -175,6 +175,20 @@ textarea{
   align-items: center;
 }
 
+.slide-stage-presenting {
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #09090b;
+  z-index: 100;
+}
+
+.slide-stage-presenting .slideview {
+  border-radius: 0;
+  border: none;
+}
+
 .slideview{
   position: relative;
   width: 1280px;
