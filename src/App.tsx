@@ -117,7 +117,7 @@ const SlideSet: React.FC = () => {
 };
 
 const SlideView: React.FC = () => {
-  const { state, currentSlide, setActiveEID, setPresenting } = useDeck();
+  const { state, currentSlide, setFrameId, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
 
@@ -143,6 +143,30 @@ const SlideView: React.FC = () => {
   }, [setPresenting]);
 
   useEffect(() => {
+    if (!state.presenting) return;
+    const handlePresentKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        if (state.curFrame < state.slides.length - 1) {
+          setFrameId(state.curFrame + 1);
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        if (state.curFrame > 0) {
+          setFrameId(state.curFrame - 1);
+        }
+      } else if (e.key === 'Escape') {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+        setPresenting(false);
+      }
+    };
+    window.addEventListener('keydown', handlePresentKeyDown);
+    return () => window.removeEventListener('keydown', handlePresentKeyDown);
+  }, [state.presenting, state.curFrame, state.slides.length, setFrameId, setPresenting]);
+
+  useEffect(() => {
     applySlideCustomCode(state.curFrame, currentSlide.customCss, currentSlide.customJs);
   }, [state.curFrame, currentSlide.customCss, currentSlide.customJs]);
 
@@ -151,7 +175,15 @@ const SlideView: React.FC = () => {
       id="presentation-stage"
       ref={stageRef}
       className={`slide-stage${state.presenting ? ' slide-stage-presenting' : ''}`}
-      onClick={() => setActiveEID(null)}
+      onClick={() => {
+        if (state.presenting) {
+          if (state.curFrame < state.slides.length - 1) {
+            setFrameId(state.curFrame + 1);
+          }
+        } else {
+          setActiveEID(null);
+        }
+      }}
     >
       <div
         id={`slide${state.curFrame}`}
@@ -163,6 +195,7 @@ const SlideView: React.FC = () => {
         }}
         className="slideview"
         onClick={(e) => {
+          if (state.presenting) return;
           e.stopPropagation();
           setActiveEID(null);
         }}
