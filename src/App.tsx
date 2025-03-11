@@ -120,6 +120,8 @@ const SlideView: React.FC = () => {
   const { state, currentSlide, setFrameId, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
+  const [laserEnabled, setLaserEnabled] = useState(false);
+  const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const updateScale = () => {
@@ -155,11 +157,15 @@ const SlideView: React.FC = () => {
         if (state.curFrame > 0) {
           setFrameId(state.curFrame - 1);
         }
+      } else if (e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        setLaserEnabled((prev) => !prev);
       } else if (e.key === 'Escape') {
         if (document.fullscreenElement && document.exitFullscreen) {
           document.exitFullscreen();
         }
         setPresenting(false);
+        setLaserEnabled(false);
       }
     };
     window.addEventListener('keydown', handlePresentKeyDown);
@@ -174,7 +180,12 @@ const SlideView: React.FC = () => {
     <div
       id="presentation-stage"
       ref={stageRef}
-      className={`slide-stage${state.presenting ? ' slide-stage-presenting' : ''}`}
+      className={`slide-stage${state.presenting ? ' slide-stage-presenting' : ''}${state.presenting && laserEnabled ? ' laser-cursor-hidden' : ''}`}
+      onMouseMove={(e) => {
+        if (state.presenting && laserEnabled) {
+          setLaserPos({ x: e.clientX, y: e.clientY });
+        }
+      }}
       onClick={() => {
         if (state.presenting) {
           if (state.curFrame < state.slides.length - 1) {
@@ -223,6 +234,40 @@ const SlideView: React.FC = () => {
           />
         ))}
       </div>
+      {state.presenting && (
+        <>
+          <div className="present-hud">
+            <span className="present-slide-counter">
+              {state.curFrame + 1} / {state.slides.length}
+            </span>
+            <button
+              type="button"
+              className={`present-laser-btn${laserEnabled ? ' active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setLaserEnabled((v) => !v);
+              }}
+              title="Toggle Laser Pointer (L)"
+            >
+              Laser (L)
+            </button>
+          </div>
+          <div className="present-progress-track">
+            <div
+              className="present-progress-bar"
+              style={{
+                width: `${((state.curFrame + 1) / Math.max(1, state.slides.length)) * 100}%`,
+              }}
+            />
+          </div>
+          {laserEnabled && laserPos && (
+            <div
+              className="laser-dot"
+              style={{ left: `${laserPos.x}px`, top: `${laserPos.y}px` }}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };

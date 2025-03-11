@@ -189,6 +189,66 @@ textarea{
   border: none;
 }
 
+.laser-cursor-hidden {
+  cursor: none;
+}
+
+.present-hud {
+  position: fixed;
+  bottom: 18px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  z-index: 120;
+}
+
+.present-laser-btn {
+  padding: 3px 10px !important;
+  font-size: 0.76rem;
+  background: rgba(255, 255, 255, 0.14);
+  color: #f8fafc;
+}
+
+.present-laser-btn.active {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.present-progress-track {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 120;
+}
+
+.present-progress-bar {
+  height: 100%;
+  background: #6366f1;
+  transition: width 0.25s ease;
+}
+
+.laser-dot {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 14px 4px rgba(239, 68, 68, 0.85);
+  pointer-events: none;
+  z-index: 130;
+}
+
 .slideview{
   position: relative;
   width: 1280px;
