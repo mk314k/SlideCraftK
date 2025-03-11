@@ -21,7 +21,10 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown, handleResizeStart, handleRotateStart } = useKElemHook(eid);
     const { state, currentSlide, updateElement, deleteElement, setActiveEID } = useDeck();
-    const elemStyle = currentSlide.elements.find((el) => el.id === eid)?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const elemStyle = elemState?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
+    const elemStep = elemState?.step ?? 0;
+    const isHiddenFragment = state.presenting && elemStep > state.presentStep;
 
     const handleDelete = useCallback(() => {
         console.log("handleDelete called");
@@ -71,7 +74,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         <div
             id={`${eid}div`}
             key={eid}
-            className={`element-container${isActive ? ' active-element' : ''}`}
+            className={`element-container${isActive ? ' active-element' : ''}${isHiddenFragment ? ' fragment-hidden' : ' fragment-visible'}`}
             style={{
                 position: 'absolute',
                 left: `${posx}px`,

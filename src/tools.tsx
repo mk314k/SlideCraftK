@@ -8,7 +8,7 @@ interface ToolsProps {
 
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     console.log("rendering tools");
-    const { state, currentSlide, updateElementStyle, setSlideBackground, setSlideCustomCode } = useDeck();
+    const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideCustomCode } = useDeck();
 
     const activeElem = state.activeEID != null
         ? currentSlide.elements.find((el) => el.id === state.activeEID)
@@ -179,6 +179,25 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             <label className="tool" title="Send to Back" onClick={handleSendToBack}>
                 <i className="material-icons">vertical_align_bottom</i>
             </label>
+            <div className="tool">
+                <i className="material-icons" title="Animation Step (0 = always visible)">animation</i>
+                <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    style={{ width: '48px' }}
+                    value={activeElem?.step ?? 0}
+                    disabled={!activeElem}
+                    onChange={(e) => {
+                        if (state.activeEID != null) {
+                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                            updateElement(state.activeEID, (el) => {
+                                el.step = val;
+                            });
+                        }
+                    }}
+                />
+            </div>
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">

@@ -117,7 +117,7 @@ const SlideSet: React.FC = () => {
 };
 
 const SlideView: React.FC = () => {
-  const { state, currentSlide, setFrameId, setActiveEID, setPresenting } = useDeck();
+  const { state, currentSlide, advancePresentation, retreatPresentation, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(1);
   const [laserEnabled, setLaserEnabled] = useState(false);
@@ -149,14 +149,10 @@ const SlideView: React.FC = () => {
     const handlePresentKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         e.preventDefault();
-        if (state.curFrame < state.slides.length - 1) {
-          setFrameId(state.curFrame + 1);
-        }
+        advancePresentation();
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
-        if (state.curFrame > 0) {
-          setFrameId(state.curFrame - 1);
-        }
+        retreatPresentation();
       } else if (e.key.toLowerCase() === 'l') {
         e.preventDefault();
         setLaserEnabled((prev) => !prev);
@@ -170,7 +166,7 @@ const SlideView: React.FC = () => {
     };
     window.addEventListener('keydown', handlePresentKeyDown);
     return () => window.removeEventListener('keydown', handlePresentKeyDown);
-  }, [state.presenting, state.curFrame, state.slides.length, setFrameId, setPresenting]);
+  }, [state.presenting, advancePresentation, retreatPresentation, setPresenting]);
 
   useEffect(() => {
     applySlideCustomCode(state.curFrame, currentSlide.customCss, currentSlide.customJs);
@@ -188,9 +184,7 @@ const SlideView: React.FC = () => {
       }}
       onClick={() => {
         if (state.presenting) {
-          if (state.curFrame < state.slides.length - 1) {
-            setFrameId(state.curFrame + 1);
-          }
+          advancePresentation();
         } else {
           setActiveEID(null);
         }

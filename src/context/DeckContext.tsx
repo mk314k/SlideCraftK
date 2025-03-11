@@ -12,6 +12,7 @@ export interface SlideElementState {
     width: number;
     height: number;
     rotation: number;
+    step: number;
     inner: string;
     style: StyleMap;
 }
@@ -34,6 +35,7 @@ export interface DeckState {
     title: string;
     slides: SlideState[];
     curFrame: number;
+    presentStep: number;
     activeEID: number | null;
     editingMode: boolean;
     presenting: boolean;
@@ -49,6 +51,8 @@ export interface DeckContextValue {
     setDeckTitle: (title: string) => void;
     setFrameId: (frameId: number) => void;
     setPresenting: (presenting: boolean) => void;
+    advancePresentation: () => void;
+    retreatPresentation: () => void;
     addSlide: () => void;
     addTemplateSlide: (template: SlideTemplateType) => void;
     deleteSlide: (frameId?: number) => void;
@@ -92,6 +96,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 880,
                     height: 160,
                     rotation: 0,
+                    step: 0,
                     inner: '# Presentation Title\n### Subtitle & Author Name',
                     style: { background: 'transparent', fontSize: '28px' },
                 },
@@ -103,6 +108,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 600,
                     height: 36,
                     rotation: 0,
+                    step: 0,
                     inner: 'line',
                     style: { color: '#4f46e5' },
                 },
@@ -125,6 +131,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 1120,
                     height: 90,
                     rotation: 0,
+                    step: 0,
                     inner: '## Two-Column Comparison',
                     style: { background: 'transparent', fontSize: '24px' },
                 },
@@ -136,6 +143,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 530,
                     height: 460,
                     rotation: 0,
+                    step: 1,
                     inner: '### Left Column\n- Key concept A\n- Supporting detail\n- Summary metric',
                     style: { background: '#e0e7ff' },
                 },
@@ -147,6 +155,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 530,
                     height: 460,
                     rotation: 0,
+                    step: 2,
                     inner: '### Right Column\n- Key concept B\n- Implementation note\n- Next steps',
                     style: { background: '#dcfce7' },
                 },
@@ -169,6 +178,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 1100,
                     height: 100,
                     rotation: 0,
+                    step: 0,
                     inner: '## Gaussian Integral Identity',
                     style: { background: 'transparent', fontSize: '24px' },
                 },
@@ -180,6 +190,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 920,
                     height: 200,
                     rotation: 0,
+                    step: 1,
                     inner: '\\left(\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx\\right)^2 = \\int_{0}^{2\\pi}\\int_{0}^{\\infty} r e^{-r^2}\\,dr\\,d\\theta = \\pi',
                     style: { background: '#ffffff', fontSize: '24px' },
                 },
@@ -191,6 +202,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     width: 920,
                     height: 160,
                     rotation: 0,
+                    step: 2,
                     inner: '- Convert Cartesian product integral into polar coordinates `(r, \\theta)`\n- Evaluate radial substitution `u = r^2`',
                     style: { background: 'transparent', fontSize: '20px' },
                 },
@@ -212,6 +224,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 width: 1100,
                 height: 100,
                 rotation: 0,
+                step: 0,
                 inner: '## Interactive StateBinder Demo',
                 style: { background: 'transparent', fontSize: '24px' },
             },
@@ -223,6 +236,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 width: 680,
                 height: 360,
                 rotation: 0,
+                step: 0,
                 inner: '// Bind reactive state to slide DOM elements\nconst colorState = new window.StyleVar(\n  "#4f46e5",\n  "2div",\n  "background"\n);\ncolorState.transition("#10b981");',
                 style: {},
             },
@@ -234,6 +248,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 width: 320,
                 height: 140,
                 rotation: 0,
+                step: 0,
                 inner: 'Interactive Target (#2div)',
                 style: { background: '#c7d2fe', fontSize: '20px', fontWeight: 'bold' },
             },
@@ -258,6 +273,7 @@ function syncFromKSlideSet(): DeckState {
                 width: data.width,
                 height: data.height,
                 rotation: data.rotation ?? 0,
+                step: data.step ?? 0,
                 inner: data.inner,
                 style: { ...data.style },
             })),
@@ -268,6 +284,7 @@ function syncFromKSlideSet(): DeckState {
         title: defaultFileName,
         slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 }],
         curFrame: KSlideSet.curFrame,
+        presentStep: 0,
         activeEID: KSlideSet.activeEID,
         editingMode: KSlideSet.editingMode,
         presenting: false,
@@ -289,7 +306,7 @@ function syncToKSlideSet(deck: DeckState): void {
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
-                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation)
+                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation, el.step)
             );
         });
         return kSlide;
@@ -389,6 +406,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateDeck((draft) => {
             if (frameId >= 0 && frameId < draft.slides.length) {
                 draft.curFrame = frameId;
+                draft.presentStep = 0;
                 draft.activeEID = null;
                 draft.editingMode = false;
             }
@@ -398,9 +416,39 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const setPresenting = useCallback((presenting: boolean) => {
         updateDeck((draft) => {
             draft.presenting = presenting;
+            draft.presentStep = 0;
             if (presenting) {
                 draft.activeEID = null;
                 draft.editingMode = false;
+            }
+        }, false);
+    }, [updateDeck]);
+
+    const advancePresentation = useCallback(() => {
+        updateDeck((draft) => {
+            const slide = draft.slides[draft.curFrame];
+            if (!slide) return;
+            const maxStep = slide.elements.reduce((acc, el) => Math.max(acc, el.step ?? 0), 0);
+            if (draft.presentStep < maxStep) {
+                draft.presentStep += 1;
+            } else if (draft.curFrame < draft.slides.length - 1) {
+                draft.curFrame += 1;
+                draft.presentStep = 0;
+            }
+        }, false);
+    }, [updateDeck]);
+
+    const retreatPresentation = useCallback(() => {
+        updateDeck((draft) => {
+            if (draft.presentStep > 0) {
+                draft.presentStep -= 1;
+            } else if (draft.curFrame > 0) {
+                draft.curFrame -= 1;
+                const prevSlide = draft.slides[draft.curFrame];
+                const maxStep = prevSlide
+                    ? prevSlide.elements.reduce((acc, el) => Math.max(acc, el.step ?? 0), 0)
+                    : 0;
+                draft.presentStep = maxStep;
             }
         }, false);
     }, [updateDeck]);
@@ -527,6 +575,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 width: defaultSV.width,
                 height: defaultSV.height,
                 rotation: 0,
+                step: 0,
                 inner,
                 style: {},
             });
@@ -584,6 +633,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 width: source.width,
                 height: source.height,
                 rotation: source.rotation,
+                step: source.step ?? 0,
                 inner: source.inner,
                 style: { ...source.style },
             });
@@ -606,6 +656,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 width: source.width,
                 height: source.height,
                 rotation: source.rotation,
+                step: source.step ?? 0,
                 inner: source.inner,
                 style: { ...source.style },
             };
@@ -626,6 +677,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 width: draft.clipboard.width,
                 height: draft.clipboard.height,
                 rotation: draft.clipboard.rotation,
+                step: draft.clipboard.step ?? 0,
                 inner: draft.clipboard.inner,
                 style: { ...draft.clipboard.style },
             });
@@ -673,6 +725,8 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setDeckTitle,
                 setFrameId,
                 setPresenting,
+                advancePresentation,
+                retreatPresentation,
                 addSlide,
                 addTemplateSlide,
                 deleteSlide,
