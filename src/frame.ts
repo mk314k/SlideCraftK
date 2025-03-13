@@ -21,8 +21,11 @@ export interface SerializedElement {
     style?: StyleMap;
 }
 
+export type SlideTransitionType = 'none' | 'fade' | 'slide';
+
 export interface SerializedSlide {
     background?: string;
+    transition?: SlideTransitionType;
     customCss?: string;
     customJs?: string;
     notes?: string;
@@ -63,6 +66,7 @@ export class KElementData {
 export class KSlide {
     public elemProp:Map<number, KElementData> = new Map();
     public background = 'azure';
+    public transition: SlideTransitionType = 'fade';
     public customCss = '';
     public customJs = '';
     public notes = '';
@@ -144,6 +148,9 @@ export class KSlideSet {
             slide.background = typeof slideData.background === 'string' && slideData.background.trim() !== ''
                 ? slideData.background
                 : 'azure';
+            slide.transition = slideData.transition === 'none' || slideData.transition === 'fade' || slideData.transition === 'slide'
+                ? slideData.transition
+                : 'fade';
             slide.customCss = typeof slideData.customCss === 'string' ? slideData.customCss : '';
             slide.customJs = typeof slideData.customJs === 'string' ? slideData.customJs : '';
             slide.notes = typeof slideData.notes === 'string' ? slideData.notes : '';
@@ -197,6 +204,7 @@ export class KSlideSet {
             });
             return {
                 background: slide.background,
+                transition: slide.transition,
                 customCss: slide.customCss || undefined,
                 customJs: slide.customJs || undefined,
                 notes: slide.notes || undefined,

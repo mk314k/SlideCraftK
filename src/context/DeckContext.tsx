@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { produce } from 'immer';
-import { KElementData, KSlide, KSlideSet, StyleMap, defaultSV, defaultFileName } from '../frame';
+import { KElementData, KSlide, KSlideSet, StyleMap, SlideTransitionType, defaultSV, defaultFileName } from '../frame';
 
 const STORAGE_KEY = 'slidecraftk.autosave.v1';
 
@@ -19,6 +19,7 @@ export interface SlideElementState {
 
 export interface SlideState {
     background: string;
+    transition: SlideTransitionType;
     customCss: string;
     customJs: string;
     notes: string;
@@ -59,6 +60,7 @@ export interface DeckContextValue {
     duplicateSlide: (frameId?: number) => void;
     moveSlide: (fromIdx: number, toIdx: number) => void;
     setSlideBackground: (color: string, frameId?: number) => void;
+    setSlideTransition: (transition: SlideTransitionType) => void;
     setSlideCustomCode: (kind: 'style' | 'script', code: string) => void;
     setSlideNotes: (notes: string) => void;
     addElement: (elemType: string, info?: string) => void;
@@ -83,6 +85,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
     if (template === 'title') {
         return {
             background: '#eef2ff',
+            transition: 'fade',
             customCss: '',
             customJs: '',
             notes: 'Welcome the audience and introduce the core problem statement.',
@@ -118,6 +121,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
     if (template === 'two-column') {
         return {
             background: '#f8fafc',
+            transition: 'slide',
             customCss: '',
             customJs: '',
             notes: 'Contrast the trade-offs between the left and right approaches.',
@@ -165,6 +169,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
     if (template === 'math-proof') {
         return {
             background: '#fffbeb',
+            transition: 'fade',
             customCss: '',
             customJs: '',
             notes: 'Walk through the polar coordinate Jacobian r dr dtheta step.',
@@ -211,6 +216,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
     }
     return {
         background: '#f0fdf4',
+        transition: 'slide',
         customCss: '',
         customJs: '',
         notes: 'Run the StateBinder JS snippet to show live DOM state binding.',
@@ -262,6 +268,7 @@ function syncFromKSlideSet(): DeckState {
         const maxId = entries.length > 0 ? Math.max(...entries.map(([id]) => id)) : -1;
         return {
             background: slide.background,
+            transition: slide.transition ?? 'fade',
             customCss: slide.customCss ?? '',
             customJs: slide.customJs ?? '',
             notes: slide.notes ?? '',
@@ -282,7 +289,7 @@ function syncFromKSlideSet(): DeckState {
     });
     return {
         title: defaultFileName,
-        slides: slides.length > 0 ? slides : [{ background: 'azure', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 }],
+        slides: slides.length > 0 ? slides : [{ background: 'azure', transition: 'fade', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 }],
         curFrame: KSlideSet.curFrame,
         presentStep: 0,
         activeEID: KSlideSet.activeEID,
@@ -300,6 +307,7 @@ function syncToKSlideSet(deck: DeckState): void {
     KSlideSet.slides = deck.slides.map((s) => {
         const kSlide = new KSlide();
         kSlide.background = s.background;
+        kSlide.transition = s.transition;
         kSlide.customCss = s.customCss;
         kSlide.customJs = s.customJs;
         kSlide.notes = s.notes;
@@ -456,7 +464,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const addSlide = useCallback(() => {
         updateDeck((draft) => {
             const newIdx = draft.slides.length;
-            draft.slides.push({ background: 'azure', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 });
+            draft.slides.push({ background: 'azure', transition: 'fade', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
         });
@@ -493,6 +501,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!source) return;
             const cloned: SlideState = {
                 background: source.background,
+                transition: source.transition,
                 customCss: source.customCss,
                 customJs: source.customJs,
                 notes: source.notes,
@@ -530,6 +539,15 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const target = frameId ?? draft.curFrame;
             if (draft.slides[target]) {
                 draft.slides[target].background = color;
+            }
+        });
+    }, [updateDeck]);
+
+    const setSlideTransition = useCallback((transition: SlideTransitionType) => {
+        updateDeck((draft) => {
+            const slide = draft.slides[draft.curFrame];
+            if (slide) {
+                slide.transition = transition;
             }
         });
     }, [updateDeck]);
@@ -733,6 +751,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 duplicateSlide,
                 moveSlide,
                 setSlideBackground,
+                setSlideTransition,
                 setSlideCustomCode,
                 setSlideNotes,
                 addElement,

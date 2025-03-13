@@ -1,6 +1,7 @@
 import React from "react";
 import { applySlideCustomCode } from "./component/utility";
 import { useDeck } from "./context/DeckContext";
+import { SlideTransitionType } from "./frame";
 
 interface ToolsProps {
     handleAddElement: (elemType:string, info?:string)=>void
@@ -8,7 +9,7 @@ interface ToolsProps {
 
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     console.log("rendering tools");
-    const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideCustomCode } = useDeck();
+    const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideTransition, setSlideCustomCode } = useDeck();
 
     const activeElem = state.activeEID != null
         ? currentSlide.elements.find((el) => el.id === state.activeEID)
@@ -210,6 +211,17 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     onChange={(e)=>{setSlideBackground(e.target.value)}}
                 />
             </label>
+            <div className="tool">
+                <i className="material-icons" title="Slide Transition">slideshow</i>
+                <select
+                    value={currentSlide.transition ?? 'fade'}
+                    onChange={(e) => setSlideTransition(e.target.value as SlideTransitionType)}
+                >
+                    <option value="none">None</option>
+                    <option value="fade">Fade</option>
+                    <option value="slide">Slide</option>
+                </select>
+            </div>
         </div>
         <span>Add CSS/JS</span>
         <div className='toolset'>

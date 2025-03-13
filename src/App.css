@@ -259,6 +259,24 @@ textarea{
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
   flex-shrink: 0;
 }
+
+@keyframes slideFadeIn {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+@keyframes slideEnterRight {
+  from { opacity: 0.4; filter: brightness(0.95); }
+  to { opacity: 1; filter: brightness(1); }
+}
+
+.slide-transition-fade {
+  animation: slideFadeIn 0.28s ease-out;
+}
+
+.slide-transition-slide {
+  animation: slideEnterRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
 .slideview-full{
   position: fixed;
   left: 0;

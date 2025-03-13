@@ -191,6 +191,7 @@ const SlideView: React.FC = () => {
       }}
     >
       <div
+        key={`slide-frame-${state.curFrame}`}
         id={`slide${state.curFrame}`}
         style={{
           background: currentSlide.background,
@@ -198,7 +199,7 @@ const SlideView: React.FC = () => {
           height: `${SLIDE_HEIGHT}px`,
           transform: `scale(${scale})`,
         }}
-        className="slideview"
+        className={`slideview slide-transition-${currentSlide.transition ?? 'fade'}`}
         onClick={(e) => {
           if (state.presenting) return;
           e.stopPropagation();
