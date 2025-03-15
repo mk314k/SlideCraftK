@@ -3,25 +3,32 @@
   border: none;
   width: 100vw;
   height: 100vh;
-  --tool-width: min(25vw, 200px);
-  --background: #e6ccc4;
-  --foreground: rgba(0, 0, 0, 0.5);
+  --tool-width: 240px;
+  --background: #1e1e2e;
+  --foreground: rgba(30, 41, 59, 0.85);
+  --panel-border: rgba(148, 163, 184, 0.2);
+  --accent: #6366f1;
   background: var(--background);
-}
-button{
-  border-radius: 10px !important;
+  color: #f8fafc;
 }
 
-/* App.css */
-*{
-  margin: 0;
+button {
+  border-radius: 8px !important;
 }
-textarea{
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+textarea {
   resize: none;
 }
 
-.slideset, .slideview, p {
-  border: 1px solid black;
+.slideset,
+.slideview,
+p {
+  border: 1px solid var(--panel-border);
 }
 
 .app-container {
@@ -29,33 +36,72 @@ textarea{
   border: none !important;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
 }
 
 .toolbar {
   position: fixed;
-  top: 2vh;
-  left: 2vw;
+  top: 12px;
+  left: 12px;
   width: var(--tool-width);
-  height: 96vh;
+  height: calc(100vh - 24px);
   background-color: var(--foreground);
-  border-radius: 30px;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 12px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  backdrop-filter: blur(12px);
 }
-.toolset{
-  border-bottom: 10px solid;
-  border-color: var(--background);
-  padding-bottom: 20px;
+
+.toolbar > span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  text-align: left;
+  padding-left: 4px;
 }
-.tool{
+
+.toolset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 10px;
+}
+
+.tool {
   cursor: pointer;
-  padding: 6px 12px;
-}
-#code{
-  height: 40vh !important;
-  border-radius: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.15s ease;
 }
 
+.tool:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
 
-.slideset{
+#code {
+  width: 100%;
+  height: 140px !important;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #e2e8f0;
+  border: 1px solid var(--panel-border);
+  padding: 8px;
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+
+.slideset {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -63,20 +109,23 @@ textarea{
   flex-wrap: nowrap;
   overflow-x: auto;
   position: fixed;
-  bottom: 3vh;
-  left: calc(0.5*var(--tool-width) + 22vw);
-  width: 60vw;
-  height: 18vh;
-  padding: 6px 10px;
-  background: var(--background);
-  border: none;
-}
-.mini{
-  height: 100%;
-  min-width: 120px;
-  border: 1px solid black;
-  padding: 16px;
+  bottom: 12px;
+  left: calc(var(--tool-width) + 28px);
+  right: 16px;
+  height: 136px;
+  padding: 8px 12px;
   background: var(--foreground);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+}
+
+.mini {
+  height: 100%;
+  min-width: 110px;
+  border: 1px solid var(--panel-border);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
 }
 
 .mini-card {
@@ -88,15 +137,14 @@ textarea{
   min-width: 164px;
   height: 100%;
   padding: 6px;
-  box-sizing: border-box;
   border-radius: 10px;
   border: 2px solid transparent;
-  background: var(--foreground);
+  background: rgba(15, 23, 42, 0.65);
   cursor: pointer;
 }
 
 .mini-card-active {
-  border-color: #4f46e5;
+  border-color: var(--accent);
 }
 
 .mini-thumb-viewport {
@@ -127,7 +175,6 @@ textarea{
   justify-content: center;
   font-size: 28px;
   padding: 6px;
-  box-sizing: border-box;
 }
 
 .mini-card-footer {
@@ -157,19 +204,18 @@ textarea{
   height: 44px;
   padding: 0 10px;
   border-radius: 10px;
-  background: var(--foreground);
+  background: rgba(15, 23, 42, 0.65);
   color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid var(--panel-border);
   cursor: pointer;
 }
 
-
 .slide-stage {
   position: fixed;
-  left: calc(0.5*var(--tool-width) + 20vw);
-  top: 12vh;
-  width: 64vw;
-  height: 60vh;
+  left: calc(var(--tool-width) + 28px);
+  right: 16px;
+  top: 64px;
+  bottom: 160px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -177,7 +223,9 @@ textarea{
 
 .slide-stage-presenting {
   left: 0;
+  right: 0;
   top: 0;
+  bottom: 0;
   width: 100vw;
   height: 100vh;
   background: #09090b;
@@ -232,7 +280,7 @@ textarea{
 
 .present-progress-bar {
   height: 100%;
-  background: #6366f1;
+  background: var(--accent);
   transition: width 0.25s ease;
 }
 
@@ -249,15 +297,16 @@ textarea{
   z-index: 130;
 }
 
-.slideview{
+.slideview {
   position: relative;
   width: 1280px;
   height: 720px;
-  border-radius: 20px;
+  border-radius: 16px;
   transform-origin: center center;
   overflow: hidden;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
   flex-shrink: 0;
+  color: #111827;
 }
 
 @keyframes slideFadeIn {
@@ -277,7 +326,8 @@ textarea{
 .slide-transition-slide {
   animation: slideEnterRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.slideview-full{
+
+.slideview-full {
   position: fixed;
   left: 0;
   top: 0;
@@ -285,10 +335,9 @@ textarea{
   height: 100vh;
 }
 
-
 .element-container {
   border: none;
-  border-radius: 20%;
+  border-radius: 12px;
   transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
@@ -302,7 +351,7 @@ textarea{
 }
 
 .element-container.active-element {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -311,10 +360,9 @@ textarea{
   width: 10px;
   height: 10px;
   background: #ffffff;
-  border: 2px solid #4f46e5;
+  border: 2px solid var(--accent);
   border-radius: 50%;
   z-index: 10;
-  box-sizing: border-box;
 }
 
 .resize-handle-nw { top: -6px; left: -6px; cursor: nwse-resize; }
@@ -332,12 +380,11 @@ textarea{
   left: calc(50% - 6px);
   width: 12px;
   height: 12px;
-  background: #4f46e5;
+  background: var(--accent);
   border: 2px solid #ffffff;
   border-radius: 50%;
   cursor: grab;
   z-index: 12;
-  box-sizing: border-box;
 }
 
 .alignment-guide {
@@ -361,12 +408,12 @@ textarea{
 }
 
 .tool-active {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(99, 102, 241, 0.35);
   border-radius: 8px;
 }
 
 .element {
-  all:inherit;
+  all: inherit;
   display: flex;
   left: initial;
   top: initial;
@@ -374,31 +421,34 @@ textarea{
   align-items: center;
 }
 
-
-
-
-
-.top-sect{
+.top-sect {
   position: fixed;
   display: flex;
+  gap: 6px;
   justify-content: center;
   align-items: center;
-  top: 2vh;
-  right: 5vw;
+  top: 12px;
+  right: 16px;
+  padding: 6px 10px;
   background: var(--foreground);
-  border-radius: 10px 0 10px 0;
-} 
-.top-sect button{
-  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+}
+
+.top-sect button {
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  padding: 6px 12px;
+  font-size: 0.82rem;
 }
 
 .deck-title-input {
-  width: 140px;
+  width: 150px;
   padding: 5px 8px;
-  margin-left: 6px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--panel-border);
+  background: rgba(15, 23, 42, 0.6);
   color: inherit;
   font-size: 0.85rem;
 }
@@ -423,7 +473,6 @@ textarea{
   height: 100%;
   gap: 4px;
   padding: 6px;
-  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.94);
   border-radius: 8px;
 }
@@ -433,9 +482,8 @@ textarea{
   font-family: monospace;
   font-size: 0.9rem;
   padding: 4px 6px;
-  border: 1px solid #4f46e5;
+  border: 1px solid var(--accent);
   border-radius: 4px;
-  box-sizing: border-box;
 }
 
 .latex-live-preview {
@@ -465,7 +513,6 @@ textarea{
   height: 100%;
   margin: 0;
   padding: 12px;
-  box-sizing: border-box;
   background: #1e1e2e !important;
   color: #cdd6f4 !important;
   font-family: 'Fira Code', 'JetBrains Mono', monospace;
@@ -484,7 +531,6 @@ textarea{
   width: 100%;
   height: 100%;
   padding: 12px 16px;
-  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -520,12 +566,13 @@ textarea{
 
 .speaker-notes-panel {
   position: fixed;
-  right: 2vw;
-  bottom: 22vh;
-  width: 280px;
-  height: 180px;
-  background: rgba(24, 24, 37, 0.94);
+  right: 16px;
+  bottom: 160px;
+  width: 300px;
+  height: 190px;
+  background: rgba(15, 23, 42, 0.95);
   color: #f8fafc;
+  border: 1px solid var(--panel-border);
   border-radius: 12px;
   padding: 10px;
   display: flex;
@@ -546,10 +593,9 @@ textarea{
 .speaker-notes-textarea {
   flex: 1;
   width: 100%;
-  box-sizing: border-box;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.06);
   color: inherit;
   padding: 8px;
   font-size: 0.82rem;
@@ -594,10 +640,3 @@ textarea{
     overflow: hidden;
   }
 }
-
-
-
-
-
-
-
