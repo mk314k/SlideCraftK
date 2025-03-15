@@ -555,6 +555,47 @@ textarea{
   font-size: 0.82rem;
 }
 
+.print-deck-container {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: 1280px 720px;
+    margin: 0;
+  }
+
+  body, #root, .app-container {
+    width: 1280px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .toolbar,
+  .slideset,
+  .slide-stage,
+  .top-sect,
+  .speaker-notes-panel {
+    display: none !important;
+  }
+
+  .print-deck-container {
+    display: block !important;
+  }
+
+  .print-slide-page {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+  }
+}
+
+
 
 
 

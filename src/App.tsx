@@ -2,7 +2,8 @@ import './App.css';
 import React, { useState, useRef, useEffect } from 'react';
 import { KComponents } from './component/component';
 import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
-import { downloadFile, handleFullScreen, applySlideCustomCode } from './component/utility';
+import { downloadFile, handleFullScreen, applySlideCustomCode, renderMarkdownToHtml } from './component/utility';
+import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
 import { DeckProvider, useDeck, SlideTemplateType } from './context/DeckContext';
 
@@ -385,6 +386,9 @@ const EditorWorkspace: React.FC = () => {
         <button onClick={() => setShowNotes((v) => !v)} title="Toggle Speaker Notes">
           Notes
         </button>
+        <button onClick={() => window.print()} title="Export Deck to PDF via Print">
+          PDF
+        </button>
         <button onClick={handleFullScreen}>Presentation</button>
         {loadError && (
           <span className="load-error" role="alert" onClick={() => setLoadError(null)}>
@@ -408,6 +412,56 @@ const EditorWorkspace: React.FC = () => {
           />
         </div>
       )}
+      <div className="print-deck-container" aria-hidden="true">
+        {state.slides.map((slide, sIdx) => (
+          <div
+            key={`print-slide-${sIdx}`}
+            className="print-slide-page"
+            style={{
+              background: slide.background,
+              width: `${SLIDE_WIDTH}px`,
+              height: `${SLIDE_HEIGHT}px`,
+            }}
+          >
+            {slide.elements.map((el) => (
+              <div
+                key={`print-el-${sIdx}-${el.id}`}
+                className="element-container"
+                style={{
+                  position: 'absolute',
+                  left: `${el.x}px`,
+                  top: `${el.y}px`,
+                  width: `${el.width}px`,
+                  height: `${el.height}px`,
+                  transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
+                  background: 'var(--background)',
+                  ...el.style,
+                }}
+              >
+                {el.name === 'image' ? (
+                  <img src={el.inner} alt="" className="element" />
+                ) : el.name === 'latex' ? (
+                  <KatexRenderer latex={el.inner} />
+                ) : el.name === 'code' ? (
+                  <pre className="element code-block-view">
+                    <code>{el.inner}</code>
+                  </pre>
+                ) : el.name === 'markdown' ? (
+                  <div
+                    className="element markdown-view"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdownToHtml(el.inner) }}
+                  />
+                ) : (
+                  <div
+                    className="element"
+                    dangerouslySetInnerHTML={{ __html: el.inner }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
