@@ -88,15 +88,15 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
       }
     };
     const elementTools = [
-        {name:'button', icon:'crop_16_9'},
-        {name:'textarea', icon:'edit_note'},
-        {name:'markdown', icon:'article'},
-        {name:'latex', icon:'functions'},
-        {name:'code', icon:'code'},
-        {name:'rect', icon:'check_box_outline_blank'},
-        {name:'circle', icon:'radio_button_unchecked'},
-        {name:'arrow', icon:'trending_flat'},
-        {name:'line', icon:'horizontal_rule'}
+        {name:'button', icon:'crop_16_9', label:'Add Button'},
+        {name:'textarea', icon:'edit_note', label:'Add Text Area'},
+        {name:'markdown', icon:'article', label:'Add Markdown Block'},
+        {name:'latex', icon:'functions', label:'Add LaTeX Math'},
+        {name:'code', icon:'code', label:'Add Code Block'},
+        {name:'rect', icon:'check_box_outline_blank', label:'Add Rectangle'},
+        {name:'circle', icon:'radio_button_unchecked', label:'Add Circle'},
+        {name:'arrow', icon:'trending_flat', label:'Add Arrow'},
+        {name:'line', icon:'horizontal_rule', label:'Add Line'}
     ]
   
     return (
@@ -105,19 +105,25 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         <div className="toolset">
             {elementTools.map(
                 (tool)=>(
-                    <label key={tool.name} className="tool" onClick={()=>{handleAddElement(tool.name)}}>
+                    <label
+                        key={tool.name}
+                        className="tool"
+                        title={tool.label}
+                        aria-label={tool.label}
+                        onClick={()=>{handleAddElement(tool.name)}}
+                    >
                         <i className="material-icons">{tool.icon}</i>
                     </label>
                 )
             )}
-            <label className="tool">
+            <label className="tool" title="Upload Image" aria-label="Upload Image">
                 <i className="material-icons">image</i>
                 <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
             </label>
         </div>
         <span>Element Formatting</span>
         <div className="toolset">
-            <div className="tool">
+            <div className="tool" title="Font Family">
                 <i className="material-icons">text_fields</i>
                 <select
                     id="font-family"
@@ -130,25 +136,29 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     <option value="Times New Roman">Times New Roman</option>
                 </select>
             </div>
-            <label className="tool" onClick={()=>{handleFontSize(5)}}>
+            <label className="tool" title="Increase Font Size" aria-label="Increase Font Size" onClick={()=>{handleFontSize(5)}}>
                 <i className="material-icons">text_increase</i>
             </label>
-            <label className="tool" onClick={()=>{handleFontSize(-5)}}>
+            <label className="tool" title="Decrease Font Size" aria-label="Decrease Font Size" onClick={()=>{handleFontSize(-5)}}>
                 <i className="material-icons">text_decrease</i>
             </label>
             <label
                 className={`tool${activeElem?.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
+                title="Toggle Bold"
+                aria-label="Toggle Bold"
                 onClick={handleBold}
             >
                 <i className="material-icons">format_bold</i>
             </label>
             <label
                 className={`tool${activeElem?.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
+                title="Toggle Italic"
+                aria-label="Toggle Italic"
                 onClick={handleItalic}
             >
                 <i className="material-icons">format_italic</i>
             </label>
-            <label className="tool">
+            <label className="tool" title="Text / Stroke Color" aria-label="Text Color">
                 <i className="material-icons">format_color_text</i>
                 <input
                     type="color"
@@ -158,7 +168,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     onChange={(e)=>{handleStyleChange('color', e.target.value)}}
                 />
             </label>
-            <label className="tool">
+            <label className="tool" title="Background / Fill Color" aria-label="Fill Color">
                 <i className="material-icons">format_color_fill</i>
                 <input
                     type="color"

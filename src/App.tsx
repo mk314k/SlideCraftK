@@ -287,12 +287,18 @@ const EditorWorkspace: React.FC = () => {
   } = useDeck();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showNotes, setShowNotes] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (state.editingMode) return;
       const target = event.target as HTMLElement | null;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT')) {
+        return;
+      }
+      if (event.key === '?' || (event.shiftKey && event.key === '/')) {
+        event.preventDefault();
+        setShowShortcuts((v) => !v);
         return;
       }
       const isMod = event.metaKey || event.ctrlKey;
@@ -389,6 +395,9 @@ const EditorWorkspace: React.FC = () => {
         <button onClick={() => window.print()} title="Export Deck to PDF via Print">
           PDF
         </button>
+        <button onClick={() => setShowShortcuts(true)} title="Keyboard Shortcuts (?)">
+          ?
+        </button>
         <button onClick={handleFullScreen}>Presentation</button>
         {loadError && (
           <span className="load-error" role="alert" onClick={() => setLoadError(null)}>
@@ -396,6 +405,30 @@ const EditorWorkspace: React.FC = () => {
           </span>
         )}
       </div>
+      {showShortcuts && (
+        <div className="shortcuts-backdrop" onClick={() => setShowShortcuts(false)}>
+          <div className="shortcuts-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="shortcuts-header">
+              <h3>Keyboard Shortcuts</h3>
+              <button type="button" onClick={() => setShowShortcuts(false)}>
+                ×
+              </button>
+            </div>
+            <ul className="shortcuts-list">
+              <li><kbd>Delete</kbd> / <kbd>Backspace</kbd> <span>Delete selected element</span></li>
+              <li><kbd>Cmd/Ctrl + Z</kbd> <span>Undo</span></li>
+              <li><kbd>Cmd/Ctrl + Shift + Z</kbd> <span>Redo</span></li>
+              <li><kbd>Cmd/Ctrl + D</kbd> <span>Duplicate selected element</span></li>
+              <li><kbd>Cmd/Ctrl + C / V</kbd> <span>Copy / Paste element</span></li>
+              <li><kbd>Arrow Keys</kbd> (<kbd>Shift</kbd> for 10px) <span>Nudge selected element</span></li>
+              <li><kbd>Double Click</kbd> <span>Edit element text / LaTeX / Code</span></li>
+              <li><kbd>→</kbd> / <kbd>Space</kbd> / <kbd>←</kbd> <span>Navigate slides in Presentation Mode</span></li>
+              <li><kbd>L</kbd> <span>Toggle Laser Pointer in Presentation Mode</span></li>
+              <li><kbd>?</kbd> <span>Toggle this shortcuts guide</span></li>
+            </ul>
+          </div>
+        </div>
+      )}
       {showNotes && (
         <div className="speaker-notes-panel">
           <div className="speaker-notes-header">
