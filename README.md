@@ -1,44 +1,81 @@
 # SlideCraftK
 
-SlideCraftK is a dynamic and interactive slide presentation platform designed for showcasing math and programming content with ease. With SlideCraftK, you can create engaging presentations that incorporate custom functions, styles, and interactive components, allowing you to captivate your audience and bring your ideas to life.
+SlideCraftK is an interactive slide presentation platform designed for math, technical storytelling, and live programmable slides. Author decks with native KaTeX equations, Markdown blocks, code snippets, vector shapes, and live per-slide CSS/JS powered by `statebinderk`.
 
 ## Features
 
-- **Dynamic Slides**: Create slides that dynamically respond to user input, allowing for interactive demonstrations and real-time updates.
-- **Custom Components**: Define your own functions, styles, and components to tailor your presentations to your specific needs.
-- **Math and Programming Integration**: Seamlessly integrate mathematical equations and code snippets into your slides, making it ideal for educational and technical presentations.
-- **Easy to Use**: Intuitive interface and user-friendly controls make it easy to create and present your slides, even for beginners.
-- **Export and Share**: Export your presentations to share with others or present offline, with support for downloading slides in the ScriptCraftedSlides (.scs) format.
+- **16:9 Scaled Stage (`1280x720`)**: Resolution-independent canvas with 8-direction resize handles, rotation, smart alignment guides, and `Shift`-grid snapping.
+- **Native KaTeX Math**: Double-click any math element to edit raw LaTeX with live preview and syntax diagnostics.
+- **Rich Elements**: Buttons, Textareas, Markdown blocks, Code blocks, Images, and SVG Shapes (rectangles, circles, arrows, lines).
+- **Interactive Slide Scripting (`statebinderk`)**: Inject per-slide CSS and JavaScript with `window.StateBinder` (`StateVar`, `StyleVar`, `MultiStateVar`, `StateVarList`, `StyleVarList`) exposed globally.
+- **Presentation Mode**: Fullscreen presenter with keyboard/click navigation, step-by-step fragment reveals, slide transitions (`none`, `fade`, `slide`), progress bar, and toggleable laser pointer (`L`).
+- ** Export & Persistence**: Auto-saves to `localStorage`, exports/imports portable `.scs` (ScriptCraftedSlides) JSON files, and prints cleanly to landscape PDF.
 
 ## Getting Started
 
-To get started with SlideCraftK, follow these steps:
+```bash
+git clone https://github.com/mk314k/slidecraftk.git
+cd slidecraftk
+npm install
+npm run dev
+```
 
-1. **Installation**: Clone this repository to your local machine and install the necessary dependencies.
-   
-    ```bash
-    git clone https://github.com/mk314k/slidecraftk.git
-    cd slidecraftk
-    npm install
-    ```
+## Keyboard Shortcuts
 
-2. **Usage**: Launch the SlideCraftK application and start creating your presentations!
+| Shortcut | Action |
+| --- | --- |
+| `Delete` / `Backspace` | Delete selected element |
+| `Cmd/Ctrl + Z` | Undo |
+| `Cmd/Ctrl + Shift + Z` | Redo |
+| `Cmd/Ctrl + D` | Duplicate selected element |
+| `Cmd/Ctrl + C` / `V` | Copy / Paste element |
+| `Arrow Keys` (`Shift` for 10px) | Nudge selected element |
+| `Double Click` | Inline edit text, Markdown, Code, or LaTeX |
+| `→` / `Space` / `←` | Advance / retreat slide or fragment in Presentation Mode |
+| `L` | Toggle laser pointer in Presentation Mode |
+| `?` | Open keyboard shortcuts modal |
 
-    ```bash
-    npm run dev
-    ```
+## `.scs` (ScriptCraftedSlides) Format Specification
 
-3. **Creating Presentations**: Use the intuitive interface to create slides, add content, and customize the appearance and behavior of your presentations.
+A `.scs` file is a JSON array of `SerializedSlide` objects:
 
-4. **Exporting Presentations**: When you're ready to share your presentation, export it in the ScriptCraftedSlides (.scs) format for easy sharing and offline viewing.
+```json
+[
+  {
+    "background": "#eef2ff",
+    "transition": "fade",
+    "customCss": "",
+    "customJs": "",
+    "notes": "Speaker notes for slide 1",
+    "elemProp": [
+      {
+        "id": 0,
+        "name": "latex",
+        "x": 180,
+        "y": 200,
+        "width": 920,
+        "height": 200,
+        "rotation": 0,
+        "step": 1,
+        "inner": "\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}",
+        "style": {
+          "fontSize": "24px",
+          "color": "#111827"
+        }
+      }
+    ]
+  }
+]
+```
 
-<!-- ## Contributing
+## Scripting Interactive Slides with `statebinderk`
 
-Contributions are welcome! If you'd like to contribute to SlideCraftK, please follow these guidelines:
+Every element on the active slide is wrapped in a container `<div id="{eid}div">` and inner element `<... id="{eid}">`. In the **Add CSS/JS** panel, you can bind reactive state directly to slide elements:
 
-1. Fork the repository and create a new branch for your feature or fix.
-2. Make your changes and ensure that all tests pass.
-3. Submit a pull request with a clear description of your changes and why they are necessary. -->
+```javascript
+const bgVar = new window.StyleVar('#4f46e5', '2div', 'background');
+bgVar.transition('#10b981');
+```
 
 ## License
 
