@@ -84,7 +84,7 @@ export interface DeckContextValue {
 function buildTemplateSlide(template: SlideTemplateType): SlideState {
     if (template === 'title') {
         return {
-            background: '#eef2ff',
+            background: '#faf6ef',
             transition: 'fade',
             customCss: '',
             customJs: '',
@@ -113,14 +113,14 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     rotation: 0,
                     step: 0,
                     inner: 'line',
-                    style: { color: '#4f46e5' },
+                    style: { color: '#b85d38' },
                 },
             ],
         };
     }
     if (template === 'two-column') {
         return {
-            background: '#f8fafc',
+            background: '#fbf8f3',
             transition: 'slide',
             customCss: '',
             customJs: '',
@@ -149,7 +149,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     rotation: 0,
                     step: 1,
                     inner: '### Left Column\n- Key concept A\n- Supporting detail\n- Summary metric',
-                    style: { background: '#e0e7ff' },
+                    style: { background: '#f2e8dc' },
                 },
                 {
                     id: 2,
@@ -161,14 +161,14 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     rotation: 0,
                     step: 2,
                     inner: '### Right Column\n- Key concept B\n- Implementation note\n- Next steps',
-                    style: { background: '#dcfce7' },
+                    style: { background: '#ebe3d5' },
                 },
             ],
         };
     }
     if (template === 'math-proof') {
         return {
-            background: '#fffbeb',
+            background: '#fdfaf4',
             transition: 'fade',
             customCss: '',
             customJs: '',
@@ -197,7 +197,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                     rotation: 0,
                     step: 1,
                     inner: '\\left(\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx\\right)^2 = \\int_{0}^{2\\pi}\\int_{0}^{\\infty} r e^{-r^2}\\,dr\\,d\\theta = \\pi',
-                    style: { background: '#ffffff', fontSize: '24px' },
+                    style: { background: '#f5efe6', fontSize: '24px' },
                 },
                 {
                     id: 2,
@@ -215,7 +215,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
         };
     }
     return {
-        background: '#f0fdf4',
+        background: '#f8f4ec',
         transition: 'slide',
         customCss: '',
         customJs: '',
@@ -243,7 +243,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 height: 360,
                 rotation: 0,
                 step: 0,
-                inner: '// Bind reactive state to slide DOM elements\nconst colorState = new window.StyleVar(\n  "#4f46e5",\n  "2div",\n  "background"\n);\ncolorState.transition("#10b981");',
+                inner: '// Bind reactive state to slide DOM elements\nconst colorState = new window.StyleVar(\n  "#b85d38",\n  "2div",\n  "background"\n);\ncolorState.transition("#d97757");',
                 style: {},
             },
             {
@@ -256,7 +256,7 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 rotation: 0,
                 step: 0,
                 inner: 'Interactive Target (#2div)',
-                style: { background: '#c7d2fe', fontSize: '20px', fontWeight: 'bold' },
+                style: { background: '#efe4d6', fontSize: '20px', fontWeight: 'bold' },
             },
         ],
     };
@@ -473,7 +473,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const addSlide = useCallback(() => {
         updateDeck((draft) => {
             const newIdx = draft.slides.length;
-            draft.slides.push({ background: 'azure', transition: 'fade', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 });
+            draft.slides.push({ background: '#faf6ef', transition: 'fade', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 });
             draft.curFrame = newIdx;
             draft.activeEID = null;
         });

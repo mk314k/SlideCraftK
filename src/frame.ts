@@ -65,7 +65,7 @@ export class KElementData {
 
 export class KSlide {
     public elemProp:Map<number, KElementData> = new Map();
-    public background = 'azure';
+    public background = '#faf6ef';
     public transition: SlideTransitionType = 'fade';
     public customCss = '';
     public customJs = '';
@@ -147,7 +147,7 @@ export class KSlideSet {
             const slide = new KSlide();
             slide.background = typeof slideData.background === 'string' && slideData.background.trim() !== ''
                 ? slideData.background
-                : 'azure';
+                : '#faf6ef';
             slide.transition = slideData.transition === 'none' || slideData.transition === 'fade' || slideData.transition === 'slide'
                 ? slideData.transition
                 : 'fade';

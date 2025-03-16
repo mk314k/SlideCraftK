@@ -362,8 +362,8 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line') =
     return ({ eid }: KElementProps) => {
         const { currentSlide } = useDeck();
         const elemState = currentSlide.elements.find((el) => el.id === eid);
-        const strokeColor = elemState?.style['color'] ?? '#312e81';
-        const fillColor = elemState?.style['background'] ?? 'rgba(79, 70, 229, 0.18)';
+        const strokeColor = elemState?.style['color'] ?? '#7c3f23';
+        const fillColor = elemState?.style['background'] ?? 'rgba(184, 93, 56, 0.14)';
 
         return (
             <KElement eid={eid} childNode={
