@@ -89,6 +89,34 @@ p {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.inspector-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.55);
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.inspector-field input {
+  width: 54px;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: inherit;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+}
+
 #code {
   width: 100%;
   height: 140px !important;
