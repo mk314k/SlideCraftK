@@ -262,6 +262,14 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
     };
 }
 
+function buildDefaultWelcomeSlides(): SlideState[] {
+    return [
+        buildTemplateSlide('title'),
+        buildTemplateSlide('math-proof'),
+        buildTemplateSlide('interactive'),
+    ];
+}
+
 function syncFromKSlideSet(): DeckState {
     const slides: SlideState[] = KSlideSet.slides.map((slide) => {
         const entries = slide.elements();
@@ -287,9 +295,10 @@ function syncFromKSlideSet(): DeckState {
             nextEid: maxId + 1,
         };
     });
+    const isInitialEmpty = slides.length === 1 && slides[0].elements.length === 0;
     return {
         title: defaultFileName,
-        slides: slides.length > 0 ? slides : [{ background: 'azure', transition: 'fade', customCss: '', customJs: '', notes: '', elements: [], nextEid: 0 }],
+        slides: isInitialEmpty ? buildDefaultWelcomeSlides() : slides,
         curFrame: KSlideSet.curFrame,
         presentStep: 0,
         activeEID: KSlideSet.activeEID,
