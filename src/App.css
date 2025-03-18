@@ -29,8 +29,7 @@ textarea {
 }
 
 .slideset,
-.slideview,
-p {
+.slideview {
   border: 1px solid var(--panel-border);
 }
 
@@ -461,10 +460,14 @@ p {
 }
 
 .element {
-  all: inherit;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   display: flex;
-  left: initial;
-  top: initial;
   justify-content: center;
   align-items: center;
 }

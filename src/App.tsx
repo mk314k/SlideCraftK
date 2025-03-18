@@ -456,7 +456,13 @@ const EditorWorkspace: React.FC = () => {
               height: `${SLIDE_HEIGHT}px`,
             }}
           >
-            {slide.elements.map((el) => (
+            {slide.elements.map((el) => {
+              const isShape = el.name === 'rect' || el.name === 'circle' || el.name === 'arrow' || el.name === 'line';
+              const printStyle = { ...el.style };
+              if (isShape || el.name === 'image') {
+                delete printStyle.background;
+              }
+              return (
               <div
                 key={`print-el-${sIdx}-${el.id}`}
                 className="element-container"
@@ -467,8 +473,8 @@ const EditorWorkspace: React.FC = () => {
                   width: `${el.width}px`,
                   height: `${el.height}px`,
                   transform: el.rotation ? `rotate(${el.rotation}deg)` : undefined,
-                  background: 'var(--background)',
-                  ...el.style,
+                  background: isShape || el.name === 'image' || el.name === 'latex' ? 'transparent' : 'var(--surface)',
+                  ...printStyle,
                 }}
               >
                 {el.name === 'image' ? (
@@ -491,7 +497,8 @@ const EditorWorkspace: React.FC = () => {
                   />
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         ))}
       </div>

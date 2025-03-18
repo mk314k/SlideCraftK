@@ -17,12 +17,23 @@ export interface KElementProps {
     info?: string;
 }
 
+const SHAPE_TYPES = new Set(['rect', 'circle', 'arrow', 'line']);
+
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown, handleResizeStart, handleRotateStart } = useKElemHook(eid);
     const { state, currentSlide, updateElement, deleteElement, setActiveEID } = useDeck();
     const elemState = currentSlide.elements.find((el) => el.id === eid);
-    const elemStyle = elemState?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
+    const elemType = elemState?.name ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).name;
+    const isShape = SHAPE_TYPES.has(elemType);
+    const rawStyle = elemState?.style ?? KSlideSet.slides[KSlideSet.curFrame].get(eid).style;
+    const containerStyle: Record<string, string | undefined> = { ...rawStyle };
+    if (isShape || elemType === 'image') {
+        delete containerStyle.background;
+    }
+    const defaultBg = isShape || elemType === 'image' || elemType === 'latex'
+        ? 'transparent'
+        : 'var(--surface)';
     const elemStep = elemState?.step ?? 0;
     const isHiddenFragment = state.presenting && elemStep > state.presentStep;
 
@@ -82,9 +93,9 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 width: style.width,
                 height: style.height,
                 transform: style.rotation ? `rotate(${style.rotation}deg)` : undefined,
-                background: 'var(--background)' ,
+                background: defaultBg,
                 cursor: state.presenting ? 'default' : style.cursor,
-                ...elemStyle
+                ...containerStyle
             }}
             onMouseDown={e => { if (!state.presenting) { setActiveEID(eid); handleMouseDown(e); } }}
             onClick={(e)=>{ if (!state.presenting) { setActiveEID(eid); e.stopPropagation(); } }}
