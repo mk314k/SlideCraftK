@@ -15,6 +15,12 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         ? currentSlide.elements.find((el) => el.id === state.activeEID)
         : undefined;
 
+    const elemType = activeElem?.name;
+    const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code';
+    const isLatexType = elemType === 'latex';
+    const isShapeType = elemType === 'rect' || elemType === 'circle' || elemType === 'arrow' || elemType === 'line';
+    const isFilledShape = elemType === 'rect' || elemType === 'circle';
+
     const handleStyleChange = (styName: string, value: string) => {
         if (state.activeEID != null) {
             updateElementStyle(state.activeEID, styName, value);
@@ -123,92 +129,130 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         </div>
         <span>Element Formatting</span>
         <div className="toolset">
-            <div className="tool" title="Font Family">
-                <i className="material-icons">text_fields</i>
-                <select
-                    id="font-family"
-                    value={activeElem?.style['fontFamily'] ?? 'Arial'}
-                    disabled={!activeElem}
-                    onChange={(e)=>{handleStyleChange('fontFamily', e.target.value)}}
-                >
-                    <option value="Arial">Arial</option>
-                    <option value="Helvetica">Helvetica</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                </select>
-            </div>
-            <label className="tool" title="Increase Font Size" aria-label="Increase Font Size" onClick={()=>{handleFontSize(5)}}>
-                <i className="material-icons">text_increase</i>
-            </label>
-            <label className="tool" title="Decrease Font Size" aria-label="Decrease Font Size" onClick={()=>{handleFontSize(-5)}}>
-                <i className="material-icons">text_decrease</i>
-            </label>
-            <label
-                className={`tool${activeElem?.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
-                title="Toggle Bold"
-                aria-label="Toggle Bold"
-                onClick={handleBold}
-            >
-                <i className="material-icons">format_bold</i>
-            </label>
-            <label
-                className={`tool${activeElem?.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
-                title="Toggle Italic"
-                aria-label="Toggle Italic"
-                onClick={handleItalic}
-            >
-                <i className="material-icons">format_italic</i>
-            </label>
-            <label className="tool" title="Text / Stroke Color" aria-label="Text Color">
-                <i className="material-icons">format_color_text</i>
-                <input
-                    type="color"
-                    id="text-color"
-                    value={activeElem?.style['color']?.startsWith('#') ? activeElem.style['color'] : '#000000'}
-                    disabled={!activeElem}
-                    onChange={(e)=>{handleStyleChange('color', e.target.value)}}
-                />
-            </label>
-            <label className="tool" title="Background / Fill Color" aria-label="Fill Color">
-                <i className="material-icons">format_color_fill</i>
-                <input
-                    type="color"
-                    id="element-bg-color"
-                    value={activeElem?.style['background']?.startsWith('#') ? activeElem.style['background'] : '#e6ccc4'}
-                    disabled={!activeElem}
-                    onChange={(e)=>{handleStyleChange('background', e.target.value)}}
-                />
-            </label>
-            <label className="tool" title="Bring Forward" onClick={() => handleZIndexStep(1)}>
-                <i className="material-icons">flip_to_front</i>
-            </label>
-            <label className="tool" title="Send Backward" onClick={() => handleZIndexStep(-1)}>
-                <i className="material-icons">flip_to_back</i>
-            </label>
-            <label className="tool" title="Bring to Front" onClick={handleBringToFront}>
-                <i className="material-icons">vertical_align_top</i>
-            </label>
-            <label className="tool" title="Send to Back" onClick={handleSendToBack}>
-                <i className="material-icons">vertical_align_bottom</i>
-            </label>
-            <div className="tool">
-                <i className="material-icons" title="Animation Step (0 = always visible)">animation</i>
-                <input
-                    type="number"
-                    min={0}
-                    max={20}
-                    style={{ width: '48px' }}
-                    value={activeElem?.step ?? 0}
-                    disabled={!activeElem}
-                    onChange={(e) => {
-                        if (state.activeEID != null) {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            updateElement(state.activeEID, (el) => {
-                                el.step = val;
-                            });
-                        }
-                    }}
-                />
-            </div>
+            {!activeElem && (
+                <span className="tool-empty-hint">Select an element to format</span>
+            )}
+            {activeElem && isTextType && (
+                <>
+                    <div className="tool" title="Font Family">
+                        <i className="material-icons">text_fields</i>
+                        <select
+                            id="font-family"
+                            value={activeElem.style['fontFamily'] ?? 'Arial'}
+                            onChange={(e)=>{handleStyleChange('fontFamily', e.target.value)}}
+                        >
+                            <option value="Arial">Arial</option>
+                            <option value="Helvetica">Helvetica</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="monospace">Monospace</option>
+                        </select>
+                    </div>
+                    <label
+                        className={`tool${activeElem.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
+                        title="Toggle Bold"
+                        aria-label="Toggle Bold"
+                        onClick={handleBold}
+                    >
+                        <i className="material-icons">format_bold</i>
+                    </label>
+                    <label
+                        className={`tool${activeElem.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
+                        title="Toggle Italic"
+                        aria-label="Toggle Italic"
+                        onClick={handleItalic}
+                    >
+                        <i className="material-icons">format_italic</i>
+                    </label>
+                </>
+            )}
+            {activeElem && (isTextType || isLatexType) && (
+                <>
+                    <label className="tool" title="Increase Size" aria-label="Increase Size" onClick={()=>{handleFontSize(4)}}>
+                        <i className="material-icons">text_increase</i>
+                    </label>
+                    <label className="tool" title="Decrease Size" aria-label="Decrease Size" onClick={()=>{handleFontSize(-4)}}>
+                        <i className="material-icons">text_decrease</i>
+                    </label>
+                    <label className="tool" title="Text Color" aria-label="Text Color">
+                        <i className="material-icons">format_color_text</i>
+                        <input
+                            type="color"
+                            id="text-color"
+                            value={activeElem.style['color']?.startsWith('#') ? activeElem.style['color'] : '#2c241d'}
+                            onChange={(e)=>{handleStyleChange('color', e.target.value)}}
+                        />
+                    </label>
+                    <label className="tool" title="Background Color" aria-label="Background Color">
+                        <i className="material-icons">format_color_fill</i>
+                        <input
+                            type="color"
+                            id="element-bg-color"
+                            value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#fbf8f3'}
+                            onChange={(e)=>{handleStyleChange('background', e.target.value)}}
+                        />
+                    </label>
+                </>
+            )}
+            {activeElem && isShapeType && (
+                <>
+                    <label className="tool" title="Line / Stroke Color" aria-label="Line Color">
+                        <i className="material-icons">border_color</i>
+                        <span className="tool-inline-label">Line</span>
+                        <input
+                            type="color"
+                            id="shape-line-color"
+                            value={activeElem.style['color']?.startsWith('#') ? activeElem.style['color'] : '#7c3f23'}
+                            onChange={(e)=>{handleStyleChange('color', e.target.value)}}
+                        />
+                    </label>
+                    {isFilledShape && (
+                        <label className="tool" title="Shape Fill Color" aria-label="Fill Color">
+                            <i className="material-icons">format_color_fill</i>
+                            <span className="tool-inline-label">Fill</span>
+                            <input
+                                type="color"
+                                id="shape-fill-color"
+                                value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
+                                onChange={(e)=>{handleStyleChange('background', e.target.value)}}
+                            />
+                        </label>
+                    )}
+                </>
+            )}
+            {activeElem && (
+                <>
+                    <label className="tool" title="Bring Forward" onClick={() => handleZIndexStep(1)}>
+                        <i className="material-icons">flip_to_front</i>
+                    </label>
+                    <label className="tool" title="Send Backward" onClick={() => handleZIndexStep(-1)}>
+                        <i className="material-icons">flip_to_back</i>
+                    </label>
+                    <label className="tool" title="Bring to Front" onClick={handleBringToFront}>
+                        <i className="material-icons">vertical_align_top</i>
+                    </label>
+                    <label className="tool" title="Send to Back" onClick={handleSendToBack}>
+                        <i className="material-icons">vertical_align_bottom</i>
+                    </label>
+                    <div className="tool">
+                        <i className="material-icons" title="Animation Step (0 = always visible)">animation</i>
+                        <input
+                            type="number"
+                            min={0}
+                            max={20}
+                            style={{ width: '48px' }}
+                            value={activeElem.step ?? 0}
+                            onChange={(e) => {
+                                if (state.activeEID != null) {
+                                    const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                    updateElement(state.activeEID, (el) => {
+                                        el.step = val;
+                                    });
+                                }
+                            }}
+                        />
+                    </div>
+                </>
+            )}
         </div>
         {activeElem && (
             <>
