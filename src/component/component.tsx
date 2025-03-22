@@ -133,7 +133,7 @@ const createKElementComponent = (Component: React.ElementType, mode?: string) =>
 
         const startEditing = () => {
             const initialDraft = mode === 'latex' && content === 'latex'
-                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                ? 'E = mc^2'
                 : content;
             setDraftText(initialDraft);
             setIsEditing(true);

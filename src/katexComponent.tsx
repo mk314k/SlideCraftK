@@ -9,7 +9,7 @@ export interface KatexRendererProps {
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function renderKatexWithStatus(latex: string): { html: string; error: string | null } {
-  const expr = latex && latex !== 'latex' ? latex : '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
+  const expr = latex && latex !== 'latex' ? latex : 'E = mc^2';
   try {
     katex.renderToString(expr, {
       throwOnError: true,

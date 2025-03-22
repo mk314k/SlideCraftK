@@ -56,6 +56,7 @@ export interface DeckContextValue {
     retreatPresentation: () => void;
     addSlide: () => void;
     addTemplateSlide: (template: SlideTemplateType) => void;
+    loadExampleDeck: () => void;
     deleteSlide: (frameId?: number) => void;
     duplicateSlide: (frameId?: number) => void;
     moveSlide: (fromIdx: number, toIdx: number) => void;
@@ -264,8 +265,78 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
 
 function buildDefaultWelcomeSlides(): SlideState[] {
     return [
-        buildTemplateSlide('title'),
+        {
+            background: '#faf6ef',
+            transition: 'fade',
+            customCss: '',
+            customJs: '',
+            notes: 'Slide 1: Overview of SlideCraftK — double-click any element to edit, drag handles to resize or rotate.',
+            nextEid: 5,
+            elements: [
+                {
+                    id: 0,
+                    name: 'markdown',
+                    x: 110,
+                    y: 90,
+                    width: 1060,
+                    height: 150,
+                    rotation: 0,
+                    step: 0,
+                    inner: '# SlideCraftK\n### Interactive Math, Diagrams & Live Code Presentations',
+                    style: { background: 'transparent', fontSize: '28px', color: '#2c241d' },
+                },
+                {
+                    id: 1,
+                    name: 'line',
+                    x: 110,
+                    y: 250,
+                    width: 680,
+                    height: 28,
+                    rotation: 0,
+                    step: 0,
+                    inner: 'line',
+                    style: { color: '#b85d38' },
+                },
+                {
+                    id: 2,
+                    name: 'rect',
+                    x: 110,
+                    y: 320,
+                    width: 310,
+                    height: 220,
+                    rotation: 0,
+                    step: 0,
+                    inner: 'rect',
+                    style: { color: '#b85d38', background: '#f2e8dc' },
+                },
+                {
+                    id: 3,
+                    name: 'markdown',
+                    x: 130,
+                    y: 340,
+                    width: 270,
+                    height: 180,
+                    rotation: 0,
+                    step: 0,
+                    inner: '### Features\n- **KaTeX** equations\n- **SVG** vector shapes\n- **StateBinder** live JS',
+                    style: { background: 'transparent', fontSize: '18px' },
+                },
+                {
+                    id: 4,
+                    name: 'circle',
+                    x: 860,
+                    y: 310,
+                    width: 230,
+                    height: 230,
+                    rotation: 0,
+                    step: 0,
+                    inner: 'circle',
+                    style: { color: '#7c3f23', background: '#efe4d6' },
+                },
+            ],
+        },
         buildTemplateSlide('math-proof'),
+        buildTemplateSlide('two-column'),
         buildTemplateSlide('interactive'),
     ];
 }
@@ -488,6 +559,17 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [updateDeck]);
 
+    const loadExampleDeck = useCallback(() => {
+        updateDeck((draft) => {
+            draft.title = 'slidecraftk-showcase';
+            draft.slides = buildDefaultWelcomeSlides();
+            draft.curFrame = 0;
+            draft.presentStep = 0;
+            draft.activeEID = null;
+            draft.editingMode = false;
+        });
+    }, [updateDeck]);
+
     const deleteSlide = useCallback((frameId?: number) => {
         updateDeck((draft) => {
             if (draft.slides.length <= 1) return;
@@ -587,7 +669,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!slide) return;
             const eid = slide.nextEid;
             const defaultInner = elemType === 'latex'
-                ? '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'
+                ? 'E = mc^2'
                 : elemType === 'code'
                 ? 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}'
                 : elemType === 'markdown'
@@ -756,6 +838,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 retreatPresentation,
                 addSlide,
                 addTemplateSlide,
+                loadExampleDeck,
                 deleteSlide,
                 duplicateSlide,
                 moveSlide,

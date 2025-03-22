@@ -50,7 +50,7 @@ export class KElementData {
         this.name = elemType;
         if (this.inner === ''){
             if (elemType === 'latex') {
-                this.inner = '\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}';
+                this.inner = 'E = mc^2';
             } else if (elemType === 'code') {
                 this.inner = 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}';
             } else if (elemType === 'markdown') {
