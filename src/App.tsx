@@ -7,11 +7,11 @@ import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
 import { DeckProvider, useDeck, SlideTemplateType } from './context/DeckContext';
 
-const SlideSet: React.FC = () => {
+const SlideSet: React.FC<{ inspectorOpen: boolean }> = ({ inspectorOpen }) => {
   const { state, setFrameId, addSlide, addTemplateSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
 
   return (
-    <div className="slideset">
+    <div className={`slideset${inspectorOpen ? ' slideset-with-inspector' : ''}`}>
       {state.slides.map((slide, i) => (
         <div
           key={`${i}ss`}
@@ -117,10 +117,10 @@ const SlideSet: React.FC = () => {
   );
 };
 
-const SlideView: React.FC = () => {
+const SlideView: React.FC<{ zoomFactor: number; inspectorOpen: boolean }> = ({ zoomFactor, inspectorOpen }) => {
   const { state, currentSlide, advancePresentation, retreatPresentation, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = useState(1);
+  const [fitScale, setFitScale] = useState(1);
   const [laserEnabled, setLaserEnabled] = useState(false);
   const [laserPos, setLaserPos] = useState<{ x: number; y: number } | null>(null);
 
@@ -131,19 +131,33 @@ const SlideView: React.FC = () => {
       if (!stageRef.current) return;
       const rect = stageRef.current.getBoundingClientRect();
       if (rect.width > 0 && rect.height > 0) {
-        const nextScale = Math.min(rect.width / SLIDE_WIDTH, rect.height / SLIDE_HEIGHT);
-        setScale(nextScale);
-        KSlideSet.scale = nextScale;
+        const pad = isFs ? 0 : 24;
+        const availW = Math.max(100, rect.width - pad);
+        const availH = Math.max(100, rect.height - pad);
+        const nextFit = Math.min(availW / SLIDE_WIDTH, availH / SLIDE_HEIGHT);
+        setFitScale(nextFit);
       }
     };
     updateScale();
+    const observer = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(() => updateScale())
+      : null;
+    if (observer && stageRef.current) {
+      observer.observe(stageRef.current);
+    }
     window.addEventListener('resize', updateScale);
     document.addEventListener('fullscreenchange', updateScale);
     return () => {
+      observer?.disconnect();
       window.removeEventListener('resize', updateScale);
       document.removeEventListener('fullscreenchange', updateScale);
     };
-  }, [setPresenting]);
+  }, [setPresenting, inspectorOpen]);
+
+  const effectiveScale = state.presenting ? fitScale : fitScale * zoomFactor;
+  useEffect(() => {
+    KSlideSet.scale = effectiveScale;
+  }, [effectiveScale]);
 
   useEffect(() => {
     if (!state.presenting) return;
@@ -177,7 +191,7 @@ const SlideView: React.FC = () => {
     <div
       id="presentation-stage"
       ref={stageRef}
-      className={`slide-stage${state.presenting ? ' slide-stage-presenting' : ''}${state.presenting && laserEnabled ? ' laser-cursor-hidden' : ''}`}
+      className={`slide-stage${inspectorOpen ? ' slide-stage-with-inspector' : ''}${state.presenting ? ' slide-stage-presenting' : ''}${state.presenting && laserEnabled ? ' laser-cursor-hidden' : ''}`}
       onMouseMove={(e) => {
         if (state.presenting && laserEnabled) {
           setLaserPos({ x: e.clientX, y: e.clientY });
@@ -198,7 +212,7 @@ const SlideView: React.FC = () => {
           background: currentSlide.background,
           width: `${SLIDE_WIDTH}px`,
           height: `${SLIDE_HEIGHT}px`,
-          transform: `scale(${scale})`,
+          transform: `scale(${effectiveScale})`,
         }}
         className={`slideview slide-transition-${currentSlide.transition ?? 'fade'}`}
         onClick={(e) => {
@@ -268,6 +282,159 @@ const SlideView: React.FC = () => {
   );
 };
 
+const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ isOpen, onToggle }) => {
+  const { state, currentSlide, updateElement, updateElementStyle, deleteElement, duplicateActiveElement } = useDeck();
+
+  const activeElem = state.activeEID != null
+    ? currentSlide.elements.find((el) => el.id === state.activeEID)
+    : undefined;
+
+  const isShape = activeElem && (activeElem.name === 'rect' || activeElem.name === 'circle' || activeElem.name === 'arrow' || activeElem.name === 'line');
+
+  return (
+    <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
+      <button
+        type="button"
+        className="inspector-edge-tab"
+        onClick={onToggle}
+        title={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+        aria-label={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+      >
+        <i className="material-icons">{isOpen ? 'chevron_right' : 'chevron_left'}</i>
+      </button>
+      {isOpen && (
+        <div className="right-inspector-content">
+          <div className="right-inspector-header">
+            <span>Element Inspector</span>
+          </div>
+          {!activeElem ? (
+            <div className="right-inspector-empty">
+              <p>No element selected.</p>
+              <p>Click any element on the slide to inspect its position, size, rotation, and layer properties.</p>
+            </div>
+          ) : (
+            <div className="right-inspector-body">
+              <div className="inspector-badge">
+                <span>Type: <strong>{activeElem.name}</strong></span>
+                <span>ID: #{activeElem.id}</span>
+              </div>
+              <div className="inspector-grid">
+                <label className="inspector-field">
+                  <span>X</span>
+                  <input
+                    type="number"
+                    value={activeElem.x}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10) || 0;
+                      updateElement(activeElem.id, (el) => { el.x = val; });
+                    }}
+                  />
+                </label>
+                <label className="inspector-field">
+                  <span>Y</span>
+                  <input
+                    type="number"
+                    value={activeElem.y}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10) || 0;
+                      updateElement(activeElem.id, (el) => { el.y = val; });
+                    }}
+                  />
+                </label>
+                <label className="inspector-field">
+                  <span>W</span>
+                  <input
+                    type="number"
+                    min={24}
+                    value={activeElem.width}
+                    onChange={(e) => {
+                      const val = Math.max(24, parseInt(e.target.value, 10) || 24);
+                      updateElement(activeElem.id, (el) => { el.width = val; });
+                    }}
+                  />
+                </label>
+                <label className="inspector-field">
+                  <span>H</span>
+                  <input
+                    type="number"
+                    min={24}
+                    value={activeElem.height}
+                    onChange={(e) => {
+                      const val = Math.max(24, parseInt(e.target.value, 10) || 24);
+                      updateElement(activeElem.id, (el) => { el.height = val; });
+                    }}
+                  />
+                </label>
+                <label className="inspector-field">
+                  <span>Rot°</span>
+                  <input
+                    type="number"
+                    value={activeElem.rotation ?? 0}
+                    onChange={(e) => {
+                      const val = ((parseInt(e.target.value, 10) || 0) % 360 + 360) % 360;
+                      updateElement(activeElem.id, (el) => { el.rotation = val; });
+                    }}
+                  />
+                </label>
+                <label className="inspector-field">
+                  <span>Opac</span>
+                  <input
+                    type="number"
+                    min={0.1}
+                    max={1}
+                    step={0.1}
+                    value={parseFloat(activeElem.style['opacity'] ?? '1') || 1}
+                    onChange={(e) => {
+                      const val = Math.min(1, Math.max(0.1, parseFloat(e.target.value) || 1));
+                      updateElementStyle(activeElem.id, 'opacity', String(val));
+                    }}
+                  />
+                </label>
+                {!isShape && (
+                  <label className="inspector-field">
+                    <span>Rad</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={parseInt(activeElem.style['borderRadius'] ?? '12', 10) || 0}
+                      onChange={(e) => {
+                        const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                        updateElementStyle(activeElem.id, 'borderRadius', `${val}px`);
+                      }}
+                    />
+                  </label>
+                )}
+                <label className="inspector-field">
+                  <span>Step</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={20}
+                    value={activeElem.step ?? 0}
+                    onChange={(e) => {
+                      const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                      updateElement(activeElem.id, (el) => { el.step = val; });
+                    }}
+                  />
+                </label>
+              </div>
+              <div className="inspector-actions">
+                <button type="button" onClick={duplicateActiveElement}>
+                  Duplicate
+                </button>
+                <button type="button" onClick={() => deleteElement(activeElem.id)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </aside>
+  );
+};
+
 const EditorWorkspace: React.FC = () => {
   const {
     state,
@@ -275,6 +442,7 @@ const EditorWorkspace: React.FC = () => {
     setDeckTitle,
     setSlideNotes,
     addElement,
+    loadExampleDeck,
     duplicateActiveElement,
     copyActiveElement,
     pasteClipboardElement,
@@ -288,6 +456,8 @@ const EditorWorkspace: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showNotes, setShowNotes] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [zoomFactor, setZoomFactor] = useState(1);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -362,43 +532,79 @@ const EditorWorkspace: React.FC = () => {
   return (
     <div className="app-container">
       <Tools handleAddElement={handleAddElement} />
-      <SlideView />
-      <SlideSet />
+      <SlideView zoomFactor={zoomFactor} inspectorOpen={inspectorOpen} />
+      <SlideSet inspectorOpen={inspectorOpen} />
+      <RightInspector isOpen={inspectorOpen} onToggle={() => setInspectorOpen((v) => !v)} />
       <div className="top-sect">
-        <input
-          type="text"
-          className="deck-title-input"
-          value={state.title}
-          placeholder="Presentation title"
-          onChange={(e) => setDeckTitle(e.target.value)}
-        />
-        <button onClick={undo} disabled={!canUndo} title="Undo (Cmd/Ctrl+Z)">
-          Undo
-        </button>
-        <button onClick={redo} disabled={!canRedo} title="Redo (Cmd/Ctrl+Shift+Z)">
-          Redo
-        </button>
-        <button
-          onClick={() =>
-            downloadFile(
-              (state.title.trim() || defaultFileName) + '.scs',
-              saveDeck()
-            )
-          }
-        >
-          Save
-        </button>
-        <input type="file" accept=".scs,application/json" onChange={handleLoad} />
-        <button onClick={() => setShowNotes((v) => !v)} title="Toggle Speaker Notes">
-          Notes
-        </button>
-        <button onClick={() => window.print()} title="Export Deck to PDF via Print">
-          PDF
-        </button>
-        <button onClick={() => setShowShortcuts(true)} title="Keyboard Shortcuts (?)">
-          ?
-        </button>
-        <button onClick={handleFullScreen}>Presentation</button>
+        <div className="top-sect-group">
+          <input
+            type="text"
+            className="deck-title-input"
+            value={state.title}
+            placeholder="Presentation title"
+            onChange={(e) => setDeckTitle(e.target.value)}
+          />
+          <button onClick={undo} disabled={!canUndo} title="Undo (Cmd/Ctrl+Z)">
+            Undo
+          </button>
+          <button onClick={redo} disabled={!canRedo} title="Redo (Cmd/Ctrl+Shift+Z)">
+            Redo
+          </button>
+        </div>
+        <div className="top-sect-group">
+          <button
+            type="button"
+            onClick={() => setZoomFactor((z) => Math.max(0.5, Number((z - 0.1).toFixed(2))))}
+            title="Zoom Out"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoomFactor(1)}
+            title="Reset Zoom to Fit"
+          >
+            {Math.round(zoomFactor * 100)}%
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoomFactor((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))}
+            title="Zoom In"
+          >
+            +
+          </button>
+        </div>
+        <div className="top-sect-group">
+          <button onClick={loadExampleDeck} title="Load Showcase Example Slides">
+            Examples
+          </button>
+          <button
+            onClick={() =>
+              downloadFile(
+                (state.title.trim() || defaultFileName) + '.scs',
+                saveDeck()
+              )
+            }
+          >
+            Save
+          </button>
+          <label className="file-upload-btn" title="Open .scs file">
+            Open
+            <input type="file" accept=".scs,application/json" onChange={handleLoad} style={{ display: 'none' }} />
+          </label>
+          <button onClick={() => setShowNotes((v) => !v)} title="Toggle Speaker Notes">
+            Notes
+          </button>
+          <button onClick={() => window.print()} title="Export Deck to PDF via Print">
+            PDF
+          </button>
+          <button onClick={() => setShowShortcuts(true)} title="Keyboard Shortcuts (?)">
+            ?
+          </button>
+          <button className="present-primary-btn" onClick={handleFullScreen}>
+            Present
+          </button>
+        </div>
         {loadError && (
           <span className="load-error" role="alert" onClick={() => setLoadError(null)}>
             {loadError}

@@ -4,6 +4,7 @@
   width: 100vw;
   height: 100vh;
   --tool-width: 240px;
+  --inspector-width: 256px;
   --background: #f7f3eb;
   --foreground: #efe8dc;
   --surface: #fbf8f3;
@@ -162,13 +163,18 @@ textarea {
   position: fixed;
   bottom: 12px;
   left: calc(var(--tool-width) + 28px);
-  right: 16px;
+  right: 44px;
   height: 136px;
   padding: 8px 12px;
   background: var(--foreground);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   box-shadow: 0 4px 16px rgba(60, 42, 26, 0.06);
+  transition: right 0.2s ease;
+}
+
+.slideset-with-inspector {
+  right: calc(var(--inspector-width) + 28px);
 }
 
 .mini {
@@ -270,12 +276,18 @@ textarea {
 .slide-stage {
   position: fixed;
   left: calc(var(--tool-width) + 28px);
-  right: 16px;
+  right: 44px;
   top: 64px;
   bottom: 160px;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  transition: right 0.2s ease;
+}
+
+.slide-stage-with-inspector {
+  right: calc(var(--inspector-width) + 28px);
 }
 
 .slide-stage-presenting {
@@ -486,29 +498,155 @@ textarea {
 .top-sect {
   position: fixed;
   display: flex;
-  gap: 6px;
-  justify-content: center;
+  gap: 10px;
+  justify-content: space-between;
   align-items: center;
   top: 12px;
+  left: calc(var(--tool-width) + 28px);
   right: 16px;
-  padding: 6px 10px;
+  padding: 6px 12px;
   background: var(--foreground);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(60, 42, 26, 0.06);
+  z-index: 30;
 }
 
-.top-sect button {
+.top-sect-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.top-sect button,
+.file-upload-btn {
   background: var(--surface);
   color: var(--text-primary);
   border: 1px solid var(--panel-border);
-  padding: 6px 12px;
-  font-size: 0.82rem;
+  padding: 6px 11px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
-.top-sect button:hover {
+.top-sect button:hover,
+.file-upload-btn:hover {
   border-color: var(--accent);
   background: #f3ece1;
+}
+
+.present-primary-btn {
+  background: var(--accent) !important;
+  color: #fffdf9 !important;
+  border-color: var(--accent) !important;
+}
+
+.right-inspector-drawer {
+  position: fixed;
+  top: 64px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  z-index: 25;
+}
+
+.right-inspector-drawer.open {
+  width: var(--inspector-width);
+}
+
+.right-inspector-drawer.collapsed {
+  width: 24px;
+}
+
+.inspector-edge-tab {
+  width: 24px;
+  min-width: 24px;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--foreground);
+  color: var(--text-muted);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px 0 0 10px !important;
+  cursor: pointer;
+  box-shadow: -2px 0 8px rgba(60, 42, 26, 0.05);
+}
+
+.right-inspector-drawer.collapsed .inspector-edge-tab {
+  border-radius: 10px !important;
+}
+
+.inspector-edge-tab:hover {
+  color: var(--accent);
+  background: #f3ece1;
+}
+
+.right-inspector-content {
+  flex: 1;
+  background: var(--foreground);
+  border: 1px solid var(--panel-border);
+  border-left: none;
+  border-radius: 0 14px 14px 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 16px rgba(60, 42, 26, 0.06);
+  overflow-y: auto;
+}
+
+.right-inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 8px;
+}
+
+.right-inspector-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 8px 4px;
+}
+
+.right-inspector-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inspector-badge {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.inspector-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.inspector-actions button {
+  padding: 6px 8px;
+  font-size: 0.78rem;
 }
 
 .deck-title-input {
@@ -748,6 +886,7 @@ textarea {
   .slideset,
   .slide-stage,
   .top-sect,
+  .right-inspector-drawer,
   .speaker-notes-panel {
     display: none !important;
   }
