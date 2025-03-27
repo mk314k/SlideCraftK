@@ -7,11 +7,11 @@ import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
 import { DeckProvider, useDeck, SlideTemplateType } from './context/DeckContext';
 
-const SlideSet: React.FC<{ inspectorOpen: boolean }> = ({ inspectorOpen }) => {
+const SlideSet: React.FC = () => {
   const { state, setFrameId, addSlide, addTemplateSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
 
   return (
-    <div className={`slideset${inspectorOpen ? ' slideset-with-inspector' : ''}`}>
+    <div className="slideset">
       {state.slides.map((slide, i) => (
         <div
           key={`${i}ss`}
@@ -533,7 +533,7 @@ const EditorWorkspace: React.FC = () => {
     <div className="app-container">
       <Tools handleAddElement={handleAddElement} />
       <SlideView zoomFactor={zoomFactor} inspectorOpen={inspectorOpen} />
-      <SlideSet inspectorOpen={inspectorOpen} />
+      <SlideSet />
       <RightInspector isOpen={inspectorOpen} onToggle={() => setInspectorOpen((v) => !v)} />
       <div className="top-sect">
         <div className="top-sect-group">

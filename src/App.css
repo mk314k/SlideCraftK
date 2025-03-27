@@ -163,18 +163,13 @@ textarea {
   position: fixed;
   bottom: 12px;
   left: calc(var(--tool-width) + 28px);
-  right: 44px;
+  right: 16px;
   height: 136px;
   padding: 8px 12px;
   background: var(--foreground);
   border: 1px solid var(--panel-border);
   border-radius: 14px;
   box-shadow: 0 4px 16px rgba(60, 42, 26, 0.06);
-  transition: right 0.2s ease;
-}
-
-.slideset-with-inspector {
-  right: calc(var(--inspector-width) + 28px);
 }
 
 .mini {
@@ -545,11 +540,11 @@ textarea {
 .right-inspector-drawer {
   position: fixed;
   top: 64px;
-  right: 12px;
-  bottom: 12px;
+  right: 16px;
+  bottom: 160px;
   display: flex;
   flex-direction: row;
-  align-items: stretch;
+  align-items: center;
   z-index: 25;
 }
 
@@ -564,6 +559,7 @@ textarea {
 .inspector-edge-tab {
   width: 24px;
   min-width: 24px;
+  height: 76px;
   padding: 0 !important;
   display: flex;
   align-items: center;
@@ -571,12 +567,14 @@ textarea {
   background: var(--foreground);
   color: var(--text-muted);
   border: 1px solid var(--panel-border);
+  border-right: none;
   border-radius: 10px 0 0 10px !important;
   cursor: pointer;
-  box-shadow: -2px 0 8px rgba(60, 42, 26, 0.05);
+  box-shadow: -2px 2px 8px rgba(60, 42, 26, 0.06);
 }
 
 .right-inspector-drawer.collapsed .inspector-edge-tab {
+  border-right: 1px solid var(--panel-border);
   border-radius: 10px !important;
 }
 
@@ -587,10 +585,10 @@ textarea {
 
 .right-inspector-content {
   flex: 1;
+  height: 100%;
   background: var(--foreground);
   border: 1px solid var(--panel-border);
-  border-left: none;
-  border-radius: 0 14px 14px 0;
+  border-radius: 14px;
   padding: 12px;
   display: flex;
   flex-direction: column;
