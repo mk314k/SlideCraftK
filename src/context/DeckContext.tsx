@@ -674,15 +674,21 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 ? 'function greet(name: string) {\n  return `Hello, ${name}!`;\n}'
                 : elemType === 'markdown'
                 ? '## Slide Heading\n- First key point\n- Second `inline` point'
+                : elemType === 'callout'
+                ? 'Key takeaway: highlight important theorems or notes here.'
+                : elemType === 'table'
+                ? 'Metric | Baseline | Proposed\nLatency | 42 ms | 11 ms\nThroughput | 1.2k/s | 4.8k/s'
                 : elemType;
             const inner = info && info !== '' ? info : defaultInner;
+            const defaultWidth = elemType === 'table' ? 460 : elemType === 'callout' ? 380 : defaultSV.width;
+            const defaultHeight = elemType === 'table' ? 180 : elemType === 'callout' ? 110 : defaultSV.height;
             slide.elements.push({
                 id: eid,
                 name: elemType,
                 x: defaultSV.x,
                 y: defaultSV.y,
-                width: defaultSV.width,
-                height: defaultSV.height,
+                width: defaultWidth,
+                height: defaultHeight,
                 rotation: 0,
                 step: 0,
                 inner,

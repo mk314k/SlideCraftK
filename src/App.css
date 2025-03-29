@@ -771,6 +771,63 @@ textarea {
   background: transparent !important;
 }
 
+.callout-view,
+.callout-editor {
+  width: 100%;
+  height: 100%;
+  padding: 12px 14px;
+  border-left: 5px solid var(--accent);
+  background: #f5ece0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+
+.callout-icon {
+  color: var(--accent);
+  font-size: 1.4rem;
+}
+
+.callout-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.table-view-wrapper,
+.table-editor {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 4px;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.slide-table {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: var(--surface);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.slide-table th,
+.slide-table td {
+  border: 1px solid var(--panel-border);
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.slide-table th {
+  background: #efe4d6;
+  font-weight: 700;
+}
+
 .speaker-notes-panel {
   position: fixed;
   right: 16px;

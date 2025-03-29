@@ -97,10 +97,14 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         {name:'button', icon:'crop_16_9', label:'Add Button'},
         {name:'textarea', icon:'edit_note', label:'Add Text Area'},
         {name:'markdown', icon:'article', label:'Add Markdown Block'},
+        {name:'callout', icon:'lightbulb', label:'Add Callout Card'},
+        {name:'table', icon:'table_chart', label:'Add Data Table'},
         {name:'latex', icon:'functions', label:'Add LaTeX Math'},
         {name:'code', icon:'code', label:'Add Code Block'},
         {name:'rect', icon:'check_box_outline_blank', label:'Add Rectangle'},
         {name:'circle', icon:'radio_button_unchecked', label:'Add Circle'},
+        {name:'diamond', icon:'crop_rotate', label:'Add Diamond'},
+        {name:'triangle', icon:'change_history', label:'Add Triangle'},
         {name:'arrow', icon:'trending_flat', label:'Add Arrow'},
         {name:'line', icon:'horizontal_rule', label:'Add Line'}
     ]

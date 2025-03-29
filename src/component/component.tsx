@@ -17,7 +17,7 @@ export interface KElementProps {
     info?: string;
 }
 
-const SHAPE_TYPES = new Set(['rect', 'circle', 'arrow', 'line']);
+const SHAPE_TYPES = new Set(['rect', 'circle', 'arrow', 'line', 'diamond', 'triangle']);
 
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
@@ -369,12 +369,14 @@ export const KImage = ({ eid, info }: KElementProps) => {
     );
 };
 
-const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line') => {
+const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 'diamond' | 'triangle') => {
     return ({ eid }: KElementProps) => {
         const { currentSlide } = useDeck();
         const elemState = currentSlide.elements.find((el) => el.id === eid);
         const strokeColor = elemState?.style['color'] ?? '#7c3f23';
         const fillColor = elemState?.style['background'] ?? 'rgba(184, 93, 56, 0.14)';
+        const strokeWidth = parseFloat(elemState?.style['strokeWidth'] ?? '4') || 4;
+        const strokeDasharray = elemState?.style['strokeDasharray'] ?? 'none';
 
         return (
             <KElement eid={eid} childNode={
@@ -385,17 +387,72 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line') =
                     preserveAspectRatio="none"
                 >
                     {shapeType === 'rect' && (
-                        <rect x="4" y="4" width="92" height="92" rx="8" fill={fillColor} stroke={strokeColor} strokeWidth="4" />
+                        <rect
+                            x="4"
+                            y="4"
+                            width="92"
+                            height="92"
+                            rx="8"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                        />
                     )}
                     {shapeType === 'circle' && (
-                        <ellipse cx="50" cy="50" rx="46" ry="46" fill={fillColor} stroke={strokeColor} strokeWidth="4" />
+                        <ellipse
+                            cx="50"
+                            cy="50"
+                            rx="46"
+                            ry="46"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                        />
+                    )}
+                    {shapeType === 'diamond' && (
+                        <polygon
+                            points="50,4 96,50 50,96 4,50"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                        />
+                    )}
+                    {shapeType === 'triangle' && (
+                        <polygon
+                            points="50,6 96,94 4,94"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                        />
                     )}
                     {shapeType === 'line' && (
-                        <line x1="6" y1="50" x2="94" y2="50" stroke={strokeColor} strokeWidth="6" strokeLinecap="round" />
+                        <line
+                            x1="6"
+                            y1="50"
+                            x2="94"
+                            y2="50"
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeLinecap="round"
+                        />
                     )}
                     {shapeType === 'arrow' && (
                         <>
-                            <line x1="6" y1="50" x2="82" y2="50" stroke={strokeColor} strokeWidth="6" strokeLinecap="round" />
+                            <line
+                                x1="6"
+                                y1="50"
+                                x2="82"
+                                y2="50"
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth}
+                                strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                                strokeLinecap="round"
+                            />
                             <polygon points="96,50 76,36 76,64" fill={strokeColor} />
                         </>
                     )}
@@ -407,8 +464,137 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line') =
 
 export const KShapeRect = createShapeComponent('rect');
 export const KShapeCircle = createShapeComponent('circle');
+export const KShapeDiamond = createShapeComponent('diamond');
+export const KShapeTriangle = createShapeComponent('triangle');
 export const KShapeArrow = createShapeComponent('arrow');
 export const KShapeLine = createShapeComponent('line');
+
+export const KCallout = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const content = elemState?.inner ?? info ?? 'Key takeaway or theorem note';
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(content);
+
+    const startEditing = () => {
+        setDraft(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draft;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element callout-editor"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <div
+                    id={`${eid}`}
+                    className="element callout-view"
+                    onDoubleClick={startEditing}
+                >
+                    <i className="material-icons callout-icon">lightbulb</i>
+                    <div className="callout-text">{content}</div>
+                </div>
+            )
+        } />
+    );
+};
+
+export const KTable = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const defaultCsv = 'Metric | Baseline | Proposed\nLatency | 42 ms | 11 ms\nThroughput | 1.2k/s | 4.8k/s';
+    const content = elemState?.inner ?? info ?? defaultCsv;
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(content);
+
+    const startEditing = () => {
+        setDraft(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draft;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    const rows = content
+        .split('\n')
+        .map((r) => r.trim())
+        .filter(Boolean)
+        .map((r) => r.split('|').map((c) => c.trim()));
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element table-editor"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <div id={`${eid}`} className="element table-view-wrapper" onDoubleClick={startEditing}>
+                    <table className="slide-table">
+                        {rows.length > 0 && (
+                            <thead>
+                                <tr>
+                                    {rows[0].map((cell, idx) => (
+                                        <th key={idx}>{cell}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                        )}
+                        {rows.length > 1 && (
+                            <tbody>
+                                {rows.slice(1).map((row, rIdx) => (
+                                    <tr key={rIdx}>
+                                        {row.map((cell, cIdx) => (
+                                            <td key={cIdx}>{cell}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        )}
+                    </table>
+                </div>
+            )
+        } />
+    );
+};
 
 export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["button", KButton],
@@ -416,8 +602,12 @@ export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["textarea", KTextArea],
     ["code", KCodeBlock],
     ["markdown", KMarkdown],
+    ["callout", KCallout],
+    ["table", KTable],
     ["rect", KShapeRect],
     ["circle", KShapeCircle],
+    ["diamond", KShapeDiamond],
+    ["triangle", KShapeTriangle],
     ["arrow", KShapeArrow],
     ["line", KShapeLine],
     ["image", KImage]
