@@ -16,10 +16,10 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         : undefined;
 
     const elemType = activeElem?.name;
-    const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code';
+    const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code' || elemType === 'callout' || elemType === 'table';
     const isLatexType = elemType === 'latex';
-    const isShapeType = elemType === 'rect' || elemType === 'circle' || elemType === 'arrow' || elemType === 'line';
-    const isFilledShape = elemType === 'rect' || elemType === 'circle';
+    const isShapeType = elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle' || elemType === 'arrow' || elemType === 'line';
+    const isFilledShape = elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle';
 
     const handleStyleChange = (styName: string, value: string) => {
         if (state.activeEID != null) {
@@ -48,6 +48,31 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         if (state.activeEID != null && activeElem) {
             const fontStyle = activeElem.style['fontStyle'];
             handleStyleChange('fontStyle', fontStyle === 'italic' ? 'normal' : 'italic');
+        }
+    };
+
+    const handleUnderline = () => {
+        if (state.activeEID != null && activeElem) {
+            const textDec = activeElem.style['textDecoration'];
+            handleStyleChange('textDecoration', textDec === 'underline' ? 'none' : 'underline');
+        }
+    };
+
+    const handleTextAlign = (align: 'left' | 'center' | 'right') => {
+        if (state.activeEID != null && activeElem) {
+            handleStyleChange('textAlign', align);
+            const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+            handleStyleChange('justifyContent', justify);
+        }
+    };
+
+    const handleShadowToggle = () => {
+        if (state.activeEID != null && activeElem) {
+            const hasShadow = Boolean(activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none');
+            handleStyleChange(
+                'boxShadow',
+                hasShadow ? 'none' : '0 8px 20px rgba(60, 42, 26, 0.16)'
+            );
         }
     };
 
@@ -167,6 +192,46 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     >
                         <i className="material-icons">format_italic</i>
                     </label>
+                    <label
+                        className={`tool${activeElem.style['textDecoration'] === 'underline' ? ' tool-active' : ''}`}
+                        title="Toggle Underline"
+                        aria-label="Toggle Underline"
+                        onClick={handleUnderline}
+                    >
+                        <i className="material-icons">format_underlined</i>
+                    </label>
+                    <label
+                        className={`tool${activeElem.style['textAlign'] === 'left' ? ' tool-active' : ''}`}
+                        title="Align Left"
+                        aria-label="Align Left"
+                        onClick={() => handleTextAlign('left')}
+                    >
+                        <i className="material-icons">format_align_left</i>
+                    </label>
+                    <label
+                        className={`tool${(!activeElem.style['textAlign'] || activeElem.style['textAlign'] === 'center') ? ' tool-active' : ''}`}
+                        title="Align Center"
+                        aria-label="Align Center"
+                        onClick={() => handleTextAlign('center')}
+                    >
+                        <i className="material-icons">format_align_center</i>
+                    </label>
+                    <label
+                        className={`tool${activeElem.style['textAlign'] === 'right' ? ' tool-active' : ''}`}
+                        title="Align Right"
+                        aria-label="Align Right"
+                        onClick={() => handleTextAlign('right')}
+                    >
+                        <i className="material-icons">format_align_right</i>
+                    </label>
+                    <label
+                        className={`tool${activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none' ? ' tool-active' : ''}`}
+                        title="Toggle Card Drop Shadow"
+                        aria-label="Toggle Drop Shadow"
+                        onClick={handleShadowToggle}
+                    >
+                        <i className="material-icons">layers</i>
+                    </label>
                 </>
             )}
             {activeElem && (isTextType || isLatexType) && (
@@ -210,17 +275,55 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                         />
                     </label>
                     {isFilledShape && (
-                        <label className="tool" title="Shape Fill Color" aria-label="Fill Color">
-                            <i className="material-icons">format_color_fill</i>
-                            <span className="tool-inline-label">Fill</span>
-                            <input
-                                type="color"
-                                id="shape-fill-color"
-                                value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
-                                onChange={(e)=>{handleStyleChange('background', e.target.value)}}
-                            />
-                        </label>
+                        <>
+                            <label className="tool" title="Shape Fill Color" aria-label="Fill Color">
+                                <i className="material-icons">format_color_fill</i>
+                                <span className="tool-inline-label">Fill</span>
+                                <input
+                                    type="color"
+                                    id="shape-fill-color"
+                                    value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
+                                    onChange={(e)=>{handleStyleChange('background', e.target.value)}}
+                                />
+                            </label>
+                            <label
+                                className={`tool${activeElem.style['background'] === 'transparent' ? ' tool-active' : ''}`}
+                                title="Toggle Transparent Fill (Outline Only)"
+                                onClick={() =>
+                                    handleStyleChange(
+                                        'background',
+                                        activeElem.style['background'] === 'transparent' ? '#f2e8dc' : 'transparent'
+                                    )
+                                }
+                            >
+                                <span className="tool-inline-label">No Fill</span>
+                            </label>
+                        </>
                     )}
+                    <div className="tool" title="Stroke Width">
+                        <span className="tool-inline-label">Width</span>
+                        <input
+                            type="number"
+                            min={1}
+                            max={16}
+                            style={{ width: '44px' }}
+                            value={parseFloat(activeElem.style['strokeWidth'] ?? '4') || 4}
+                            onChange={(e) => {
+                                const w = Math.max(1, Math.min(16, parseInt(e.target.value, 10) || 4));
+                                handleStyleChange('strokeWidth', String(w));
+                            }}
+                        />
+                    </div>
+                    <div className="tool" title="Stroke Style">
+                        <select
+                            value={activeElem.style['strokeDasharray'] ?? 'none'}
+                            onChange={(e) => handleStyleChange('strokeDasharray', e.target.value)}
+                        >
+                            <option value="none">Solid</option>
+                            <option value="8,6">Dashed</option>
+                            <option value="3,5">Dotted</option>
+                        </select>
+                    </div>
                 </>
             )}
             {activeElem && (

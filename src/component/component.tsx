@@ -30,6 +30,8 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     const containerStyle: Record<string, string | undefined> = { ...rawStyle };
     if (isShape || elemType === 'image') {
         delete containerStyle.background;
+        delete containerStyle.strokeWidth;
+        delete containerStyle.strokeDasharray;
     }
     const defaultBg = isShape || elemType === 'image' || elemType === 'latex'
         ? 'transparent'

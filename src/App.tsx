@@ -289,7 +289,7 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
     ? currentSlide.elements.find((el) => el.id === state.activeEID)
     : undefined;
 
-  const isShape = activeElem && (activeElem.name === 'rect' || activeElem.name === 'circle' || activeElem.name === 'arrow' || activeElem.name === 'line');
+  const isShape = activeElem && (activeElem.name === 'rect' || activeElem.name === 'circle' || activeElem.name === 'diamond' || activeElem.name === 'triangle' || activeElem.name === 'arrow' || activeElem.name === 'line');
 
   return (
     <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
@@ -663,10 +663,12 @@ const EditorWorkspace: React.FC = () => {
             }}
           >
             {slide.elements.map((el) => {
-              const isShape = el.name === 'rect' || el.name === 'circle' || el.name === 'arrow' || el.name === 'line';
+              const isShape = el.name === 'rect' || el.name === 'circle' || el.name === 'diamond' || el.name === 'triangle' || el.name === 'arrow' || el.name === 'line';
               const printStyle = { ...el.style };
               if (isShape || el.name === 'image') {
                 delete printStyle.background;
+                delete printStyle.strokeWidth;
+                delete printStyle.strokeDasharray;
               }
               return (
               <div
