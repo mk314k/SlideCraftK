@@ -514,7 +514,8 @@ textarea {
 }
 
 .top-sect button,
-.file-upload-btn {
+.file-upload-btn,
+.examples-select {
   background: var(--surface);
   color: var(--text-primary);
   border: 1px solid var(--panel-border);
@@ -526,9 +527,52 @@ textarea {
 }
 
 .top-sect button:hover,
-.file-upload-btn:hover {
+.file-upload-btn:hover,
+.examples-select:hover {
   border-color: var(--accent);
   background: #f3ece1;
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: fixed;
+  transform: translateY(-34px);
+  background: #2c241d;
+  color: #fbf8f3;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 250;
+  box-shadow: 0 4px 12px rgba(44, 36, 29, 0.22);
+}
+
+.element-container:hover {
+  outline: 1px dashed rgba(184, 93, 56, 0.55);
+  outline-offset: 2px;
+}
+
+.element-container[data-elem-label]:hover::before {
+  content: attr(data-elem-label);
+  position: absolute;
+  top: -24px;
+  left: 0;
+  background: rgba(44, 36, 29, 0.88);
+  color: #fbf8f3;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 30;
 }
 
 .present-primary-btn {

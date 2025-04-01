@@ -143,6 +143,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     <label
                         key={tool.name}
                         className="tool"
+                        data-tooltip={tool.label}
                         title={tool.label}
                         aria-label={tool.label}
                         onClick={()=>{handleAddElement(tool.name)}}
@@ -151,7 +152,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                 )
             )}
-            <label className="tool" title="Upload Image" aria-label="Upload Image">
+            <label className="tool" data-tooltip="Upload Image" title="Upload Image" aria-label="Upload Image">
                 <i className="material-icons">image</i>
                 <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
             </label>
@@ -163,7 +164,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             )}
             {activeElem && isTextType && (
                 <>
-                    <div className="tool" title="Font Family">
+                    <div className="tool" data-tooltip="Font Family" title="Font Family">
                         <i className="material-icons">text_fields</i>
                         <select
                             id="font-family"
@@ -178,6 +179,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </div>
                     <label
                         className={`tool${activeElem.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
+                        data-tooltip="Toggle Bold"
                         title="Toggle Bold"
                         aria-label="Toggle Bold"
                         onClick={handleBold}
@@ -186,6 +188,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${activeElem.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
+                        data-tooltip="Toggle Italic"
                         title="Toggle Italic"
                         aria-label="Toggle Italic"
                         onClick={handleItalic}
@@ -194,6 +197,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${activeElem.style['textDecoration'] === 'underline' ? ' tool-active' : ''}`}
+                        data-tooltip="Toggle Underline"
                         title="Toggle Underline"
                         aria-label="Toggle Underline"
                         onClick={handleUnderline}
@@ -202,6 +206,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${activeElem.style['textAlign'] === 'left' ? ' tool-active' : ''}`}
+                        data-tooltip="Align Left"
                         title="Align Left"
                         aria-label="Align Left"
                         onClick={() => handleTextAlign('left')}
@@ -210,6 +215,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${(!activeElem.style['textAlign'] || activeElem.style['textAlign'] === 'center') ? ' tool-active' : ''}`}
+                        data-tooltip="Align Center"
                         title="Align Center"
                         aria-label="Align Center"
                         onClick={() => handleTextAlign('center')}
@@ -218,6 +224,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${activeElem.style['textAlign'] === 'right' ? ' tool-active' : ''}`}
+                        data-tooltip="Align Right"
                         title="Align Right"
                         aria-label="Align Right"
                         onClick={() => handleTextAlign('right')}
@@ -226,6 +233,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     <label
                         className={`tool${activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none' ? ' tool-active' : ''}`}
+                        data-tooltip="Card Drop Shadow"
                         title="Toggle Card Drop Shadow"
                         aria-label="Toggle Drop Shadow"
                         onClick={handleShadowToggle}
@@ -236,13 +244,13 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             )}
             {activeElem && (isTextType || isLatexType) && (
                 <>
-                    <label className="tool" title="Increase Size" aria-label="Increase Size" onClick={()=>{handleFontSize(4)}}>
+                    <label className="tool" data-tooltip="Increase Font Size" title="Increase Size" aria-label="Increase Size" onClick={()=>{handleFontSize(4)}}>
                         <i className="material-icons">text_increase</i>
                     </label>
-                    <label className="tool" title="Decrease Size" aria-label="Decrease Size" onClick={()=>{handleFontSize(-4)}}>
+                    <label className="tool" data-tooltip="Decrease Font Size" title="Decrease Size" aria-label="Decrease Size" onClick={()=>{handleFontSize(-4)}}>
                         <i className="material-icons">text_decrease</i>
                     </label>
-                    <label className="tool" title="Text Color" aria-label="Text Color">
+                    <label className="tool" data-tooltip="Text Color" title="Text Color" aria-label="Text Color">
                         <i className="material-icons">format_color_text</i>
                         <input
                             type="color"
@@ -251,7 +259,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                             onChange={(e)=>{handleStyleChange('color', e.target.value)}}
                         />
                     </label>
-                    <label className="tool" title="Background Color" aria-label="Background Color">
+                    <label className="tool" data-tooltip="Background Color" title="Background Color" aria-label="Background Color">
                         <i className="material-icons">format_color_fill</i>
                         <input
                             type="color"
@@ -264,7 +272,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             )}
             {activeElem && isShapeType && (
                 <>
-                    <label className="tool" title="Line / Stroke Color" aria-label="Line Color">
+                    <label className="tool" data-tooltip="Shape Line / Stroke Color" title="Line / Stroke Color" aria-label="Line Color">
                         <i className="material-icons">border_color</i>
                         <span className="tool-inline-label">Line</span>
                         <input
@@ -276,7 +284,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     </label>
                     {isFilledShape && (
                         <>
-                            <label className="tool" title="Shape Fill Color" aria-label="Fill Color">
+                            <label className="tool" data-tooltip="Shape Fill Color" title="Shape Fill Color" aria-label="Fill Color">
                                 <i className="material-icons">format_color_fill</i>
                                 <span className="tool-inline-label">Fill</span>
                                 <input
@@ -288,6 +296,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                             </label>
                             <label
                                 className={`tool${activeElem.style['background'] === 'transparent' ? ' tool-active' : ''}`}
+                                data-tooltip="Outline Only (Transparent Fill)"
                                 title="Toggle Transparent Fill (Outline Only)"
                                 onClick={() =>
                                     handleStyleChange(
@@ -300,7 +309,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                             </label>
                         </>
                     )}
-                    <div className="tool" title="Stroke Width">
+                    <div className="tool" data-tooltip="Line Thickness (px)" title="Stroke Width">
                         <span className="tool-inline-label">Width</span>
                         <input
                             type="number"
@@ -314,7 +323,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                             }}
                         />
                     </div>
-                    <div className="tool" title="Stroke Style">
+                    <div className="tool" data-tooltip="Line Dash Pattern" title="Stroke Style">
                         <select
                             value={activeElem.style['strokeDasharray'] ?? 'none'}
                             onChange={(e) => handleStyleChange('strokeDasharray', e.target.value)}
@@ -328,19 +337,19 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             )}
             {activeElem && (
                 <>
-                    <label className="tool" title="Bring Forward" onClick={() => handleZIndexStep(1)}>
+                    <label className="tool" data-tooltip="Bring Forward 1 Layer" title="Bring Forward" onClick={() => handleZIndexStep(1)}>
                         <i className="material-icons">flip_to_front</i>
                     </label>
-                    <label className="tool" title="Send Backward" onClick={() => handleZIndexStep(-1)}>
+                    <label className="tool" data-tooltip="Send Backward 1 Layer" title="Send Backward" onClick={() => handleZIndexStep(-1)}>
                         <i className="material-icons">flip_to_back</i>
                     </label>
-                    <label className="tool" title="Bring to Front" onClick={handleBringToFront}>
+                    <label className="tool" data-tooltip="Bring to Front" title="Bring to Front" onClick={handleBringToFront}>
                         <i className="material-icons">vertical_align_top</i>
                     </label>
-                    <label className="tool" title="Send to Back" onClick={handleSendToBack}>
+                    <label className="tool" data-tooltip="Send to Back" title="Send to Back" onClick={handleSendToBack}>
                         <i className="material-icons">vertical_align_bottom</i>
                     </label>
-                    <div className="tool">
+                    <div className="tool" data-tooltip="Fragment Reveal Step (0 = always visible)">
                         <i className="material-icons" title="Animation Step (0 = always visible)">animation</i>
                         <input
                             type="number"
@@ -363,7 +372,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">
-            <label className="tool" title="Custom Slide Color">
+            <label className="tool" data-tooltip="Custom Slide Background Color" title="Custom Slide Color">
                 <i className="material-icons">palette</i>
                 <input
                     type="color"
@@ -384,13 +393,14 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                         key={preset.label}
                         type="button"
                         className="bg-swatch-btn"
+                        data-tooltip={preset.label}
                         title={preset.label}
                         style={{ background: preset.value }}
                         onClick={() => setSlideBackground(preset.value)}
                     />
                 ))}
             </div>
-            <div className="tool">
+            <div className="tool" data-tooltip="Slide Transition Effect">
                 <i className="material-icons" title="Slide Transition">slideshow</i>
                 <select
                     value={currentSlide.transition ?? 'fade'}
@@ -414,6 +424,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             />
             <label
                 className="tool"
+                data-tooltip="Apply Custom CSS to Slide"
                 onClick={() => {
                     const val = (document.getElementById('code') as HTMLTextAreaElement | null)?.value ?? '';
                     setSlideCustomCode('style', val);
@@ -424,6 +435,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
             </label>
             <label
                 className="tool"
+                data-tooltip="Run Custom JS on Slide"
                 onClick={() => {
                     const val = (document.getElementById('code') as HTMLTextAreaElement | null)?.value ?? '';
                     setSlideCustomCode('script', val);

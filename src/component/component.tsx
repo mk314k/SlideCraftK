@@ -19,6 +19,23 @@ export interface KElementProps {
 
 const SHAPE_TYPES = new Set(['rect', 'circle', 'arrow', 'line', 'diamond', 'triangle']);
 
+const ELEMENT_TYPE_LABELS: Record<string, string> = {
+    button: 'Button (double-click to edit)',
+    textarea: 'Text Area',
+    markdown: 'Markdown Block (double-click to edit)',
+    callout: 'Callout Card (double-click to edit)',
+    table: 'Data Table (double-click to edit)',
+    latex: 'LaTeX Equation (double-click to edit)',
+    code: 'Code Block (double-click to edit)',
+    rect: 'Rectangle Shape',
+    circle: 'Circle Shape',
+    diamond: 'Diamond Shape',
+    triangle: 'Triangle Shape',
+    arrow: 'Arrow Connector',
+    line: 'Line Connector',
+    image: 'Image Element',
+};
+
 const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
     console.log("rendering KElement");
     const { style, handleMouseDown, handleResizeStart, handleRotateStart } = useKElemHook(eid);
@@ -38,6 +55,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         : 'var(--surface)';
     const elemStep = elemState?.step ?? 0;
     const isHiddenFragment = state.presenting && elemStep > state.presentStep;
+    const elemBadgeLabel = ELEMENT_TYPE_LABELS[elemType] ?? elemType;
 
     const handleDelete = useCallback(() => {
         console.log("handleDelete called");
@@ -87,6 +105,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         <div
             id={`${eid}div`}
             key={eid}
+            data-elem-label={!state.presenting ? `${elemBadgeLabel} (#${eid})` : undefined}
             className={`element-container${isActive ? ' active-element' : ''}${isHiddenFragment ? ' fragment-hidden' : ' fragment-visible'}`}
             style={{
                 position: 'absolute',

@@ -5,7 +5,7 @@ import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
 import { downloadFile, handleFullScreen, applySlideCustomCode, renderMarkdownToHtml } from './component/utility';
 import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
-import { DeckProvider, useDeck, SlideTemplateType } from './context/DeckContext';
+import { DeckProvider, useDeck, SlideTemplateType, ExampleDeckId } from './context/DeckContext';
 
 const SlideSet: React.FC = () => {
   const { state, setFrameId, addSlide, addTemplateSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
@@ -599,10 +599,28 @@ const EditorWorkspace: React.FC = () => {
           </button>
         </div>
         <div className="top-sect-group">
-          <button onClick={loadExampleDeck} title="Load Showcase Example Slides">
-            Examples
-          </button>
+          <select
+            className="examples-select"
+            defaultValue=""
+            data-tooltip="Load a pre-built example presentation"
+            title="Load Example Presentation"
+            onChange={(e) => {
+              if (e.target.value) {
+                loadExampleDeck(e.target.value as ExampleDeckId);
+                e.target.value = '';
+              }
+            }}
+          >
+            <option value="" disabled>
+              Examples…
+            </option>
+            <option value="showcase">Full Feature Showcase (4 slides)</option>
+            <option value="calculus">Calculus & Fourier Series (3 slides)</option>
+            <option value="algorithms">Algorithms & Flowcharts (2 slides)</option>
+            <option value="statebinder">Interactive StateBinder Lab (2 slides)</option>
+          </select>
           <button
+            data-tooltip="Download .scs presentation file"
             onClick={() =>
               downloadFile(
                 (state.title.trim() || defaultFileName) + '.scs',
@@ -612,20 +630,20 @@ const EditorWorkspace: React.FC = () => {
           >
             Save
           </button>
-          <label className="file-upload-btn" title="Open .scs file">
+          <label className="file-upload-btn" data-tooltip="Open a saved .scs file" title="Open .scs file">
             Open
             <input type="file" accept=".scs,application/json" onChange={handleLoad} style={{ display: 'none' }} />
           </label>
-          <button onClick={() => setShowNotes((v) => !v)} title="Toggle Speaker Notes">
+          <button onClick={() => setShowNotes((v) => !v)} data-tooltip="Toggle Speaker Notes" title="Toggle Speaker Notes">
             Notes
           </button>
-          <button onClick={() => window.print()} title="Export Deck to PDF via Print">
+          <button onClick={() => window.print()} data-tooltip="Print or Export to PDF" title="Export Deck to PDF via Print">
             PDF
           </button>
-          <button onClick={() => setShowShortcuts(true)} title="Keyboard Shortcuts (?)">
+          <button onClick={() => setShowShortcuts(true)} data-tooltip="Keyboard Shortcuts (?)" title="Keyboard Shortcuts (?)">
             ?
           </button>
-          <button className="present-primary-btn" onClick={handleFullScreen}>
+          <button className="present-primary-btn" data-tooltip="Enter Fullscreen Presentation" onClick={handleFullScreen}>
             Present
           </button>
         </div>

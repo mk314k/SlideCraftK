@@ -45,6 +45,7 @@ export interface DeckState {
 }
 
 export type SlideTemplateType = 'title' | 'two-column' | 'math-proof' | 'interactive';
+export type ExampleDeckId = 'showcase' | 'calculus' | 'algorithms' | 'statebinder';
 
 export interface DeckContextValue {
     state: DeckState;
@@ -56,7 +57,7 @@ export interface DeckContextValue {
     retreatPresentation: () => void;
     addSlide: () => void;
     addTemplateSlide: (template: SlideTemplateType) => void;
-    loadExampleDeck: () => void;
+    loadExampleDeck: (deckId?: ExampleDeckId) => void;
     deleteSlide: (frameId?: number) => void;
     duplicateSlide: (frameId?: number) => void;
     moveSlide: (fromIdx: number, toIdx: number) => void;
@@ -260,6 +261,317 @@ function buildTemplateSlide(template: SlideTemplateType): SlideState {
                 style: { background: '#efe4d6', fontSize: '20px', fontWeight: 'bold' },
             },
         ],
+    };
+}
+
+function buildExampleDeck(deckId: ExampleDeckId): { title: string; slides: SlideState[] } {
+    if (deckId === 'calculus') {
+        return {
+            title: 'calculus-fourier-series',
+            slides: [
+                {
+                    background: '#faf6ef',
+                    transition: 'fade',
+                    customCss: '',
+                    customJs: '',
+                    notes: 'Introduce the Gaussian integral and Fourier transform duality.',
+                    nextEid: 4,
+                    elements: [
+                        {
+                            id: 0,
+                            name: 'markdown',
+                            x: 100,
+                            y: 70,
+                            width: 1080,
+                            height: 120,
+                            rotation: 0,
+                            step: 0,
+                            inner: '# Calculus & Fourier Analysis\n### Classical Identities & Spectral Decomposition',
+                            style: { background: 'transparent', fontSize: '26px' },
+                        },
+                        {
+                            id: 1,
+                            name: 'latex',
+                            x: 140,
+                            y: 230,
+                            width: 1000,
+                            height: 170,
+                            rotation: 0,
+                            step: 0,
+                            inner: '\\hat{f}(\\xi) = \\int_{-\\infty}^{\\infty} f(x)\\, e^{-2\\pi i x \\xi}\\,dx',
+                            style: { fontSize: '28px' },
+                        },
+                        {
+                            id: 2,
+                            name: 'callout',
+                            x: 180,
+                            y: 450,
+                            width: 920,
+                            height: 120,
+                            rotation: 0,
+                            step: 1,
+                            inner: 'Plancherel Theorem: The Fourier transform preserves energy (L² norm) between time and frequency domains.',
+                            style: { fontSize: '20px' },
+                        },
+                    ],
+                },
+                buildTemplateSlide('math-proof'),
+                {
+                    background: '#fbf8f3',
+                    transition: 'slide',
+                    customCss: '',
+                    customJs: '',
+                    notes: 'Compare convergence rates across function classes.',
+                    nextEid: 3,
+                    elements: [
+                        {
+                            id: 0,
+                            name: 'markdown',
+                            x: 100,
+                            y: 60,
+                            width: 1080,
+                            height: 90,
+                            rotation: 0,
+                            step: 0,
+                            inner: '## Fourier Coefficient Decay Rates',
+                            style: { background: 'transparent', fontSize: '24px' },
+                        },
+                        {
+                            id: 1,
+                            name: 'latex',
+                            x: 140,
+                            y: 170,
+                            width: 1000,
+                            height: 140,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'c_n = \\frac{1}{2\\pi}\\int_{-\\pi}^{\\pi} f(x) e^{-inx}\\,dx, \\quad |c_n| = \\mathcal{O}(|n|^{-k})',
+                            style: { fontSize: '24px' },
+                        },
+                        {
+                            id: 2,
+                            name: 'table',
+                            x: 160,
+                            y: 350,
+                            width: 960,
+                            height: 240,
+                            rotation: 0,
+                            step: 1,
+                            inner: 'Regularity Class | Coefficient Decay | Gibbs Phenomenon\nStep Discontinuity | O(1 / n) | Yes (~9% overshoot)\nContinuous Piecewise | O(1 / n²) | No\nAnalytic Smooth | Exponential O(e^{-αn}) | No',
+                            style: { fontSize: '18px' },
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
+    if (deckId === 'algorithms') {
+        return {
+            title: 'algorithms-data-structures',
+            slides: [
+                {
+                    background: '#faf6ef',
+                    transition: 'fade',
+                    customCss: '',
+                    customJs: '',
+                    notes: 'Flowchart of binary search decision tree.',
+                    nextEid: 6,
+                    elements: [
+                        {
+                            id: 0,
+                            name: 'markdown',
+                            x: 90,
+                            y: 50,
+                            width: 1100,
+                            height: 90,
+                            rotation: 0,
+                            step: 0,
+                            inner: '## Algorithm Pipeline & Decision Graph',
+                            style: { background: 'transparent', fontSize: '24px' },
+                        },
+                        {
+                            id: 1,
+                            name: 'rect',
+                            x: 100,
+                            y: 230,
+                            width: 240,
+                            height: 130,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'rect',
+                            style: { color: '#7c3f23', background: '#f2e8dc' },
+                        },
+                        {
+                            id: 2,
+                            name: 'arrow',
+                            x: 360,
+                            y: 265,
+                            width: 120,
+                            height: 60,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'arrow',
+                            style: { color: '#b85d38' },
+                        },
+                        {
+                            id: 3,
+                            name: 'diamond',
+                            x: 500,
+                            y: 205,
+                            width: 220,
+                            height: 180,
+                            rotation: 0,
+                            step: 1,
+                            inner: 'diamond',
+                            style: { color: '#b85d38', background: '#efe4d6' },
+                        },
+                        {
+                            id: 4,
+                            name: 'arrow',
+                            x: 740,
+                            y: 265,
+                            width: 120,
+                            height: 60,
+                            rotation: 0,
+                            step: 1,
+                            inner: 'arrow',
+                            style: { color: '#b85d38' },
+                        },
+                        {
+                            id: 5,
+                            name: 'circle',
+                            x: 880,
+                            y: 220,
+                            width: 160,
+                            height: 160,
+                            rotation: 0,
+                            step: 2,
+                            inner: 'circle',
+                            style: { color: '#7c3f23', background: '#ebe3d5' },
+                        },
+                    ],
+                },
+                {
+                    background: '#fbf8f3',
+                    transition: 'slide',
+                    customCss: '',
+                    customJs: '',
+                    notes: 'Compare time and space complexity alongside implementation.',
+                    nextEid: 3,
+                    elements: [
+                        {
+                            id: 0,
+                            name: 'markdown',
+                            x: 80,
+                            y: 50,
+                            width: 1120,
+                            height: 80,
+                            rotation: 0,
+                            step: 0,
+                            inner: '## Dijkstra Shortest Path — Complexity & Code',
+                            style: { background: 'transparent', fontSize: '24px' },
+                        },
+                        {
+                            id: 1,
+                            name: 'code',
+                            x: 80,
+                            y: 160,
+                            width: 560,
+                            height: 440,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'function dijkstra(adj: Edge[][], src: number) {\n  const dist = Array(adj.length).fill(Infinity);\n  dist[src] = 0;\n  const pq = new MinHeap([[0, src]]);\n  while (!pq.isEmpty()) {\n    const [d, u] = pq.pop()!;\n    if (d > dist[u]) continue;\n    for (const { to, w } of adj[u]) {\n      if (dist[u] + w < dist[to]) {\n        dist[to] = dist[u] + w;\n        pq.push([dist[to], to]);\n      }\n    }\n  }\n  return dist;\n}',
+                            style: {},
+                        },
+                        {
+                            id: 2,
+                            name: 'table',
+                            x: 680,
+                            y: 160,
+                            width: 520,
+                            height: 260,
+                            rotation: 0,
+                            step: 1,
+                            inner: 'Heap Type | Extract-Min | Decrease-Key | Total Time\nBinary Heap | O(log V) | O(log V) | O((V + E) log V)\nFibonacci Heap | O(log V) | O(1) amort. | O(E + V log V)\nArray Scan | O(V) | O(1) | O(V²)',
+                            style: { fontSize: '16px' },
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
+    if (deckId === 'statebinder') {
+        return {
+            title: 'interactive-statebinder-lab',
+            slides: [
+                buildTemplateSlide('interactive'),
+                {
+                    background: '#faf6ef',
+                    transition: 'fade',
+                    customCss: '',
+                    customJs: '',
+                    notes: 'MultiStyleVar binds a single state transition across multiple DOM elements at once.',
+                    nextEid: 4,
+                    elements: [
+                        {
+                            id: 0,
+                            name: 'markdown',
+                            x: 90,
+                            y: 55,
+                            width: 1100,
+                            height: 90,
+                            rotation: 0,
+                            step: 0,
+                            inner: '## Multi-Element Reactive Binding (`MultiStyleVar`)',
+                            style: { background: 'transparent', fontSize: '24px' },
+                        },
+                        {
+                            id: 1,
+                            name: 'code',
+                            x: 90,
+                            y: 175,
+                            width: 660,
+                            height: 360,
+                            rotation: 0,
+                            step: 0,
+                            inner: '// Bind one state variable to multiple slide elements\nconst theme = new window.MultiStyleVar("#b85d38");\ntheme.addBinding("2div", "background");\ntheme.addBinding("3div", "background");\ntheme.transition("#d97757");',
+                            style: {},
+                        },
+                        {
+                            id: 2,
+                            name: 'button',
+                            x: 810,
+                            y: 195,
+                            width: 340,
+                            height: 130,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'Target A (#2div)',
+                            style: { background: '#efe4d6', fontSize: '20px', fontWeight: 'bold' },
+                        },
+                        {
+                            id: 3,
+                            name: 'button',
+                            x: 810,
+                            y: 375,
+                            width: 340,
+                            height: 130,
+                            rotation: 0,
+                            step: 0,
+                            inner: 'Target B (#3div)',
+                            style: { background: '#f2e8dc', fontSize: '20px', fontWeight: 'bold' },
+                        },
+                    ],
+                },
+            ],
+        };
+    }
+
+    return {
+        title: 'slidecraftk-showcase',
+        slides: buildDefaultWelcomeSlides(),
     };
 }
 
@@ -559,10 +871,11 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [updateDeck]);
 
-    const loadExampleDeck = useCallback(() => {
+    const loadExampleDeck = useCallback((deckId: ExampleDeckId = 'showcase') => {
         updateDeck((draft) => {
-            draft.title = 'slidecraftk-showcase';
-            draft.slides = buildDefaultWelcomeSlides();
+            const built = buildExampleDeck(deckId);
+            draft.title = built.title;
+            draft.slides = built.slides;
             draft.curFrame = 0;
             draft.presentStep = 0;
             draft.activeEID = null;
