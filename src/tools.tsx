@@ -363,15 +363,33 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         </div>
         <span>Slide Formatting</span>
         <div className="toolset">
-            <label className="tool">
+            <label className="tool" title="Custom Slide Color">
                 <i className="material-icons">palette</i>
                 <input
                     type="color"
                     id="slide-bg-color"
-                    value={currentSlide.background.startsWith('#') ? currentSlide.background : '#f0ffff'}
+                    value={currentSlide.background.startsWith('#') ? currentSlide.background : '#faf6ef'}
                     onChange={(e)=>{setSlideBackground(e.target.value)}}
                 />
             </label>
+            <div className="slide-bg-swatches">
+                {[
+                    { label: 'Warm Cream', value: '#faf6ef' },
+                    { label: 'Oatmeal', value: '#f2e8dc' },
+                    { label: 'Sage Mist', value: '#eef3ec' },
+                    { label: 'Soft Amber', value: '#fdf6e7' },
+                    { label: 'Sunset Gradient', value: 'linear-gradient(135deg, #faf6ef 0%, #f2dfd0 100%)' },
+                ].map((preset) => (
+                    <button
+                        key={preset.label}
+                        type="button"
+                        className="bg-swatch-btn"
+                        title={preset.label}
+                        style={{ background: preset.value }}
+                        onClick={() => setSlideBackground(preset.value)}
+                    />
+                ))}
+            </div>
             <div className="tool">
                 <i className="material-icons" title="Slide Transition">slideshow</i>
                 <select

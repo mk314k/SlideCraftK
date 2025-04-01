@@ -642,9 +642,32 @@ textarea {
   gap: 6px;
 }
 
-.inspector-actions button {
+.inspector-actions button,
+.inspector-align-bar button {
   padding: 6px 8px;
   font-size: 0.78rem;
+}
+
+.inspector-align-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.slide-bg-swatches {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 4px;
+}
+
+.bg-swatch-btn {
+  width: 20px;
+  height: 20px;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 1px solid var(--panel-border);
+  cursor: pointer;
 }
 
 .deck-title-input {

@@ -291,33 +291,57 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
 
   const isShape = activeElem && (activeElem.name === 'rect' || activeElem.name === 'circle' || activeElem.name === 'diamond' || activeElem.name === 'triangle' || activeElem.name === 'arrow' || activeElem.name === 'line');
 
-  return (
-    <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
-      <button
-        type="button"
-        className="inspector-edge-tab"
-        onClick={onToggle}
-        title={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
-        aria-label={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
-      >
-        <i className="material-icons">{isOpen ? 'chevron_right' : 'chevron_left'}</i>
-      </button>
-      {isOpen && (
-        <div className="right-inspector-content">
-          <div className="right-inspector-header">
-            <span>Element Inspector</span>
-          </div>
-          {!activeElem ? (
-            <div className="right-inspector-empty">
-              <p>No element selected.</p>
-              <p>Click any element on the slide to inspect its position, size, rotation, and layer properties.</p>
-            </div>
-          ) : (
-            <div className="right-inspector-body">
-              <div className="inspector-badge">
-                <span>Type: <strong>{activeElem.name}</strong></span>
-                <span>ID: #{activeElem.id}</span>
-              </div>
+        return (
+            <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
+              <button
+                type="button"
+                className="inspector-edge-tab"
+                onClick={onToggle}
+                title={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+                aria-label={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+              >
+                <i className="material-icons">{isOpen ? 'chevron_right' : 'chevron_left'}</i>
+              </button>
+              {isOpen && (
+                <div className="right-inspector-content">
+                  <div className="right-inspector-header">
+                    <span>Element Inspector</span>
+                  </div>
+                  {!activeElem ? (
+                    <div className="right-inspector-empty">
+                      <p>No element selected.</p>
+                      <p>Click any element on the slide to inspect its position, size, rotation, and layer properties.</p>
+                    </div>
+                  ) : (
+                    <div className="right-inspector-body">
+                      <div className="inspector-badge">
+                        <span>Type: <strong>{activeElem.name}</strong></span>
+                        <span>ID: #{activeElem.id}</span>
+                      </div>
+                      <div className="inspector-align-bar">
+                        <button
+                          type="button"
+                          title="Center Horizontally on Slide"
+                          onClick={() =>
+                            updateElement(activeElem.id, (el) => {
+                              el.x = Math.round((SLIDE_WIDTH - el.width) / 2);
+                            })
+                          }
+                        >
+                          Center X
+                        </button>
+                        <button
+                          type="button"
+                          title="Center Vertically on Slide"
+                          onClick={() =>
+                            updateElement(activeElem.id, (el) => {
+                              el.y = Math.round((SLIDE_HEIGHT - el.height) / 2);
+                            })
+                          }
+                        >
+                          Center Y
+                        </button>
+                      </div>
               <div className="inspector-grid">
                 <label className="inspector-field">
                   <span>X</span>
