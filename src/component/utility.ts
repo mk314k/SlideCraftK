@@ -125,8 +125,134 @@ export function downloadFile(fileName:string, fileContent:string) {
   document.body.removeChild(element);
 }
 
-export function applySlideCustomCode(frameId: number, customCss: string, customJs: string) {
-  if (typeof document === 'undefined') return;
+const activeSlideCleanups: Array<() => void> = [];
+
+export function cleanupSlideRuntime() {
+  while (activeSlideCleanups.length > 0) {
+    const fn = activeSlideCleanups.pop();
+    try {
+      fn?.();
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+}
+
+export function scopeCssToSlide(frameId: number, rawCss: string): string {
+  const scopePrefix = `#slide${frameId}`;
+  const sanitized = rawCss
+    .replace(/<\/?style[^>]*>/gi, '')
+    .replace(/@import\b[^;]*;?/gi, '')
+    .replace(/expression\s*\(/gi, '')
+    .replace(/javascript\s*:/gi, '');
+
+  return sanitized.replace(/(^|\})\s*([^{}@]+)\{/g, (match, brace, selectorGroup: string) => {
+    const trimmed = selectorGroup.trim();
+    if (!trimmed) return match;
+    const scopedSelectors = trimmed
+      .split(',')
+      .map((sel) => {
+        const s = sel.trim();
+        if (!s) return '';
+        if (s === ':root' || s === 'body' || s === 'html' || s === '#slide') {
+          return scopePrefix;
+        }
+        if (s.startsWith(scopePrefix)) {
+          return s;
+        }
+        return `${scopePrefix} ${s}`;
+      })
+      .filter(Boolean)
+      .join(', ');
+    return `${brace} ${scopedSelectors} {`;
+  });
+}
+
+export interface ScopedSlideController {
+  el: (id: number | string) => HTMLElement | null;
+  box: (id: number | string) => HTMLElement | null;
+  setText: (id: number | string, text: string) => void;
+  setStyle: (id: number | string, prop: string, value: string) => void;
+  onClick: (id: number | string, handler: (ev: MouseEvent) => void) => void;
+  stateVar: <T>(initial: T, id: number | string, updater: (el: HTMLElement, state: T) => void) => StateVar<T>;
+  styleVar: <T>(initial: T, id: number | string, prop: string) => StyleVar<T>;
+}
+
+const FORBIDDEN_CODE_PATTERNS = /\b(fetch|XMLHttpRequest|WebSocket|Worker|SharedWorker|importScripts|localStorage|sessionStorage|indexedDB|cookie|eval|Function|parent|top|frames|opener)\b/;
+
+export function createScopedSlideController(frameId: number): ScopedSlideController {
+  const getSlideRoot = () => document.getElementById(`slide${frameId}`);
+
+  const resolveInner = (id: number | string): HTMLElement | null => {
+    const root = getSlideRoot();
+    if (!root) return null;
+    const cleanId = String(id).replace(/^#/, '');
+    const candidate = document.getElementById(cleanId);
+    return candidate && root.contains(candidate) ? candidate : null;
+  };
+
+  const resolveBox = (id: number | string): HTMLElement | null => {
+    const root = getSlideRoot();
+    if (!root) return null;
+    const cleanId = String(id).replace(/^#/, '').replace(/div$/, '');
+    const candidate = document.getElementById(`${cleanId}div`);
+    return candidate && root.contains(candidate) ? candidate : null;
+  };
+
+  const ctrl: ScopedSlideController = {
+    el: resolveInner,
+    box: resolveBox,
+    setText(id: number | string, text: string) {
+      const target = resolveInner(id);
+      if (target) {
+        target.textContent = String(text);
+      }
+    },
+    setStyle(id: number | string, prop: string, value: string) {
+      const target = resolveBox(id) ?? resolveInner(id);
+      if (target && !(prop in Object.prototype)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (target.style as any)[prop] = value;
+      }
+    },
+    onClick(id: number | string, handler: (ev: MouseEvent) => void) {
+      const target = resolveBox(id) ?? resolveInner(id);
+      if (target && typeof handler === 'function') {
+        const wrapped = (ev: MouseEvent) => {
+          ev.stopPropagation();
+          handler(ev);
+        };
+        target.addEventListener('click', wrapped);
+        activeSlideCleanups.push(() => target.removeEventListener('click', wrapped));
+      }
+    },
+    stateVar<T>(initial: T, id: number | string, updater: (el: HTMLElement, state: T) => void) {
+      const cleanId = String(id).replace(/^#/, '');
+      return new StateVar<T>(initial, cleanId, (el, st) => {
+        const root = getSlideRoot();
+        if (root && root.contains(el)) {
+          updater(el, st);
+        }
+      });
+    },
+    styleVar<T>(initial: T, id: number | string, prop: string) {
+      const cleanId = String(id).replace(/^#/, '');
+      const normalizedId = cleanId.endsWith('div') ? cleanId : `${cleanId}div`;
+      return new StyleVar<T>(initial, normalizedId, prop);
+    },
+  };
+  return Object.freeze(ctrl);
+}
+
+export function applySlideCustomCode(
+  frameId: number,
+  customCss: string,
+  customJs: string
+): { error: string | null } {
+  if (typeof document === 'undefined') return { error: null };
+
+  cleanupSlideRuntime();
+
   const styleId = `slidecraftk-custom-style-${frameId}`;
   let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
   if (customCss.trim() !== '') {
@@ -135,19 +261,57 @@ export function applySlideCustomCode(frameId: number, customCss: string, customJ
       styleEl.id = styleId;
       document.head.appendChild(styleEl);
     }
-    styleEl.textContent = customCss;
+    styleEl.textContent = scopeCssToSlide(frameId, customCss);
   } else if (styleEl) {
     styleEl.remove();
   }
 
   if (customJs.trim() !== '') {
+    if (FORBIDDEN_CODE_PATTERNS.test(customJs)) {
+      return {
+        error: 'Blocked restricted API: Slide code is sandboxed to the current slide (`slide.*` and `StateBinder`).',
+      };
+    }
     try {
-      const runner = new Function(customJs);
-      runner();
+      const slideCtrl = createScopedSlideController(frameId);
+      const safeBinder = Object.freeze({
+        StateVar,
+        StyleVar,
+        MultiStateVar,
+        MultiStyleVar,
+        StateVarList,
+        StyleVarList,
+      });
+      const runner = new Function(
+        'slide',
+        'StateBinder',
+        'StateVar',
+        'StyleVar',
+        'MultiStateVar',
+        'MultiStyleVar',
+        'window',
+        'document',
+        'globalThis',
+        '"use strict";\n' + customJs
+      );
+      runner(
+        slideCtrl,
+        safeBinder,
+        StateVar,
+        StyleVar,
+        MultiStateVar,
+        MultiStyleVar,
+        undefined,
+        undefined,
+        undefined
+      );
     } catch (err) {
-      console.error('Slide script error:', err);
+      const msg = err instanceof Error ? err.message : 'Slide code execution error';
+      console.error('Slide code error:', msg);
+      return { error: msg };
     }
   }
+  return { error: null };
 }
 
 export function insertCode(cssOrJs:string){
