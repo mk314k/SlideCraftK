@@ -1,5 +1,4 @@
 import React from "react";
-import { applySlideCustomCode } from "./component/utility";
 import { useDeck } from "./context/DeckContext";
 import { SlideTransitionType } from "./frame";
 
@@ -9,7 +8,7 @@ interface ToolsProps {
 
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     console.log("rendering tools");
-    const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideTransition, setSlideCustomCode } = useDeck();
+    const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideTransition } = useDeck();
 
     const activeElem = state.activeEID != null
         ? currentSlide.elements.find((el) => el.id === state.activeEID)
@@ -411,39 +410,6 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     <option value="slide">Slide</option>
                 </select>
             </div>
-        </div>
-        <span>Add CSS/JS</span>
-        <div className='toolset'>
-            <textarea
-                name="code"
-                id="code"
-                cols={20}
-                rows={20}
-                defaultValue={currentSlide.customJs || currentSlide.customCss}
-                key={`code-slide-${state.curFrame}`}
-            />
-            <label
-                className="tool"
-                data-tooltip="Apply Custom CSS to Slide"
-                onClick={() => {
-                    const val = (document.getElementById('code') as HTMLTextAreaElement | null)?.value ?? '';
-                    setSlideCustomCode('style', val);
-                    applySlideCustomCode(state.curFrame, val, '');
-                }}
-            >
-                CSS
-            </label>
-            <label
-                className="tool"
-                data-tooltip="Run Custom JS on Slide"
-                onClick={() => {
-                    const val = (document.getElementById('code') as HTMLTextAreaElement | null)?.value ?? '';
-                    setSlideCustomCode('script', val);
-                    applySlideCustomCode(state.curFrame, currentSlide.customCss, val);
-                }}
-            >
-                JS
-            </label>
         </div>
       </div>
     )

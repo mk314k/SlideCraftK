@@ -459,6 +459,208 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
   );
 };
 
+export type DevTabType = 'style' | 'code';
+
+const DeveloperModal: React.FC<{
+  isOpen: boolean;
+  activeTab: DevTabType;
+  setActiveTab: (tab: DevTabType) => void;
+  onClose: () => void;
+}> = ({ isOpen, activeTab, setActiveTab, onClose }) => {
+  const { state, currentSlide, setSlideCustomCode } = useDeck();
+  const [cssDraft, setCssDraft] = useState(currentSlide.customCss);
+  const [codeDraft, setCodeDraft] = useState(currentSlide.customJs);
+  const [runStatus, setRunStatus] = useState<{ type: 'ok' | 'err'; msg: string } | null>(null);
+
+  useEffect(() => {
+    setCssDraft(currentSlide.customCss);
+    setCodeDraft(currentSlide.customJs);
+    setRunStatus(null);
+  }, [state.curFrame, currentSlide.customCss, currentSlide.customJs, isOpen]);
+
+  if (!isOpen) return null;
+
+  const handleApply = () => {
+    setSlideCustomCode('style', cssDraft);
+    setSlideCustomCode('script', codeDraft);
+    const res = applySlideCustomCode(state.curFrame, cssDraft, codeDraft);
+    if (res.error) {
+      setRunStatus({ type: 'err', msg: res.error });
+    } else {
+      setRunStatus({ type: 'ok', msg: 'Applied scoped CSS & Code to Slide ' + (state.curFrame + 1) });
+    }
+  };
+
+  const handleClearCurrent = () => {
+    if (activeTab === 'style') {
+      setCssDraft('');
+      setSlideCustomCode('style', '');
+      applySlideCustomCode(state.curFrame, '', codeDraft);
+    } else {
+      setCodeDraft('');
+      setSlideCustomCode('script', '');
+      applySlideCustomCode(state.curFrame, cssDraft, '');
+    }
+    setRunStatus({ type: 'ok', msg: `Cleared custom ${activeTab === 'style' ? 'CSS' : 'Code'} on this slide.` });
+  };
+
+  const insertSnippet = (snippet: string) => {
+    if (activeTab === 'style') {
+      setCssDraft((prev) => (prev ? `${prev}\n${snippet}` : snippet));
+    } else {
+      setCodeDraft((prev) => (prev ? `${prev}\n${snippet}` : snippet));
+    }
+  };
+
+  return (
+    <div className="shortcuts-backdrop" onClick={onClose}>
+      <div className="developer-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="developer-modal-header">
+          <div>
+            <h3>Slide {state.curFrame + 1} — Developer Studio</h3>
+            <p className="developer-subtitle">
+              Scoped strictly to <code>#slide{state.curFrame}</code>. Global browser/network APIs are blocked for safety.
+            </p>
+          </div>
+          <button type="button" onClick={onClose} title="Close Developer Studio">
+            ×
+          </button>
+        </div>
+
+        <div className="developer-tabs">
+          <button
+            type="button"
+            className={`dev-tab-btn${activeTab === 'style' ? ' active' : ''}`}
+            onClick={() => setActiveTab('style')}
+          >
+            <i className="material-icons" style={{ fontSize: '16px' }}>auto_awesome</i>
+            Custom CSS {cssDraft.trim() ? '•' : ''}
+          </button>
+          <button
+            type="button"
+            className={`dev-tab-btn${activeTab === 'code' ? ' active' : ''}`}
+            onClick={() => setActiveTab('code')}
+          >
+            <i className="material-icons" style={{ fontSize: '16px' }}>code</i>
+            Slide Code {codeDraft.trim() ? '•' : ''}
+          </button>
+        </div>
+
+        <div className="developer-workspace">
+          <div className="developer-editor-col">
+            {activeTab === 'style' ? (
+              <textarea
+                className="developer-textarea"
+                placeholder={`/* Rules are automatically scoped to #slide${state.curFrame} */\nbutton {\n  box-shadow: 0 6px 18px rgba(184, 93, 56, 0.25);\n}`}
+                value={cssDraft}
+                onChange={(e) => setCssDraft(e.target.value)}
+              />
+            ) : (
+              <textarea
+                className="developer-textarea"
+                placeholder={`// Available API: slide.onClick(id, fn), slide.setText(id, text), slide.setStyle(id, prop, val), StateVar, StyleVar, MultiStyleVar\nslide.onClick(0, () => {\n  slide.setStyle(0, "background", "#d97757");\n});`}
+                value={codeDraft}
+                onChange={(e) => setCodeDraft(e.target.value)}
+              />
+            )}
+            {runStatus && (
+              <div className={`developer-status ${runStatus.type}`}>
+                {runStatus.msg}
+              </div>
+            )}
+            <div className="developer-footer-actions">
+              <button type="button" onClick={handleClearCurrent}>
+                Clear {activeTab === 'style' ? 'CSS' : 'Code'}
+              </button>
+              <button type="button" className="present-primary-btn" onClick={handleApply}>
+                Apply &amp; Run on Slide
+              </button>
+            </div>
+          </div>
+
+          <div className="developer-helper-col">
+            <span className="developer-helper-title">Elements on Slide {state.curFrame + 1}</span>
+            <div className="developer-elem-list">
+              {currentSlide.elements.length === 0 && (
+                <span className="tool-empty-hint">No elements on this slide yet.</span>
+              )}
+              {currentSlide.elements.map((el) => (
+                <div key={el.id} className="developer-elem-chip">
+                  <span>
+                    <strong>#{el.id}</strong> ({el.name})
+                  </span>
+                  <button
+                    type="button"
+                    className="mini-action-btn"
+                    title="Insert snippet for this element"
+                    onClick={() => {
+                      if (activeTab === 'style') {
+                        insertSnippet(`#${el.id}div {\n  transform: scale(1.02);\n}`);
+                      } else {
+                        insertSnippet(
+                          `slide.onClick(${el.id}, () => {\n  slide.setStyle(${el.id}, "background", "#d97757");\n});`
+                        );
+                      }
+                    }}
+                  >
+                    + Insert
+                  </button>
+                </div>
+              ))}
+            </div>
+            <span className="developer-helper-title">Quick Snippets</span>
+            <div className="developer-snippets">
+              {activeTab === 'style' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(`button:hover {\n  transform: translateY(-2px);\n}`)
+                    }
+                  >
+                    + Hover Lift Effect
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(`.katex {\n  color: #b85d38;\n}`)
+                    }
+                  >
+                    + Highlight Math Color
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(
+                        `let count = 0;\nslide.onClick(0, () => {\n  count += 1;\n  slide.setText(0, "Count: " + count);\n});`
+                      )
+                    }
+                  >
+                    + Click Counter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      insertSnippet(
+                        `const color = slide.styleVar("#efe4d6", 0, "background");\nslide.onClick(0, () => color.transition("#d97757"));`
+                      )
+                    }
+                  >
+                    + StateBinder StyleVar
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const EditorWorkspace: React.FC = () => {
   const {
     state,
@@ -480,6 +682,8 @@ const EditorWorkspace: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showNotes, setShowNotes] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [devModalOpen, setDevModalOpen] = useState(false);
+  const [devTab, setDevTab] = useState<DevTabType>('code');
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [zoomFactor, setZoomFactor] = useState(1);
 
@@ -637,6 +841,17 @@ const EditorWorkspace: React.FC = () => {
           <button onClick={() => setShowNotes((v) => !v)} data-tooltip="Toggle Speaker Notes" title="Toggle Speaker Notes">
             Notes
           </button>
+          <button
+            className={devModalOpen ? 'tool-active' : ''}
+            onClick={() => {
+              setDevTab(currentSlide.customCss.trim() && !currentSlide.customJs.trim() ? 'style' : 'code');
+              setDevModalOpen(true);
+            }}
+            data-tooltip="Attach Scoped Slide CSS or Interactive Code"
+            title="Developer Studio (Scoped CSS & Code)"
+          >
+            Developer
+          </button>
           <button onClick={() => window.print()} data-tooltip="Print or Export to PDF" title="Export Deck to PDF via Print">
             PDF
           </button>
@@ -653,6 +868,12 @@ const EditorWorkspace: React.FC = () => {
           </span>
         )}
       </div>
+      <DeveloperModal
+        isOpen={devModalOpen}
+        activeTab={devTab}
+        setActiveTab={setDevTab}
+        onClose={() => setDevModalOpen(false)}
+      />
       {showShortcuts && (
         <div className="shortcuts-backdrop" onClick={() => setShowShortcuts(false)}>
           <div className="shortcuts-modal" onClick={(e) => e.stopPropagation()}>
