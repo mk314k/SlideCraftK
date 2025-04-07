@@ -7,7 +7,7 @@ import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
 import { DeckProvider, useDeck, SlideTemplateType, ExampleDeckId } from './context/DeckContext';
 
-const SlideSet: React.FC = () => {
+const SlideSet: React.FC<{ onOpenDev: (slideIndex: number, tab: DevTabType) => void }> = ({ onOpenDev }) => {
   const { state, setFrameId, addSlide, addTemplateSlide, deleteSlide, duplicateSlide, moveSlide } = useDeck();
 
   return (
@@ -49,6 +49,34 @@ const SlideSet: React.FC = () => {
                 </div>
               ))}
             </div>
+            {(slide.customCss.trim() !== '' || slide.customJs.trim() !== '') && (
+              <div className="mini-thumb-badges" onClick={(e) => e.stopPropagation()}>
+                {slide.customCss.trim() !== '' && (
+                  <button
+                    type="button"
+                    className="slide-Attachment-chip css-chip"
+                    data-tooltip="Edit Slide Custom CSS"
+                    title="Edit Slide Custom CSS"
+                    onClick={() => onOpenDev(i, 'style')}
+                  >
+                    <i className="material-icons">star</i>
+                    <span>CSS</span>
+                  </button>
+                )}
+                {slide.customJs.trim() !== '' && (
+                  <button
+                    type="button"
+                    className="slide-Attachment-chip code-chip"
+                    data-tooltip="Edit Slide Custom Code"
+                    title="Edit Slide Custom Code"
+                    onClick={() => onOpenDev(i, 'code')}
+                  >
+                    <i className="material-icons">code</i>
+                    <span>Code</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           <div className="mini-card-footer">
             <span className="mini-card-label">{i + 1}</span>
@@ -117,7 +145,11 @@ const SlideSet: React.FC = () => {
   );
 };
 
-const SlideView: React.FC<{ zoomFactor: number; inspectorOpen: boolean }> = ({ zoomFactor, inspectorOpen }) => {
+const SlideView: React.FC<{
+  zoomFactor: number;
+  inspectorOpen: boolean;
+  onOpenDevTab: (tab: DevTabType) => void;
+}> = ({ zoomFactor, inspectorOpen, onOpenDevTab }) => {
   const { state, currentSlide, advancePresentation, retreatPresentation, setActiveEID, setPresenting } = useDeck();
   const stageRef = useRef<HTMLDivElement | null>(null);
   const [fitScale, setFitScale] = useState(1);
@@ -244,6 +276,32 @@ const SlideView: React.FC<{ zoomFactor: number; inspectorOpen: boolean }> = ({ z
           />
         ))}
       </div>
+      {!state.presenting && (currentSlide.customCss.trim() !== '' || currentSlide.customJs.trim() !== '') && (
+        <div className="stage-dev-badges" onClick={(e) => e.stopPropagation()}>
+          {currentSlide.customCss.trim() !== '' && (
+            <button
+              type="button"
+              className="slide-Attachment-chip css-chip stage-chip"
+              data-tooltip="Click to edit custom CSS attached to this slide"
+              onClick={() => onOpenDevTab('style')}
+            >
+              <i className="material-icons">star</i>
+              <span>CSS</span>
+            </button>
+          )}
+          {currentSlide.customJs.trim() !== '' && (
+            <button
+              type="button"
+              className="slide-Attachment-chip code-chip stage-chip"
+              data-tooltip="Click to edit custom Code attached to this slide"
+              onClick={() => onOpenDevTab('code')}
+            >
+              <i className="material-icons">code</i>
+              <span>Code</span>
+            </button>
+          )}
+        </div>
+      )}
       {state.presenting && (
         <>
           <div className="present-hud">
@@ -666,6 +724,7 @@ const EditorWorkspace: React.FC = () => {
     state,
     currentSlide,
     setDeckTitle,
+    setFrameId,
     setSlideNotes,
     addElement,
     loadExampleDeck,
@@ -760,8 +819,21 @@ const EditorWorkspace: React.FC = () => {
   return (
     <div className="app-container">
       <Tools handleAddElement={handleAddElement} />
-      <SlideView zoomFactor={zoomFactor} inspectorOpen={inspectorOpen} />
-      <SlideSet />
+      <SlideView
+        zoomFactor={zoomFactor}
+        inspectorOpen={inspectorOpen}
+        onOpenDevTab={(tab) => {
+          setDevTab(tab);
+          setDevModalOpen(true);
+        }}
+      />
+      <SlideSet
+        onOpenDev={(slideIdx, tab) => {
+          setFrameId(slideIdx);
+          setDevTab(tab);
+          setDevModalOpen(true);
+        }}
+      />
       <RightInspector isOpen={inspectorOpen} onToggle={() => setInspectorOpen((v) => !v)} />
       <div className="top-sect">
         <div className="top-sect-group">

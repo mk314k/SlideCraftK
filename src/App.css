@@ -212,6 +212,62 @@ textarea {
   border: 1px solid var(--panel-border);
 }
 
+.mini-thumb-badges {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 3px;
+  z-index: 5;
+}
+
+.stage-dev-badges {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 28;
+}
+
+.slide-Attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px !important;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 999px !important;
+  cursor: pointer;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(44, 36, 29, 0.14);
+}
+
+.slide-Attachment-chip .material-icons {
+  font-size: 12px;
+}
+
+.slide-Attachment-chip.stage-chip {
+  padding: 5px 10px !important;
+  font-size: 0.76rem;
+}
+
+.slide-Attachment-chip.stage-chip .material-icons {
+  font-size: 15px;
+}
+
+.slide-Attachment-chip.css-chip {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.slide-Attachment-chip.code-chip {
+  background: #f5ebe0;
+  color: #7c3f23;
+  border: 1px solid #b85d38;
+}
+
 .mini-thumb-canvas {
   position: absolute;
   top: 0;
