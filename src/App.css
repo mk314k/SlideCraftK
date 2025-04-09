@@ -1043,16 +1043,17 @@ textarea {
 }
 
 .developer-modal {
-  width: min(760px, 92vw);
+  width: min(1140px, 94vw);
+  height: min(760px, 88vh);
   background: var(--surface);
   color: var(--text-primary);
   border: 1px solid var(--panel-border);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 20px 44px rgba(60, 42, 26, 0.24);
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 24px 56px rgba(60, 42, 26, 0.28);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   text-align: left;
 }
 
@@ -1092,28 +1093,33 @@ textarea {
 }
 
 .developer-workspace {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 14px;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 18px;
 }
 
 .developer-editor-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  min-height: 0;
 }
 
 .developer-textarea {
+  flex: 1;
   width: 100%;
-  height: 250px;
-  padding: 12px;
-  border-radius: 10px;
+  min-height: 360px;
+  padding: 16px;
+  border-radius: 12px;
   border: 1px solid var(--panel-border);
   background: #2b2520;
   color: #f5ebe0;
   font-family: 'Fira Code', 'JetBrains Mono', monospace;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  tab-size: 2;
 }
 
 .developer-status {
@@ -1136,18 +1142,39 @@ textarea {
 
 .developer-footer-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.developer-footer-btns {
+  display: flex;
   gap: 8px;
+}
+
+.developer-shortcut-hint {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.developer-shortcut-hint kbd {
+  background: var(--foreground);
+  border: 1px solid var(--panel-border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
 }
 
 .developer-helper-col {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   background: var(--foreground);
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  padding: 10px;
+  border-radius: 12px;
+  padding: 14px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .developer-helper-title {
@@ -1161,8 +1188,8 @@ textarea {
 .developer-elem-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  max-height: 150px;
+  gap: 6px;
+  max-height: 240px;
   overflow-y: auto;
 }
 

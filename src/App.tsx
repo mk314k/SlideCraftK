@@ -609,16 +609,42 @@ const DeveloperModal: React.FC<{
             {activeTab === 'style' ? (
               <textarea
                 className="developer-textarea"
+                spellCheck={false}
                 placeholder={`/* Rules are automatically scoped to #slide${state.curFrame} */\nbutton {\n  box-shadow: 0 6px 18px rgba(184, 93, 56, 0.25);\n}`}
                 value={cssDraft}
                 onChange={(e) => setCssDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApply();
+                  } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = e.currentTarget.selectionStart;
+                    const end = e.currentTarget.selectionEnd;
+                    const next = cssDraft.slice(0, start) + '  ' + cssDraft.slice(end);
+                    setCssDraft(next);
+                  }
+                }}
               />
             ) : (
               <textarea
                 className="developer-textarea"
+                spellCheck={false}
                 placeholder={`// Available API: slide.onClick(id, fn), slide.setText(id, text), slide.setStyle(id, prop, val), StateVar, StyleVar, MultiStyleVar\nslide.onClick(0, () => {\n  slide.setStyle(0, "background", "#d97757");\n});`}
                 value={codeDraft}
                 onChange={(e) => setCodeDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    handleApply();
+                  } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = e.currentTarget.selectionStart;
+                    const end = e.currentTarget.selectionEnd;
+                    const next = codeDraft.slice(0, start) + '  ' + codeDraft.slice(end);
+                    setCodeDraft(next);
+                  }
+                }}
               />
             )}
             {runStatus && (
@@ -627,12 +653,15 @@ const DeveloperModal: React.FC<{
               </div>
             )}
             <div className="developer-footer-actions">
-              <button type="button" onClick={handleClearCurrent}>
-                Clear {activeTab === 'style' ? 'CSS' : 'Code'}
-              </button>
-              <button type="button" className="present-primary-btn" onClick={handleApply}>
-                Apply &amp; Run on Slide
-              </button>
+              <span className="developer-shortcut-hint">Tip: Press <kbd>Cmd/Ctrl + Enter</kbd> to Apply &amp; Run</span>
+              <div className="developer-footer-btns">
+                <button type="button" onClick={handleClearCurrent}>
+                  Clear {activeTab === 'style' ? 'CSS' : 'Code'}
+                </button>
+                <button type="button" className="present-primary-btn" onClick={handleApply}>
+                  Apply &amp; Run on Slide
+                </button>
+              </div>
             </div>
           </div>
 
