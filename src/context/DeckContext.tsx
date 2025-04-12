@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { produce } from 'immer';
-import { KElementData, KSlide, KSlideSet, StyleMap, SlideTransitionType, defaultSV, defaultFileName } from '../frame';
+import { KElementData, KSlide, KSlideSet, StyleMap, SlideTransitionType, ElementAnimationType, defaultSV, defaultFileName } from '../frame';
 
 const STORAGE_KEY = 'slidecraftk.autosave.v1';
 
@@ -13,6 +13,7 @@ export interface SlideElementState {
     height: number;
     rotation: number;
     step: number;
+    animation?: ElementAnimationType;
     inner: string;
     style: StyleMap;
 }
@@ -683,6 +684,7 @@ function syncFromKSlideSet(): DeckState {
                 height: data.height,
                 rotation: data.rotation ?? 0,
                 step: data.step ?? 0,
+                animation: data.animation ?? 'fade-in',
                 inner: data.inner,
                 style: { ...data.style },
             })),
@@ -717,7 +719,7 @@ function syncToKSlideSet(deck: DeckState): void {
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
-                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation, el.step)
+                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation, el.step, el.animation ?? 'fade-in')
             );
         });
         return kSlide;
@@ -1015,6 +1017,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 height: defaultHeight,
                 rotation: 0,
                 step: 0,
+                animation: 'fade-in',
                 inner,
                 style: {},
             });
@@ -1073,6 +1076,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 height: source.height,
                 rotation: source.rotation,
                 step: source.step ?? 0,
+                animation: source.animation ?? 'fade-in',
                 inner: source.inner,
                 style: { ...source.style },
             });
@@ -1096,6 +1100,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 height: source.height,
                 rotation: source.rotation,
                 step: source.step ?? 0,
+                animation: source.animation ?? 'fade-in',
                 inner: source.inner,
                 style: { ...source.style },
             };
@@ -1117,6 +1122,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 height: draft.clipboard.height,
                 rotation: draft.clipboard.rotation,
                 step: draft.clipboard.step ?? 0,
+                animation: draft.clipboard.animation ?? 'fade-in',
                 inner: draft.clipboard.inner,
                 style: { ...draft.clipboard.style },
             });

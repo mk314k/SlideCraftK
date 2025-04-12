@@ -8,6 +8,9 @@ export interface StyleMap {
     [key:string]:string;
 }
 
+export type ElementAnimationType = 'none' | 'fade-in' | 'rise-up' | 'pop-in' | 'slide-right' | 'blur-in';
+export type SlideTransitionType = 'none' | 'fade' | 'slide' | 'zoom' | 'flip' | 'rise';
+
 export interface SerializedElement {
     id?: number;
     name: string;
@@ -17,11 +20,10 @@ export interface SerializedElement {
     height: number;
     rotation?: number;
     step?: number;
+    animation?: ElementAnimationType;
     inner: string;
     style?: StyleMap;
 }
-
-export type SlideTransitionType = 'none' | 'fade' | 'slide';
 
 export interface SerializedSlide {
     background?: string;
@@ -45,7 +47,8 @@ export class KElementData {
         public inner = '',
         public style:StyleMap = {},
         public rotation = 0,
-        public step = 0
+        public step = 0,
+        public animation: ElementAnimationType = 'fade-in'
     ){
         this.name = elemType;
         if (this.inner === ''){
@@ -148,13 +151,15 @@ export class KSlideSet {
             slide.background = typeof slideData.background === 'string' && slideData.background.trim() !== ''
                 ? slideData.background
                 : '#faf6ef';
-            slide.transition = slideData.transition === 'none' || slideData.transition === 'fade' || slideData.transition === 'slide'
+            const validTransitions: SlideTransitionType[] = ['none', 'fade', 'slide', 'zoom', 'flip', 'rise'];
+            slide.transition = slideData.transition && validTransitions.includes(slideData.transition)
                 ? slideData.transition
                 : 'fade';
             slide.customCss = typeof slideData.customCss === 'string' ? slideData.customCss : '';
             slide.customJs = typeof slideData.customJs === 'string' ? slideData.customJs : '';
             slide.notes = typeof slideData.notes === 'string' ? slideData.notes : '';
 
+            const validAnimations: ElementAnimationType[] = ['none', 'fade-in', 'rise-up', 'pop-in', 'slide-right', 'blur-in'];
             slideData.elemProp.forEach((rawElem: unknown, index: number) => {
                 if (!rawElem || typeof rawElem !== 'object') {
                     return;
@@ -167,6 +172,9 @@ export class KSlideSet {
                 const height = typeof elemPropData.height === 'number' && Number.isFinite(elemPropData.height) ? elemPropData.height : defaultSV.height;
                 const rotation = typeof elemPropData.rotation === 'number' && Number.isFinite(elemPropData.rotation) ? elemPropData.rotation : 0;
                 const step = typeof elemPropData.step === 'number' && Number.isInteger(elemPropData.step) && elemPropData.step >= 0 ? elemPropData.step : 0;
+                const animation: ElementAnimationType = elemPropData.animation && validAnimations.includes(elemPropData.animation)
+                    ? elemPropData.animation
+                    : 'fade-in';
                 const inner = typeof elemPropData.inner === 'string' ? elemPropData.inner : '';
                 const style: StyleMap = elemPropData.style && typeof elemPropData.style === 'object'
                     ? { ...elemPropData.style }
@@ -174,7 +182,7 @@ export class KSlideSet {
                 const eid = typeof elemPropData.id === 'number' && Number.isInteger(elemPropData.id) && elemPropData.id >= 0
                     ? elemPropData.id
                     : index;
-                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style, rotation, step));
+                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style, rotation, step, animation));
             });
             return slide;
         });
@@ -198,6 +206,7 @@ export class KSlideSet {
                     height: elemProp.height,
                     rotation: elemProp.rotation,
                     step: elemProp.step || undefined,
+                    animation: elemProp.animation !== 'fade-in' ? elemProp.animation : undefined,
                     inner: elemProp.inner,
                     style: { ...elemProp.style }
                 });

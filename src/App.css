@@ -431,21 +431,48 @@ textarea {
 }
 
 @keyframes slideFadeIn {
-  from { opacity: 0.25; }
+  from { opacity: 0.2; }
   to { opacity: 1; }
 }
 
 @keyframes slideEnterRight {
-  from { opacity: 0.4; filter: brightness(0.97); }
+  from { opacity: 0.3; clip-path: inset(0 0 0 18%); }
+  to { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+
+@keyframes slideRiseUp {
+  from { opacity: 0.25; filter: blur(3px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes slideZoomIn {
+  from { opacity: 0.2; filter: contrast(0.92); }
+  to { opacity: 1; filter: contrast(1); }
+}
+
+@keyframes slideFlip3D {
+  from { opacity: 0.25; filter: brightness(0.9); }
   to { opacity: 1; filter: brightness(1); }
 }
 
 .slide-transition-fade {
-  animation: slideFadeIn 0.28s ease-out;
+  animation: slideFadeIn 0.32s ease-out;
 }
 
 .slide-transition-slide {
-  animation: slideEnterRight 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: slideEnterRight 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide-transition-rise {
+  animation: slideRiseUp 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.slide-transition-zoom {
+  animation: slideZoomIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.slide-transition-flip {
+  animation: slideFlip3D 0.4s ease-out;
 }
 
 .slideview-full {
@@ -459,7 +486,7 @@ textarea {
 .element-container {
   border: none;
   border-radius: 12px;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.32s ease, translate 0.32s cubic-bezier(0.22, 1, 0.36, 1), scale 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
 }
 
 .fragment-hidden {
@@ -467,8 +494,80 @@ textarea {
   pointer-events: none;
 }
 
+.fragment-hidden.elem-anim-rise-up {
+  translate: 0 28px;
+}
+
+.fragment-hidden.elem-anim-pop-in {
+  scale: 0.72;
+}
+
+.fragment-hidden.elem-anim-slide-right {
+  translate: -36px 0;
+}
+
+.fragment-hidden.elem-anim-blur-in {
+  filter: blur(8px);
+  scale: 0.95;
+}
+
 .fragment-visible {
   opacity: 1;
+  translate: 0 0;
+  scale: 1;
+  filter: blur(0);
+}
+
+@keyframes elemPreviewFade {
+  0% { opacity: 0.1; }
+  100% { opacity: 1; }
+}
+
+@keyframes elemPreviewRise {
+  0% { opacity: 0.15; translate: 0 26px; }
+  100% { opacity: 1; translate: 0 0; }
+}
+
+@keyframes elemPreviewPop {
+  0% { opacity: 0.2; scale: 0.72; }
+  70% { scale: 1.05; }
+  100% { opacity: 1; scale: 1; }
+}
+
+@keyframes elemPreviewSlideRight {
+  0% { opacity: 0.15; translate: -34px 0; }
+  100% { opacity: 1; translate: 0 0; }
+}
+
+@keyframes elemPreviewBlur {
+  0% { opacity: 0.15; filter: blur(8px); scale: 0.94; }
+  100% { opacity: 1; filter: blur(0); scale: 1; }
+}
+
+.elem-anim-fade-in.elem-anim-preview {
+  animation: elemPreviewFade 0.45s ease-out;
+}
+
+.elem-anim-rise-up.elem-anim-preview {
+  animation: elemPreviewRise 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.elem-anim-pop-in.elem-anim-preview {
+  animation: elemPreviewPop 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.elem-anim-slide-right.elem-anim-preview {
+  animation: elemPreviewSlideRight 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.elem-anim-blur-in.elem-anim-preview {
+  animation: elemPreviewBlur 0.48s ease-out;
+}
+
+.anim-preview-btn {
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  padding: 4px 8px !important;
 }
 
 .element-container.active-element {

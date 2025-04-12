@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDeck } from "./context/DeckContext";
-import { SlideTransitionType } from "./frame";
+import { SlideTransitionType, ElementAnimationType } from "./frame";
 
 interface ToolsProps {
     handleAddElement: (elemType:string, info?:string)=>void
@@ -9,6 +9,17 @@ interface ToolsProps {
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     console.log("rendering tools");
     const { state, currentSlide, updateElement, updateElementStyle, setSlideBackground, setSlideTransition } = useDeck();
+    const [previewingAnim, setPreviewingAnim] = useState(false);
+
+    const triggerAnimPreview = (eid: number) => {
+        const el = document.getElementById(`${eid}div`);
+        if (!el) return;
+        setPreviewingAnim(true);
+        el.classList.remove('elem-anim-preview');
+        void el.offsetWidth;
+        el.classList.add('elem-anim-preview');
+        setTimeout(() => setPreviewingAnim(false), 550);
+    };
 
     const activeElem = state.activeEID != null
         ? currentSlide.elements.find((el) => el.id === state.activeEID)
@@ -348,24 +359,60 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     <label className="tool" data-tooltip="Send to Back" title="Send to Back" onClick={handleSendToBack}>
                         <i className="material-icons">vertical_align_bottom</i>
                     </label>
-                    <div className="tool" data-tooltip="Fragment Reveal Step (0 = always visible)">
-                        <i className="material-icons" title="Animation Step (0 = always visible)">animation</i>
+                </>
+            )}
+        </div>
+        <span>Element Animation</span>
+        <div className="toolset">
+            {!activeElem ? (
+                <span className="tool-empty-hint">Select an element to animate</span>
+            ) : (
+                <>
+                    <div className="tool" data-tooltip="Entrance Animation Style">
+                        <i className="material-icons">motion_photos_on</i>
+                        <select
+                            value={activeElem.animation ?? 'fade-in'}
+                            onChange={(e) => {
+                                const nextAnim = e.target.value as ElementAnimationType;
+                                updateElement(activeElem.id, (el) => {
+                                    el.animation = nextAnim;
+                                });
+                                setTimeout(() => triggerAnimPreview(activeElem.id), 20);
+                            }}
+                        >
+                            <option value="none">None</option>
+                            <option value="fade-in">Fade In</option>
+                            <option value="rise-up">Rise Up</option>
+                            <option value="pop-in">Pop Zoom</option>
+                            <option value="slide-right">Slide Right</option>
+                            <option value="blur-in">Blur In</option>
+                        </select>
+                    </div>
+                    <div className="tool" data-tooltip="Click Step in Presentation (0 = immediate)">
+                        <span className="tool-inline-label">Step</span>
                         <input
                             type="number"
                             min={0}
                             max={20}
-                            style={{ width: '48px' }}
+                            style={{ width: '44px' }}
                             value={activeElem.step ?? 0}
                             onChange={(e) => {
-                                if (state.activeEID != null) {
-                                    const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                                    updateElement(state.activeEID, (el) => {
-                                        el.step = val;
-                                    });
-                                }
+                                const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                updateElement(activeElem.id, (el) => {
+                                    el.step = val;
+                                });
                             }}
                         />
                     </div>
+                    <button
+                        type="button"
+                        className={`tool anim-preview-btn${previewingAnim ? ' tool-active' : ''}`}
+                        data-tooltip="Preview Entrance Animation"
+                        onClick={() => triggerAnimPreview(activeElem.id)}
+                    >
+                        <i className="material-icons" style={{ fontSize: '16px' }}>play_arrow</i>
+                        <span className="tool-inline-label">Preview</span>
+                    </button>
                 </>
             )}
         </div>
@@ -406,8 +453,11 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     onChange={(e) => setSlideTransition(e.target.value as SlideTransitionType)}
                 >
                     <option value="none">None</option>
-                    <option value="fade">Fade</option>
-                    <option value="slide">Slide</option>
+                    <option value="fade">Cross Fade</option>
+                    <option value="slide">Slide Left</option>
+                    <option value="rise">Rise Up</option>
+                    <option value="zoom">Zoom Scale</option>
+                    <option value="flip">3D Flip</option>
                 </select>
             </div>
         </div>

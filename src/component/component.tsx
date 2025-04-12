@@ -54,6 +54,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         ? 'transparent'
         : 'var(--surface)';
     const elemStep = elemState?.step ?? 0;
+    const elemAnim = elemState?.animation ?? 'fade-in';
     const isHiddenFragment = state.presenting && elemStep > state.presentStep;
     const elemBadgeLabel = ELEMENT_TYPE_LABELS[elemType] ?? elemType;
 
@@ -106,7 +107,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
             id={`${eid}div`}
             key={eid}
             data-elem-label={!state.presenting ? `${elemBadgeLabel} (#${eid})` : undefined}
-            className={`element-container${isActive ? ' active-element' : ''}${isHiddenFragment ? ' fragment-hidden' : ' fragment-visible'}`}
+            className={`element-container elem-anim-${elemAnim}${isActive ? ' active-element' : ''}${isHiddenFragment ? ' fragment-hidden' : ' fragment-visible'}`}
             style={{
                 position: 'absolute',
                 left: `${posx}px`,
