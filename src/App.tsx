@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState, useRef, useEffect } from 'react';
 import { KComponents } from './component/component';
-import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT } from './frame';
+import { defaultFileName, KSlideSet, SLIDE_WIDTH, SLIDE_HEIGHT, ElementAnimationType } from './frame';
 import { downloadFile, handleFullScreen, applySlideCustomCode, renderMarkdownToHtml } from './component/utility';
 import { KatexRenderer } from './katexComponent';
 import { Tools } from './tools';
@@ -342,64 +342,368 @@ const SlideView: React.FC<{
 
 const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ isOpen, onToggle }) => {
   const { state, currentSlide, updateElement, updateElementStyle, deleteElement, duplicateActiveElement } = useDeck();
+  const [previewingAnim, setPreviewingAnim] = useState(false);
 
   const activeElem = state.activeEID != null
     ? currentSlide.elements.find((el) => el.id === state.activeEID)
     : undefined;
 
-  const isShape = activeElem && (activeElem.name === 'rect' || activeElem.name === 'circle' || activeElem.name === 'diamond' || activeElem.name === 'triangle' || activeElem.name === 'arrow' || activeElem.name === 'line');
+  const elemType = activeElem?.name;
+  const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code' || elemType === 'callout' || elemType === 'table';
+  const isLatexType = elemType === 'latex';
+  const isShape = Boolean(activeElem && (elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle' || elemType === 'arrow' || elemType === 'line'));
+  const isFilledShape = elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle';
 
-        return (
-            <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
-              <button
-                type="button"
-                className="inspector-edge-tab"
-                onClick={onToggle}
-                title={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
-                aria-label={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
-              >
-                <i className="material-icons">{isOpen ? 'chevron_right' : 'chevron_left'}</i>
-              </button>
-              {isOpen && (
-                <div className="right-inspector-content">
-                  <div className="right-inspector-header">
-                    <span>Element Inspector</span>
-                  </div>
-                  {!activeElem ? (
-                    <div className="right-inspector-empty">
-                      <p>No element selected.</p>
-                      <p>Click any element on the slide to inspect its position, size, rotation, and layer properties.</p>
+  const triggerAnimPreview = (eid: number) => {
+    const el = document.getElementById(`${eid}div`);
+    if (!el) return;
+    setPreviewingAnim(true);
+    el.classList.remove('elem-anim-preview');
+    void el.offsetWidth;
+    el.classList.add('elem-anim-preview');
+    setTimeout(() => setPreviewingAnim(false), 550);
+  };
+
+  const handleStyleChange = (styName: string, value: string) => {
+    if (activeElem) {
+      updateElementStyle(activeElem.id, styName, value);
+    }
+  };
+
+  const handleFontSize = (change: number) => {
+    if (activeElem) {
+      const currentRaw = activeElem.style['fontSize'] ?? '16px';
+      const parsed = parseFloat(currentRaw);
+      const baseSize = Number.isFinite(parsed) ? parsed : 16;
+      const newFontSize = Math.max(8, baseSize + change);
+      handleStyleChange('fontSize', `${newFontSize}px`);
+    }
+  };
+
+  const handleBold = () => {
+    if (activeElem) {
+      const fontWeight = activeElem.style['fontWeight'];
+      handleStyleChange('fontWeight', fontWeight === 'bold' ? 'normal' : 'bold');
+    }
+  };
+
+  const handleItalic = () => {
+    if (activeElem) {
+      const fontStyle = activeElem.style['fontStyle'];
+      handleStyleChange('fontStyle', fontStyle === 'italic' ? 'normal' : 'italic');
+    }
+  };
+
+  const handleUnderline = () => {
+    if (activeElem) {
+      const textDec = activeElem.style['textDecoration'];
+      handleStyleChange('textDecoration', textDec === 'underline' ? 'none' : 'underline');
+    }
+  };
+
+  const handleTextAlign = (align: 'left' | 'center' | 'right') => {
+    if (activeElem) {
+      handleStyleChange('textAlign', align);
+      const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+      handleStyleChange('justifyContent', justify);
+    }
+  };
+
+  const handleShadowToggle = () => {
+    if (activeElem) {
+      const hasShadow = Boolean(activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none');
+      handleStyleChange('boxShadow', hasShadow ? 'none' : '0 8px 20px rgba(60, 42, 26, 0.16)');
+    }
+  };
+
+  const getElementZ = (zRaw?: string) => {
+    const parsed = parseInt(zRaw ?? '1', 10);
+    return Number.isFinite(parsed) ? parsed : 1;
+  };
+
+  const handleZIndexStep = (delta: number) => {
+    if (activeElem) {
+      const nextZ = Math.max(0, getElementZ(activeElem.style['zIndex']) + delta);
+      handleStyleChange('zIndex', String(nextZ));
+    }
+  };
+
+  const handleBringToFront = () => {
+    if (activeElem) {
+      const maxZ = currentSlide.elements.reduce(
+        (acc, el) => Math.max(acc, getElementZ(el.style['zIndex'])),
+        1
+      );
+      handleStyleChange('zIndex', String(maxZ + 1));
+    }
+  };
+
+  const handleSendToBack = () => {
+    if (activeElem) {
+      handleStyleChange('zIndex', '0');
+    }
+  };
+
+  return (
+    <aside className={`right-inspector-drawer${isOpen ? ' open' : ' collapsed'}`}>
+      <button
+        type="button"
+        className="inspector-edge-tab"
+        onClick={onToggle}
+        title={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+        aria-label={isOpen ? 'Collapse Inspector' : 'Expand Inspector'}
+      >
+        <i className="material-icons">{isOpen ? 'chevron_right' : 'chevron_left'}</i>
+      </button>
+      {isOpen && (
+        <div className="right-inspector-content">
+          <div className="right-inspector-header">
+            <span>Element Inspector</span>
+          </div>
+          {!activeElem ? (
+            <div className="right-inspector-empty">
+              <p>No element selected.</p>
+              <p>Click any element on the slide to format, animate, or adjust its geometry.</p>
+            </div>
+          ) : (
+            <div className="right-inspector-body">
+              <div className="inspector-badge">
+                <span>Type: <strong>{activeElem.name}</strong></span>
+                <span>ID: #{activeElem.id}</span>
+              </div>
+
+              <span className="inspector-section-label">Formatting</span>
+              <div className="toolset">
+                {isTextType && (
+                  <>
+                    <div className="tool" data-tooltip="Font Family" title="Font Family">
+                      <i className="material-icons">text_fields</i>
+                      <select
+                        id="font-family"
+                        value={activeElem.style['fontFamily'] ?? 'Arial'}
+                        onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
+                      >
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="monospace">Monospace</option>
+                      </select>
                     </div>
-                  ) : (
-                    <div className="right-inspector-body">
-                      <div className="inspector-badge">
-                        <span>Type: <strong>{activeElem.name}</strong></span>
-                        <span>ID: #{activeElem.id}</span>
-                      </div>
-                      <div className="inspector-align-bar">
-                        <button
-                          type="button"
-                          title="Center Horizontally on Slide"
+                    <label
+                      className={`tool${activeElem.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
+                      data-tooltip="Toggle Bold"
+                      onClick={handleBold}
+                    >
+                      <i className="material-icons">format_bold</i>
+                    </label>
+                    <label
+                      className={`tool${activeElem.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
+                      data-tooltip="Toggle Italic"
+                      onClick={handleItalic}
+                    >
+                      <i className="material-icons">format_italic</i>
+                    </label>
+                    <label
+                      className={`tool${activeElem.style['textDecoration'] === 'underline' ? ' tool-active' : ''}`}
+                      data-tooltip="Toggle Underline"
+                      onClick={handleUnderline}
+                    >
+                      <i className="material-icons">format_underlined</i>
+                    </label>
+                    <label
+                      className={`tool${activeElem.style['textAlign'] === 'left' ? ' tool-active' : ''}`}
+                      data-tooltip="Align Left"
+                      onClick={() => handleTextAlign('left')}
+                    >
+                      <i className="material-icons">format_align_left</i>
+                    </label>
+                    <label
+                      className={`tool${(!activeElem.style['textAlign'] || activeElem.style['textAlign'] === 'center') ? ' tool-active' : ''}`}
+                      data-tooltip="Align Center"
+                      onClick={() => handleTextAlign('center')}
+                    >
+                      <i className="material-icons">format_align_center</i>
+                    </label>
+                    <label
+                      className={`tool${activeElem.style['textAlign'] === 'right' ? ' tool-active' : ''}`}
+                      data-tooltip="Align Right"
+                      onClick={() => handleTextAlign('right')}
+                    >
+                      <i className="material-icons">format_align_right</i>
+                    </label>
+                    <label
+                      className={`tool${activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none' ? ' tool-active' : ''}`}
+                      data-tooltip="Card Drop Shadow"
+                      onClick={handleShadowToggle}
+                    >
+                      <i className="material-icons">layers</i>
+                    </label>
+                  </>
+                )}
+                {(isTextType || isLatexType) && (
+                  <>
+                    <label className="tool" data-tooltip="Increase Font Size" onClick={() => handleFontSize(4)}>
+                      <i className="material-icons">text_increase</i>
+                    </label>
+                    <label className="tool" data-tooltip="Decrease Font Size" onClick={() => handleFontSize(-4)}>
+                      <i className="material-icons">text_decrease</i>
+                    </label>
+                    <label className="tool" data-tooltip="Text Color">
+                      <i className="material-icons">format_color_text</i>
+                      <input
+                        type="color"
+                        id="text-color"
+                        value={activeElem.style['color']?.startsWith('#') ? activeElem.style['color'] : '#2c241d'}
+                        onChange={(e) => handleStyleChange('color', e.target.value)}
+                      />
+                    </label>
+                    <label className="tool" data-tooltip="Background Color">
+                      <i className="material-icons">format_color_fill</i>
+                      <input
+                        type="color"
+                        id="element-bg-color"
+                        value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#fbf8f3'}
+                        onChange={(e) => handleStyleChange('background', e.target.value)}
+                      />
+                    </label>
+                  </>
+                )}
+                {isShape && (
+                  <>
+                    <label className="tool" data-tooltip="Shape Line / Stroke Color">
+                      <i className="material-icons">border_color</i>
+                      <span className="tool-inline-label">Line</span>
+                      <input
+                        type="color"
+                        id="shape-line-color"
+                        value={activeElem.style['color']?.startsWith('#') ? activeElem.style['color'] : '#7c3f23'}
+                        onChange={(e) => handleStyleChange('color', e.target.value)}
+                      />
+                    </label>
+                    {isFilledShape && (
+                      <>
+                        <label className="tool" data-tooltip="Shape Fill Color">
+                          <i className="material-icons">format_color_fill</i>
+                          <span className="tool-inline-label">Fill</span>
+                          <input
+                            type="color"
+                            id="shape-fill-color"
+                            value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
+                            onChange={(e) => handleStyleChange('background', e.target.value)}
+                          />
+                        </label>
+                        <label
+                          className={`tool${activeElem.style['background'] === 'transparent' ? ' tool-active' : ''}`}
+                          data-tooltip="Outline Only (Transparent Fill)"
                           onClick={() =>
-                            updateElement(activeElem.id, (el) => {
-                              el.x = Math.round((SLIDE_WIDTH - el.width) / 2);
-                            })
+                            handleStyleChange(
+                              'background',
+                              activeElem.style['background'] === 'transparent' ? '#f2e8dc' : 'transparent'
+                            )
                           }
                         >
-                          Center X
-                        </button>
-                        <button
-                          type="button"
-                          title="Center Vertically on Slide"
-                          onClick={() =>
-                            updateElement(activeElem.id, (el) => {
-                              el.y = Math.round((SLIDE_HEIGHT - el.height) / 2);
-                            })
-                          }
-                        >
-                          Center Y
-                        </button>
-                      </div>
+                          <span className="tool-inline-label">No Fill</span>
+                        </label>
+                      </>
+                    )}
+                    <div className="tool" data-tooltip="Line Thickness (px)">
+                      <span className="tool-inline-label">Width</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={16}
+                        style={{ width: '44px' }}
+                        value={parseFloat(activeElem.style['strokeWidth'] ?? '4') || 4}
+                        onChange={(e) => {
+                          const w = Math.max(1, Math.min(16, parseInt(e.target.value, 10) || 4));
+                          handleStyleChange('strokeWidth', String(w));
+                        }}
+                      />
+                    </div>
+                    <div className="tool" data-tooltip="Line Dash Pattern">
+                      <select
+                        value={activeElem.style['strokeDasharray'] ?? 'none'}
+                        onChange={(e) => handleStyleChange('strokeDasharray', e.target.value)}
+                      >
+                        <option value="none">Solid</option>
+                        <option value="8,6">Dashed</option>
+                        <option value="3,5">Dotted</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+                <label className="tool" data-tooltip="Bring Forward 1 Layer" onClick={() => handleZIndexStep(1)}>
+                  <i className="material-icons">flip_to_front</i>
+                </label>
+                <label className="tool" data-tooltip="Send Backward 1 Layer" onClick={() => handleZIndexStep(-1)}>
+                  <i className="material-icons">flip_to_back</i>
+                </label>
+                <label className="tool" data-tooltip="Bring to Front" onClick={handleBringToFront}>
+                  <i className="material-icons">vertical_align_top</i>
+                </label>
+                <label className="tool" data-tooltip="Send to Back" onClick={handleSendToBack}>
+                  <i className="material-icons">vertical_align_bottom</i>
+                </label>
+              </div>
+
+              <span className="inspector-section-label">Entrance Animation</span>
+              <div className="toolset">
+                <div className="tool" data-tooltip="Entrance Animation Style">
+                  <i className="material-icons">motion_photos_on</i>
+                  <select
+                    value={activeElem.animation ?? 'fade-in'}
+                    onChange={(e) => {
+                      const nextAnim = e.target.value as ElementAnimationType;
+                      updateElement(activeElem.id, (el) => {
+                        el.animation = nextAnim;
+                      });
+                      setTimeout(() => triggerAnimPreview(activeElem.id), 20);
+                    }}
+                  >
+                    <option value="none">None</option>
+                    <option value="fade-in">Fade In</option>
+                    <option value="rise-up">Rise Up</option>
+                    <option value="pop-in">Pop Zoom</option>
+                    <option value="slide-right">Slide Right</option>
+                    <option value="blur-in">Blur In</option>
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  className={`tool anim-preview-btn${previewingAnim ? ' tool-active' : ''}`}
+                  data-tooltip="Preview Entrance Animation"
+                  onClick={() => triggerAnimPreview(activeElem.id)}
+                >
+                  <i className="material-icons" style={{ fontSize: '16px' }}>play_arrow</i>
+                  <span className="tool-inline-label">Preview</span>
+                </button>
+              </div>
+
+              <span className="inspector-section-label">Geometry &amp; Layer</span>
+              <div className="inspector-align-bar">
+                <button
+                  type="button"
+                  title="Center Horizontally on Slide"
+                  onClick={() =>
+                    updateElement(activeElem.id, (el) => {
+                      el.x = Math.round((SLIDE_WIDTH - el.width) / 2);
+                    })
+                  }
+                >
+                  Center X
+                </button>
+                <button
+                  type="button"
+                  title="Center Vertically on Slide"
+                  onClick={() =>
+                    updateElement(activeElem.id, (el) => {
+                      el.y = Math.round((SLIDE_HEIGHT - el.height) / 2);
+                    })
+                  }
+                >
+                  Center Y
+                </button>
+              </div>
               <div className="inspector-grid">
                 <label className="inspector-field">
                   <span>X</span>

@@ -3,8 +3,8 @@
   border: none;
   width: 100vw;
   height: 100vh;
-  --tool-width: 240px;
-  --inspector-width: 256px;
+  --tool-width: 176px;
+  --inspector-width: 280px;
   --background: #f7f3eb;
   --foreground: #efe8dc;
   --surface: #fbf8f3;
@@ -76,6 +76,32 @@ textarea {
   gap: 4px;
   border-bottom: 1px solid var(--panel-border);
   padding-bottom: 10px;
+}
+
+.toolset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  gap: 6px;
+}
+
+.tool-full {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.tool-full select {
+  flex: 1;
+}
+
+.inspector-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  text-align: left;
+  margin-top: 2px;
 }
 
 .tool {
