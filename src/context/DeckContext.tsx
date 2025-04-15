@@ -1002,12 +1002,39 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 ? '## Slide Heading\n- First key point\n- Second `inline` point'
                 : elemType === 'callout'
                 ? 'Key takeaway: highlight important theorems or notes here.'
+                : elemType === 'quote'
+                ? 'Simplicity is prerequisite for reliability.\n— Edsger W. Dijkstra'
+                : elemType === 'stat'
+                ? '99.4%\nModel Accuracy'
+                : elemType === 'badge'
+                ? 'NEW RELEASE'
+                : elemType === 'chart'
+                ? 'Q1: 45\nQ2: 72\nQ3: 64\nQ4: 92'
                 : elemType === 'table'
                 ? 'Metric | Baseline | Proposed\nLatency | 42 ms | 11 ms\nThroughput | 1.2k/s | 4.8k/s'
                 : elemType;
             const inner = info && info !== '' ? info : defaultInner;
-            const defaultWidth = elemType === 'table' ? 460 : elemType === 'callout' ? 380 : defaultSV.width;
-            const defaultHeight = elemType === 'table' ? 180 : elemType === 'callout' ? 110 : defaultSV.height;
+            const defaultWidth = elemType === 'table'
+                ? 460
+                : elemType === 'callout' || elemType === 'quote'
+                ? 400
+                : elemType === 'chart'
+                ? 360
+                : elemType === 'badge'
+                ? 150
+                : defaultSV.width;
+            const defaultHeight = elemType === 'table'
+                ? 180
+                : elemType === 'chart'
+                ? 220
+                : elemType === 'callout' || elemType === 'quote'
+                ? 120
+                : elemType === 'badge'
+                ? 48
+                : defaultSV.height;
+            const initialStyle: StyleMap = elemType === 'badge'
+                ? { background: '#b85d38', color: '#fffdf9', borderRadius: '999px', fontWeight: 'bold', fontSize: '14px' }
+                : {};
             slide.elements.push({
                 id: eid,
                 name: elemType,
@@ -1019,7 +1046,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 step: 0,
                 animation: 'fade-in',
                 inner,
-                style: {},
+                style: initialStyle,
             });
             slide.nextEid = eid + 1;
             draft.activeEID = eid;

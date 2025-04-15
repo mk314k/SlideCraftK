@@ -349,7 +349,7 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
     : undefined;
 
   const elemType = activeElem?.name;
-  const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code' || elemType === 'callout' || elemType === 'table';
+  const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code' || elemType === 'callout' || elemType === 'quote' || elemType === 'stat' || elemType === 'badge' || elemType === 'chart' || elemType === 'table';
   const isLatexType = elemType === 'latex';
   const isShape = Boolean(activeElem && (elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle' || elemType === 'arrow' || elemType === 'line'));
   const isFilledShape = elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle';

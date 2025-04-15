@@ -24,6 +24,10 @@ const ELEMENT_TYPE_LABELS: Record<string, string> = {
     textarea: 'Text Area',
     markdown: 'Markdown Block (double-click to edit)',
     callout: 'Callout Card (double-click to edit)',
+    quote: 'Quote Block (double-click to edit)',
+    stat: 'Metric Card (double-click to edit)',
+    badge: 'Badge Pill (double-click to edit)',
+    chart: 'Bar Chart (double-click to edit)',
     table: 'Data Table (double-click to edit)',
     latex: 'LaTeX Equation (double-click to edit)',
     code: 'Code Block (double-click to edit)',
@@ -618,6 +622,188 @@ export const KTable = ({ eid, info }: KElementProps) => {
     );
 };
 
+export const KQuote = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const content = elemState?.inner ?? info ?? 'Simplicity is prerequisite for reliability.\n— Edsger W. Dijkstra';
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(content);
+
+    const startEditing = () => {
+        setDraft(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draft;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    const lines = content.split('\n');
+    const quoteBody = lines[0] ?? '';
+    const authorLine = lines.slice(1).join(' ');
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element quote-editor"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <blockquote id={`${eid}`} className="element quote-view" onDoubleClick={startEditing}>
+                    <p className="quote-text">“{quoteBody}”</p>
+                    {authorLine && <footer className="quote-author">{authorLine}</footer>}
+                </blockquote>
+            )
+        } />
+    );
+};
+
+export const KStatCard = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const content = elemState?.inner ?? info ?? '99.4%\nModel Accuracy';
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(content);
+
+    const startEditing = () => {
+        setDraft(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draft;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    const [statValue, ...rest] = content.split('\n');
+    const statLabel = rest.join(' ');
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element stat-editor"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <div id={`${eid}`} className="element stat-view" onDoubleClick={startEditing}>
+                    <span className="stat-number">{statValue}</span>
+                    {statLabel && <span className="stat-caption">{statLabel}</span>}
+                </div>
+            )
+        } />
+    );
+};
+
+export const KBadge = createKElementComponent('span');
+
+export const KBarChart = ({ eid, info }: KElementProps) => {
+    const { currentSlide, updateElement, setEditingMode } = useDeck();
+    const elemState = currentSlide.elements.find((el) => el.id === eid);
+    const defaultChart = 'Q1: 45\nQ2: 72\nQ3: 64\nQ4: 92';
+    const content = elemState?.inner ?? info ?? defaultChart;
+    const [isEditing, setIsEditing] = useState(false);
+    const [draft, setDraft] = useState(content);
+
+    const startEditing = () => {
+        setDraft(content);
+        setIsEditing(true);
+        setEditingMode(true);
+    };
+
+    const commitEdit = () => {
+        updateElement(eid, (el) => {
+            el.inner = draft;
+        });
+        setIsEditing(false);
+        setEditingMode(false);
+    };
+
+    const bars = content
+        .split('\n')
+        .map((line) => {
+            const [label, rawVal] = line.split(':');
+            const val = parseFloat((rawVal ?? '0').trim());
+            return {
+                label: (label ?? '').trim(),
+                value: Number.isFinite(val) ? Math.max(0, val) : 0,
+            };
+        })
+        .filter((b) => b.label !== '');
+
+    const maxVal = Math.max(1, ...bars.map((b) => b.value));
+    const barColor = elemState?.style['color'] ?? '#b85d38';
+
+    return (
+        <KElement eid={eid} childNode={
+            isEditing ? (
+                <textarea
+                    id={`${eid}`}
+                    className="element chart-editor"
+                    value={draft}
+                    autoFocus
+                    onChange={(e) => setDraft(e.target.value)}
+                    onBlur={commitEdit}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Escape') {
+                            commitEdit();
+                        }
+                    }}
+                />
+            ) : (
+                <div id={`${eid}`} className="element chart-view" onDoubleClick={startEditing}>
+                    {bars.map((bar, idx) => (
+                        <div key={idx} className="chart-bar-col">
+                            <span className="chart-bar-val">{bar.value}</span>
+                            <div className="chart-bar-track">
+                                <div
+                                    className="chart-bar-fill"
+                                    style={{
+                                        height: `${Math.round((bar.value / maxVal) * 100)}%`,
+                                        background: barColor,
+                                    }}
+                                />
+                            </div>
+                            <span className="chart-bar-label">{bar.label}</span>
+                        </div>
+                    ))}
+                </div>
+            )
+        } />
+    );
+};
+
 export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["button", KButton],
     ["latex", KLatex],
@@ -625,6 +811,10 @@ export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["code", KCodeBlock],
     ["markdown", KMarkdown],
     ["callout", KCallout],
+    ["quote", KQuote],
+    ["stat", KStatCard],
+    ["badge", KBadge],
+    ["chart", KBarChart],
     ["table", KTable],
     ["rect", KShapeRect],
     ["circle", KShapeCircle],

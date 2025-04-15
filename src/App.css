@@ -1076,6 +1076,117 @@ textarea {
   font-weight: 700;
 }
 
+.quote-view,
+.quote-editor {
+  width: 100%;
+  height: 100%;
+  padding: 14px 18px;
+  border-left: 4px solid #7c3f23;
+  background: #f5efe6;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  gap: 6px;
+}
+
+.quote-text {
+  font-style: italic;
+  font-size: 1.05em;
+  line-height: 1.4;
+}
+
+.quote-author {
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.stat-view,
+.stat-editor {
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  background: #f5efe6;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+}
+
+.stat-number {
+  font-size: 2.2em;
+  font-weight: 800;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.stat-caption {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chart-view,
+.chart-editor {
+  width: 100%;
+  height: 100%;
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+}
+
+.chart-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.chart-bar-val {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.chart-bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 42px;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(184, 93, 56, 0.1);
+  border-radius: 6px 6px 2px 2px;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  width: 100%;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.25s ease;
+}
+
+.chart-bar-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .speaker-notes-panel {
   position: fixed;
   right: 16px;
