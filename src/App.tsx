@@ -245,7 +245,8 @@ const SlideView: React.FC<{
           width: `${SLIDE_WIDTH}px`,
           height: `${SLIDE_HEIGHT}px`,
           transform: `scale(${effectiveScale})`,
-        }}
+          '--slide-transition-duration': `${currentSlide.transitionDuration ?? 0.35}s`,
+        } as React.CSSProperties}
         className={`slideview slide-transition-${currentSlide.transition ?? 'fade'}`}
         onClick={(e) => {
           if (state.presenting) return;
@@ -351,8 +352,32 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
   const elemType = activeElem?.name;
   const isTextType = elemType === 'button' || elemType === 'textarea' || elemType === 'markdown' || elemType === 'code' || elemType === 'callout' || elemType === 'quote' || elemType === 'stat' || elemType === 'badge' || elemType === 'chart' || elemType === 'table';
   const isLatexType = elemType === 'latex';
-  const isShape = Boolean(activeElem && (elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle' || elemType === 'arrow' || elemType === 'line'));
-  const isFilledShape = elemType === 'rect' || elemType === 'circle' || elemType === 'diamond' || elemType === 'triangle';
+  const isShape = Boolean(
+    activeElem &&
+      (elemType === 'rect' ||
+        elemType === 'circle' ||
+        elemType === 'diamond' ||
+        elemType === 'triangle' ||
+        elemType === 'database' ||
+        elemType === 'cloud' ||
+        elemType === 'server' ||
+        elemType === 'hexagon' ||
+        elemType === 'parallelogram' ||
+        elemType === 'queue' ||
+        elemType === 'arrow' ||
+        elemType === 'line')
+  );
+  const isFilledShape =
+    elemType === 'rect' ||
+    elemType === 'circle' ||
+    elemType === 'diamond' ||
+    elemType === 'triangle' ||
+    elemType === 'database' ||
+    elemType === 'cloud' ||
+    elemType === 'server' ||
+    elemType === 'hexagon' ||
+    elemType === 'parallelogram' ||
+    elemType === 'queue';
 
   const triggerAnimPreview = (eid: number) => {
     const el = document.getElementById(`${eid}div`);
@@ -677,6 +702,22 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
                   <i className="material-icons" style={{ fontSize: '16px' }}>play_arrow</i>
                   <span className="tool-inline-label">Preview</span>
                 </button>
+                <label className="inspector-field" style={{ width: '100%' }} data-tooltip="Animation Speed / Duration in seconds">
+                  <span>Duration (s)</span>
+                  <input
+                    type="number"
+                    min={0.1}
+                    max={3.0}
+                    step={0.05}
+                    value={activeElem.animDuration ?? 0.45}
+                    onChange={(e) => {
+                      const val = Math.min(3.0, Math.max(0.1, parseFloat(e.target.value) || 0.45));
+                      updateElement(activeElem.id, (el) => {
+                        el.animDuration = val;
+                      });
+                    }}
+                  />
+                </label>
               </div>
 
               <span className="inspector-section-label">Geometry &amp; Layer</span>

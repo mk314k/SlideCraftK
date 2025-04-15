@@ -7,7 +7,7 @@ interface ToolsProps {
 }
 
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
-    const { currentSlide, setSlideBackground, setSlideTransition } = useDeck();
+    const { currentSlide, setSlideBackground, setSlideTransition, setSlideTransitionDuration } = useDeck();
 
     const handleAddImage = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
@@ -22,7 +22,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
       }
     };
 
-    const elementTools = [
+    const contentTools = [
         {name:'button', icon:'crop_16_9', label:'Add Button'},
         {name:'textarea', icon:'edit_note', label:'Add Text Area'},
         {name:'markdown', icon:'article', label:'Add Markdown Block'},
@@ -34,19 +34,28 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
         {name:'table', icon:'table_chart', label:'Add Data Table'},
         {name:'latex', icon:'functions', label:'Add LaTeX Math'},
         {name:'code', icon:'code', label:'Add Code Block'},
+    ];
+
+    const archShapeTools = [
         {name:'rect', icon:'check_box_outline_blank', label:'Add Rectangle'},
         {name:'circle', icon:'radio_button_unchecked', label:'Add Circle'},
-        {name:'diamond', icon:'crop_rotate', label:'Add Diamond'},
+        {name:'diamond', icon:'crop_rotate', label:'Add Decision Diamond'},
         {name:'triangle', icon:'change_history', label:'Add Triangle'},
-        {name:'arrow', icon:'trending_flat', label:'Add Arrow'},
-        {name:'line', icon:'horizontal_rule', label:'Add Line'}
+        {name:'hexagon', icon:'hexagon', label:'Add Microservice Hexagon'},
+        {name:'parallelogram', icon:'view_stream', label:'Add I/O Parallelogram'},
+        {name:'database', icon:'storage', label:'Add Database Cylinder'},
+        {name:'server', icon:'dns', label:'Add Server / Compute Rack'},
+        {name:'cloud', icon:'cloud_queue', label:'Add Cloud Node'},
+        {name:'queue', icon:'sync_alt', label:'Add Message Queue / Bus'},
+        {name:'arrow', icon:'trending_flat', label:'Add Arrow Connector'},
+        {name:'line', icon:'horizontal_rule', label:'Add Line Connector'},
     ];
 
     return (
       <div className="toolbar">
-        <span>Elements</span>
+        <span>Content Blocks</span>
         <div className="toolset toolset-grid">
-            {elementTools.map(
+            {contentTools.map(
                 (tool)=>(
                     <label
                         key={tool.name}
@@ -64,6 +73,24 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                 <i className="material-icons">image</i>
                 <input type="file" accept="image/*" onChange={handleAddImage} style={{ position: 'absolute', left: '-9999px' }} />
             </label>
+        </div>
+
+        <span>Architecture &amp; Shapes</span>
+        <div className="toolset toolset-grid">
+            {archShapeTools.map(
+                (tool)=>(
+                    <label
+                        key={tool.name}
+                        className="tool"
+                        data-tooltip={tool.label}
+                        title={tool.label}
+                        aria-label={tool.label}
+                        onClick={()=>{handleAddElement(tool.name)}}
+                    >
+                        <i className="material-icons">{tool.icon}</i>
+                    </label>
+                )
+            )}
         </div>
 
         <span>Slide Background</span>
@@ -114,6 +141,20 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                     <option value="flip">3D Flip</option>
                 </select>
             </div>
+            <label className="inspector-field" style={{ width: '100%' }} data-tooltip="Slide Transition Duration (seconds)">
+                <span>Duration (s)</span>
+                <input
+                    type="number"
+                    min={0.1}
+                    max={3.0}
+                    step={0.05}
+                    value={currentSlide.transitionDuration ?? 0.35}
+                    onChange={(e) => {
+                        const val = Math.min(3.0, Math.max(0.1, parseFloat(e.target.value) || 0.35));
+                        setSlideTransitionDuration(val);
+                    }}
+                />
+            </label>
         </div>
       </div>
     );

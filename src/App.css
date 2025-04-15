@@ -482,23 +482,23 @@ textarea {
 }
 
 .slide-transition-fade {
-  animation: slideFadeIn 0.32s ease-out;
+  animation: slideFadeIn var(--slide-transition-duration, 0.35s) ease-out;
 }
 
 .slide-transition-slide {
-  animation: slideEnterRight 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: slideEnterRight var(--slide-transition-duration, 0.35s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .slide-transition-rise {
-  animation: slideRiseUp 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideRiseUp var(--slide-transition-duration, 0.35s) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide-transition-zoom {
-  animation: slideZoomIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: slideZoomIn var(--slide-transition-duration, 0.35s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .slide-transition-flip {
-  animation: slideFlip3D 0.4s ease-out;
+  animation: slideFlip3D var(--slide-transition-duration, 0.35s) ease-out;
 }
 
 .slideview-full {
@@ -512,7 +512,12 @@ textarea {
 .element-container {
   border: none;
   border-radius: 12px;
-  transition: opacity 0.32s ease, translate 0.32s cubic-bezier(0.22, 1, 0.36, 1), scale 0.32s cubic-bezier(0.22, 1, 0.36, 1), filter 0.32s ease;
+  --anim-duration: 0.45s;
+  transition:
+    opacity var(--anim-duration) ease,
+    translate var(--anim-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    scale var(--anim-duration) cubic-bezier(0.22, 1, 0.36, 1),
+    filter var(--anim-duration) ease;
 }
 
 .fragment-hidden {
@@ -571,23 +576,23 @@ textarea {
 }
 
 .elem-anim-fade-in.elem-anim-preview {
-  animation: elemPreviewFade 0.45s ease-out;
+  animation: elemPreviewFade var(--anim-duration, 0.45s) ease-out;
 }
 
 .elem-anim-rise-up.elem-anim-preview {
-  animation: elemPreviewRise 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: elemPreviewRise var(--anim-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .elem-anim-pop-in.elem-anim-preview {
-  animation: elemPreviewPop 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: elemPreviewPop var(--anim-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .elem-anim-slide-right.elem-anim-preview {
-  animation: elemPreviewSlideRight 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: elemPreviewSlideRight var(--anim-duration, 0.45s) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .elem-anim-blur-in.elem-anim-preview {
-  animation: elemPreviewBlur 0.48s ease-out;
+  animation: elemPreviewBlur var(--anim-duration, 0.45s) ease-out;
 }
 
 .anim-preview-btn {

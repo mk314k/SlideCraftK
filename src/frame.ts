@@ -21,6 +21,7 @@ export interface SerializedElement {
     rotation?: number;
     step?: number;
     animation?: ElementAnimationType;
+    animDuration?: number;
     inner: string;
     style?: StyleMap;
 }
@@ -28,6 +29,7 @@ export interface SerializedElement {
 export interface SerializedSlide {
     background?: string;
     transition?: SlideTransitionType;
+    transitionDuration?: number;
     customCss?: string;
     customJs?: string;
     notes?: string;
@@ -48,7 +50,8 @@ export class KElementData {
         public style:StyleMap = {},
         public rotation = 0,
         public step = 0,
-        public animation: ElementAnimationType = 'fade-in'
+        public animation: ElementAnimationType = 'fade-in',
+        public animDuration = 0.45
     ){
         this.name = elemType;
         if (this.inner === ''){
@@ -70,6 +73,7 @@ export class KSlide {
     public elemProp:Map<number, KElementData> = new Map();
     public background = '#faf6ef';
     public transition: SlideTransitionType = 'fade';
+    public transitionDuration = 0.35;
     public customCss = '';
     public customJs = '';
     public notes = '';
@@ -155,6 +159,9 @@ export class KSlideSet {
             slide.transition = slideData.transition && validTransitions.includes(slideData.transition)
                 ? slideData.transition
                 : 'fade';
+            slide.transitionDuration = typeof slideData.transitionDuration === 'number' && Number.isFinite(slideData.transitionDuration) && slideData.transitionDuration > 0
+                ? slideData.transitionDuration
+                : 0.35;
             slide.customCss = typeof slideData.customCss === 'string' ? slideData.customCss : '';
             slide.customJs = typeof slideData.customJs === 'string' ? slideData.customJs : '';
             slide.notes = typeof slideData.notes === 'string' ? slideData.notes : '';
@@ -175,6 +182,9 @@ export class KSlideSet {
                 const animation: ElementAnimationType = elemPropData.animation && validAnimations.includes(elemPropData.animation)
                     ? elemPropData.animation
                     : 'fade-in';
+                const animDuration = typeof elemPropData.animDuration === 'number' && Number.isFinite(elemPropData.animDuration) && elemPropData.animDuration > 0
+                    ? elemPropData.animDuration
+                    : 0.45;
                 const inner = typeof elemPropData.inner === 'string' ? elemPropData.inner : '';
                 const style: StyleMap = elemPropData.style && typeof elemPropData.style === 'object'
                     ? { ...elemPropData.style }
@@ -182,7 +192,7 @@ export class KSlideSet {
                 const eid = typeof elemPropData.id === 'number' && Number.isInteger(elemPropData.id) && elemPropData.id >= 0
                     ? elemPropData.id
                     : index;
-                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style, rotation, step, animation));
+                slide.elemProp.set(eid, new KElementData(name, x, y, width, height, inner, style, rotation, step, animation, animDuration));
             });
             return slide;
         });
@@ -207,6 +217,7 @@ export class KSlideSet {
                     rotation: elemProp.rotation,
                     step: elemProp.step || undefined,
                     animation: elemProp.animation !== 'fade-in' ? elemProp.animation : undefined,
+                    animDuration: elemProp.animDuration !== 0.45 ? elemProp.animDuration : undefined,
                     inner: elemProp.inner,
                     style: { ...elemProp.style }
                 });
@@ -214,6 +225,7 @@ export class KSlideSet {
             return {
                 background: slide.background,
                 transition: slide.transition,
+                transitionDuration: slide.transitionDuration !== 0.35 ? slide.transitionDuration : undefined,
                 customCss: slide.customCss || undefined,
                 customJs: slide.customJs || undefined,
                 notes: slide.notes || undefined,

@@ -14,6 +14,7 @@ export interface SlideElementState {
     rotation: number;
     step: number;
     animation?: ElementAnimationType;
+    animDuration?: number;
     inner: string;
     style: StyleMap;
 }
@@ -21,6 +22,7 @@ export interface SlideElementState {
 export interface SlideState {
     background: string;
     transition: SlideTransitionType;
+    transitionDuration?: number;
     customCss: string;
     customJs: string;
     notes: string;
@@ -64,6 +66,7 @@ export interface DeckContextValue {
     moveSlide: (fromIdx: number, toIdx: number) => void;
     setSlideBackground: (color: string, frameId?: number) => void;
     setSlideTransition: (transition: SlideTransitionType) => void;
+    setSlideTransitionDuration: (duration: number) => void;
     setSlideCustomCode: (kind: 'style' | 'script', code: string) => void;
     setSlideNotes: (notes: string) => void;
     addElement: (elemType: string, info?: string) => void;
@@ -672,6 +675,7 @@ function syncFromKSlideSet(): DeckState {
         return {
             background: slide.background,
             transition: slide.transition ?? 'fade',
+            transitionDuration: slide.transitionDuration ?? 0.35,
             customCss: slide.customCss ?? '',
             customJs: slide.customJs ?? '',
             notes: slide.notes ?? '',
@@ -685,6 +689,7 @@ function syncFromKSlideSet(): DeckState {
                 rotation: data.rotation ?? 0,
                 step: data.step ?? 0,
                 animation: data.animation ?? 'fade-in',
+                animDuration: data.animDuration ?? 0.45,
                 inner: data.inner,
                 style: { ...data.style },
             })),
@@ -713,13 +718,14 @@ function syncToKSlideSet(deck: DeckState): void {
         const kSlide = new KSlide();
         kSlide.background = s.background;
         kSlide.transition = s.transition;
+        kSlide.transitionDuration = s.transitionDuration ?? 0.35;
         kSlide.customCss = s.customCss;
         kSlide.customJs = s.customJs;
         kSlide.notes = s.notes;
         s.elements.forEach((el) => {
             kSlide.elemProp.set(
                 el.id,
-                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation, el.step, el.animation ?? 'fade-in')
+                new KElementData(el.name, el.x, el.y, el.width, el.height, el.inner, { ...el.style }, el.rotation, el.step, el.animation ?? 'fade-in', el.animDuration ?? 0.45)
             );
         });
         return kSlide;
@@ -969,6 +975,15 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     }, [updateDeck]);
 
+    const setSlideTransitionDuration = useCallback((duration: number) => {
+        updateDeck((draft) => {
+            const slide = draft.slides[draft.curFrame];
+            if (slide) {
+                slide.transitionDuration = duration;
+            }
+        });
+    }, [updateDeck]);
+
     const setSlideCustomCode = useCallback((kind: 'style' | 'script', code: string) => {
         updateDeck((draft) => {
             const slide = draft.slides[draft.curFrame];
@@ -1207,6 +1222,7 @@ export const DeckProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 moveSlide,
                 setSlideBackground,
                 setSlideTransition,
+                setSlideTransitionDuration,
                 setSlideCustomCode,
                 setSlideNotes,
                 addElement,

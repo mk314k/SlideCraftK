@@ -17,7 +17,20 @@ export interface KElementProps {
     info?: string;
 }
 
-const SHAPE_TYPES = new Set(['rect', 'circle', 'arrow', 'line', 'diamond', 'triangle']);
+const SHAPE_TYPES = new Set([
+    'rect',
+    'circle',
+    'arrow',
+    'line',
+    'diamond',
+    'triangle',
+    'database',
+    'cloud',
+    'server',
+    'hexagon',
+    'parallelogram',
+    'queue',
+]);
 
 const ELEMENT_TYPE_LABELS: Record<string, string> = {
     button: 'Button (double-click to edit)',
@@ -33,8 +46,14 @@ const ELEMENT_TYPE_LABELS: Record<string, string> = {
     code: 'Code Block (double-click to edit)',
     rect: 'Rectangle Shape',
     circle: 'Circle Shape',
-    diamond: 'Diamond Shape',
+    diamond: 'Decision Diamond',
     triangle: 'Triangle Shape',
+    database: 'Database Cylinder',
+    cloud: 'Cloud Node',
+    server: 'Server / Compute Node',
+    hexagon: 'Microservice Hexagon',
+    parallelogram: 'I/O Data Parallelogram',
+    queue: 'Message Queue / Pipe',
     arrow: 'Arrow Connector',
     line: 'Line Connector',
     image: 'Image Element',
@@ -59,6 +78,7 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
         : 'var(--surface)';
     const elemStep = elemState?.step ?? 0;
     const elemAnim = elemState?.animation ?? 'fade-in';
+    const elemAnimDuration = elemState?.animDuration ?? 0.45;
     const isHiddenFragment = state.presenting && elemStep > state.presentStep;
     const elemBadgeLabel = ELEMENT_TYPE_LABELS[elemType] ?? elemType;
 
@@ -121,8 +141,9 @@ const KElement: React.FC<KElementContainerProps> = ({ eid, childNode }) => {
                 transform: style.rotation ? `rotate(${style.rotation}deg)` : undefined,
                 background: defaultBg,
                 cursor: state.presenting ? 'default' : style.cursor,
+                '--anim-duration': `${elemAnimDuration}s`,
                 ...containerStyle
-            }}
+            } as React.CSSProperties}
             onMouseDown={e => { if (!state.presenting) { setActiveEID(eid); handleMouseDown(e); } }}
             onClick={(e)=>{ if (!state.presenting) { setActiveEID(eid); e.stopPropagation(); } }}
             onKeyDown={onKeyDown}
@@ -395,7 +416,21 @@ export const KImage = ({ eid, info }: KElementProps) => {
     );
 };
 
-const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 'diamond' | 'triangle') => {
+type ArchShapeType =
+    | 'rect'
+    | 'circle'
+    | 'arrow'
+    | 'line'
+    | 'diamond'
+    | 'triangle'
+    | 'database'
+    | 'cloud'
+    | 'server'
+    | 'hexagon'
+    | 'parallelogram'
+    | 'queue';
+
+const createShapeComponent = (shapeType: ArchShapeType) => {
     return ({ eid }: KElementProps) => {
         const { currentSlide } = useDeck();
         const elemState = currentSlide.elements.find((el) => el.id === eid);
@@ -403,6 +438,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
         const fillColor = elemState?.style['background'] ?? 'rgba(184, 93, 56, 0.14)';
         const strokeWidth = parseFloat(elemState?.style['strokeWidth'] ?? '4') || 4;
         const strokeDasharray = elemState?.style['strokeDasharray'] ?? 'none';
+        const dashProp = strokeDasharray === 'none' ? undefined : strokeDasharray;
 
         return (
             <KElement eid={eid} childNode={
@@ -422,7 +458,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                             fill={fillColor}
                             stroke={strokeColor}
                             strokeWidth={strokeWidth}
-                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeDasharray={dashProp}
                         />
                     )}
                     {shapeType === 'circle' && (
@@ -434,7 +470,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                             fill={fillColor}
                             stroke={strokeColor}
                             strokeWidth={strokeWidth}
-                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeDasharray={dashProp}
                         />
                     )}
                     {shapeType === 'diamond' && (
@@ -443,7 +479,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                             fill={fillColor}
                             stroke={strokeColor}
                             strokeWidth={strokeWidth}
-                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeDasharray={dashProp}
                         />
                     )}
                     {shapeType === 'triangle' && (
@@ -452,8 +488,91 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                             fill={fillColor}
                             stroke={strokeColor}
                             strokeWidth={strokeWidth}
-                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeDasharray={dashProp}
                         />
+                    )}
+                    {shapeType === 'hexagon' && (
+                        <polygon
+                            points="25,6 75,6 96,50 75,94 25,94 4,50"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={dashProp}
+                        />
+                    )}
+                    {shapeType === 'parallelogram' && (
+                        <polygon
+                            points="20,8 96,8 80,92 4,92"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={dashProp}
+                        />
+                    )}
+                    {shapeType === 'database' && (
+                        <>
+                            <path
+                                d="M 8,20 L 8,80 A 42,14 0 0 0 92,80 L 92,20 Z"
+                                fill={fillColor}
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth}
+                                strokeDasharray={dashProp}
+                            />
+                            <ellipse
+                                cx="50"
+                                cy="20"
+                                rx="42"
+                                ry="14"
+                                fill={fillColor}
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth}
+                                strokeDasharray={dashProp}
+                            />
+                        </>
+                    )}
+                    {shapeType === 'queue' && (
+                        <>
+                            <path
+                                d="M 18,8 L 82,8 A 12,42 0 0 1 82,92 L 18,92 A 12,42 0 0 1 18,8 Z"
+                                fill={fillColor}
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth}
+                                strokeDasharray={dashProp}
+                            />
+                            <ellipse
+                                cx="82"
+                                cy="50"
+                                rx="12"
+                                ry="42"
+                                fill={fillColor}
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth}
+                                strokeDasharray={dashProp}
+                            />
+                        </>
+                    )}
+                    {shapeType === 'cloud' && (
+                        <path
+                            d="M 26,78 L 76,78 A 18,18 0 0 0 80,43 A 22,22 0 0 0 38,32 A 18,18 0 0 0 14,50 A 16,16 0 0 0 26,78 Z"
+                            fill={fillColor}
+                            stroke={strokeColor}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={dashProp}
+                            strokeLinejoin="round"
+                        />
+                    )}
+                    {shapeType === 'server' && (
+                        <>
+                            <rect x="6" y="6" width="88" height="26" rx="4" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} strokeDasharray={dashProp} />
+                            <circle cx="18" cy="19" r="3.5" fill={strokeColor} />
+                            <circle cx="28" cy="19" r="3.5" fill={strokeColor} />
+                            <rect x="6" y="37" width="88" height="26" rx="4" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} strokeDasharray={dashProp} />
+                            <circle cx="18" cy="50" r="3.5" fill={strokeColor} />
+                            <circle cx="28" cy="50" r="3.5" fill={strokeColor} />
+                            <rect x="6" y="68" width="88" height="26" rx="4" fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} strokeDasharray={dashProp} />
+                            <circle cx="18" cy="81" r="3.5" fill={strokeColor} />
+                            <circle cx="28" cy="81" r="3.5" fill={strokeColor} />
+                        </>
                     )}
                     {shapeType === 'line' && (
                         <line
@@ -463,7 +582,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                             y2="50"
                             stroke={strokeColor}
                             strokeWidth={strokeWidth}
-                            strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                            strokeDasharray={dashProp}
                             strokeLinecap="round"
                         />
                     )}
@@ -476,7 +595,7 @@ const createShapeComponent = (shapeType: 'rect' | 'circle' | 'arrow' | 'line' | 
                                 y2="50"
                                 stroke={strokeColor}
                                 strokeWidth={strokeWidth}
-                                strokeDasharray={strokeDasharray === 'none' ? undefined : strokeDasharray}
+                                strokeDasharray={dashProp}
                                 strokeLinecap="round"
                             />
                             <polygon points="96,50 76,36 76,64" fill={strokeColor} />
@@ -492,6 +611,12 @@ export const KShapeRect = createShapeComponent('rect');
 export const KShapeCircle = createShapeComponent('circle');
 export const KShapeDiamond = createShapeComponent('diamond');
 export const KShapeTriangle = createShapeComponent('triangle');
+export const KShapeDatabase = createShapeComponent('database');
+export const KShapeCloud = createShapeComponent('cloud');
+export const KShapeServer = createShapeComponent('server');
+export const KShapeHexagon = createShapeComponent('hexagon');
+export const KShapeParallelogram = createShapeComponent('parallelogram');
+export const KShapeQueue = createShapeComponent('queue');
 export const KShapeArrow = createShapeComponent('arrow');
 export const KShapeLine = createShapeComponent('line');
 
@@ -820,6 +945,12 @@ export const KComponents: Map<string, React.FC<KElementProps>> = new Map([
     ["circle", KShapeCircle],
     ["diamond", KShapeDiamond],
     ["triangle", KShapeTriangle],
+    ["database", KShapeDatabase],
+    ["cloud", KShapeCloud],
+    ["server", KShapeServer],
+    ["hexagon", KShapeHexagon],
+    ["parallelogram", KShapeParallelogram],
+    ["queue", KShapeQueue],
     ["arrow", KShapeArrow],
     ["line", KShapeLine],
     ["image", KImage]
