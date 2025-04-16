@@ -6,6 +6,105 @@ interface ToolsProps {
     handleAddElement: (elemType:string, info?:string)=>void
 }
 
+const ShapeToolIcon: React.FC<{ name: string }> = ({ name }) => {
+    const svgProps = {
+        width: 20,
+        height: 20,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: 2,
+        strokeLinecap: "round" as const,
+        strokeLinejoin: "round" as const,
+    };
+
+    switch (name) {
+        case 'rect':
+            return (
+                <svg {...svgProps}>
+                    <rect x="3" y="5" width="18" height="14" rx="2" />
+                </svg>
+            );
+        case 'circle':
+            return (
+                <svg {...svgProps}>
+                    <circle cx="12" cy="12" r="8.5" />
+                </svg>
+            );
+        case 'diamond':
+            return (
+                <svg {...svgProps}>
+                    <polygon points="12,2.5 21.5,12 12,21.5 2.5,12" />
+                </svg>
+            );
+        case 'triangle':
+            return (
+                <svg {...svgProps}>
+                    <polygon points="12,3.5 21,20 3,20" />
+                </svg>
+            );
+        case 'hexagon':
+            return (
+                <svg {...svgProps}>
+                    <polygon points="7,3.5 17,3.5 22,12 17,20.5 7,20.5 2,12" />
+                </svg>
+            );
+        case 'parallelogram':
+            return (
+                <svg {...svgProps}>
+                    <polygon points="6.5,5 21.5,5 17.5,19 2.5,19" />
+                </svg>
+            );
+        case 'database':
+            return (
+                <svg {...svgProps}>
+                    <ellipse cx="12" cy="5.5" rx="7.5" ry="3" />
+                    <path d="M4.5,5.5 v13 c0,1.66 3.36,3 7.5,3 s7.5,-1.34 7.5,-3 v-13" />
+                    <path d="M4.5,12 c0,1.66 3.36,3 7.5,3 s7.5,-1.34 7.5,-3" />
+                </svg>
+            );
+        case 'server':
+            return (
+                <svg {...svgProps}>
+                    <rect x="3" y="3.5" width="18" height="5" rx="1" />
+                    <circle cx="6.5" cy="6" r="0.8" fill="currentColor" />
+                    <rect x="3" y="9.5" width="18" height="5" rx="1" />
+                    <circle cx="6.5" cy="12" r="0.8" fill="currentColor" />
+                    <rect x="3" y="15.5" width="18" height="5" rx="1" />
+                    <circle cx="6.5" cy="18" r="0.8" fill="currentColor" />
+                </svg>
+            );
+        case 'cloud':
+            return (
+                <svg {...svgProps}>
+                    <path d="M6.5,19 h11 a4.5,4.5 0 0 0 0.8,-8.92 a5.5,5.5 0 0 0 -10.6,-1.58 a4,4 0 0 0 -1.2,10.5 z" />
+                </svg>
+            );
+        case 'queue':
+            return (
+                <svg {...svgProps}>
+                    <path d="M5,6 h14 a2.5,6 0 0 1 0,12 h-14 a2.5,6 0 0 1 0,-12 z" />
+                    <ellipse cx="19" cy="12" rx="2.5" ry="6" />
+                </svg>
+            );
+        case 'arrow':
+            return (
+                <svg {...svgProps}>
+                    <line x1="3" y1="12" x2="19" y2="12" />
+                    <polyline points="14,7 20,12 14,17" />
+                </svg>
+            );
+        case 'line':
+            return (
+                <svg {...svgProps}>
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                </svg>
+            );
+        default:
+            return null;
+    }
+};
+
 export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     const { currentSlide, setSlideBackground, setSlideTransition, setSlideTransitionDuration } = useDeck();
 
@@ -23,12 +122,12 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     };
 
     const contentTools = [
-        {name:'button', icon:'crop_16_9', label:'Add Button'},
-        {name:'textarea', icon:'edit_note', label:'Add Text Area'},
+        {name:'button', icon:'smart_button', label:'Add Button'},
+        {name:'textarea', icon:'notes', label:'Add Text Area'},
         {name:'markdown', icon:'article', label:'Add Markdown Block'},
         {name:'callout', icon:'lightbulb', label:'Add Callout Card'},
         {name:'quote', icon:'format_quote', label:'Add Quote Block'},
-        {name:'stat', icon:'analytics', label:'Add Metric / KPI Card'},
+        {name:'stat', icon:'Leaderboard', fallbackIcon:'equalizer', label:'Add Metric / KPI Card'},
         {name:'badge', icon:'label', label:'Add Tag Badge'},
         {name:'chart', icon:'bar_chart', label:'Add Bar Chart'},
         {name:'table', icon:'table_chart', label:'Add Data Table'},
@@ -37,18 +136,18 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
     ];
 
     const archShapeTools = [
-        {name:'rect', icon:'check_box_outline_blank', label:'Add Rectangle'},
-        {name:'circle', icon:'radio_button_unchecked', label:'Add Circle'},
-        {name:'diamond', icon:'crop_rotate', label:'Add Decision Diamond'},
-        {name:'triangle', icon:'change_history', label:'Add Triangle'},
-        {name:'hexagon', icon:'hexagon', label:'Add Microservice Hexagon'},
-        {name:'parallelogram', icon:'view_stream', label:'Add I/O Parallelogram'},
-        {name:'database', icon:'storage', label:'Add Database Cylinder'},
-        {name:'server', icon:'dns', label:'Add Server / Compute Rack'},
-        {name:'cloud', icon:'cloud_queue', label:'Add Cloud Node'},
-        {name:'queue', icon:'sync_alt', label:'Add Message Queue / Bus'},
-        {name:'arrow', icon:'trending_flat', label:'Add Arrow Connector'},
-        {name:'line', icon:'horizontal_rule', label:'Add Line Connector'},
+        {name:'rect', label:'Add Rectangle'},
+        {name:'circle', label:'Add Circle'},
+        {name:'diamond', label:'Add Decision Diamond'},
+        {name:'triangle', label:'Add Triangle'},
+        {name:'hexagon', label:'Add Microservice Hexagon'},
+        {name:'parallelogram', label:'Add I/O Parallelogram'},
+        {name:'database', label:'Add Database Cylinder'},
+        {name:'server', label:'Add Server / Compute Rack'},
+        {name:'cloud', label:'Add Cloud Node'},
+        {name:'queue', label:'Add Message Queue / Bus'},
+        {name:'arrow', label:'Add Arrow Connector'},
+        {name:'line', label:'Add Line Connector'},
     ];
 
     return (
@@ -65,7 +164,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                         aria-label={tool.label}
                         onClick={()=>{handleAddElement(tool.name)}}
                     >
-                        <i className="material-icons">{tool.icon}</i>
+                        <i className="material-icons">{tool.fallbackIcon ?? tool.icon}</i>
                     </label>
                 )
             )}
@@ -87,7 +186,7 @@ export const Tools:React.FC<ToolsProps> = ({handleAddElement}) => {
                         aria-label={tool.label}
                         onClick={()=>{handleAddElement(tool.name)}}
                     >
-                        <i className="material-icons">{tool.icon}</i>
+                        <ShapeToolIcon name={tool.name} />
                     </label>
                 )
             )}

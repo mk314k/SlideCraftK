@@ -512,7 +512,7 @@ const createShapeComponent = (shapeType: ArchShapeType) => {
                     {shapeType === 'database' && (
                         <>
                             <path
-                                d="M 8,20 L 8,80 A 42,14 0 0 0 92,80 L 92,20 Z"
+                                d="M 8,18 L 8,82 A 42,13 0 0 0 92,82 L 92,18"
                                 fill={fillColor}
                                 stroke={strokeColor}
                                 strokeWidth={strokeWidth}
@@ -520,12 +520,19 @@ const createShapeComponent = (shapeType: ArchShapeType) => {
                             />
                             <ellipse
                                 cx="50"
-                                cy="20"
+                                cy="18"
                                 rx="42"
-                                ry="14"
+                                ry="13"
                                 fill={fillColor}
                                 stroke={strokeColor}
                                 strokeWidth={strokeWidth}
+                                strokeDasharray={dashProp}
+                            />
+                            <path
+                                d="M 8,42 A 42,13 0 0 0 92,42"
+                                fill="none"
+                                stroke={strokeColor}
+                                strokeWidth={strokeWidth * 0.75}
                                 strokeDasharray={dashProp}
                             />
                         </>
@@ -533,7 +540,7 @@ const createShapeComponent = (shapeType: ArchShapeType) => {
                     {shapeType === 'queue' && (
                         <>
                             <path
-                                d="M 18,8 L 82,8 A 12,42 0 0 1 82,92 L 18,92 A 12,42 0 0 1 18,8 Z"
+                                d="M 18,8 L 82,8 A 12,42 0 0 0 82,92 L 18,92 A 12,42 0 0 1 18,8 Z"
                                 fill={fillColor}
                                 stroke={strokeColor}
                                 strokeWidth={strokeWidth}
