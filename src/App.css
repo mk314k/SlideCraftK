@@ -853,17 +853,203 @@ textarea {
 .right-inspector-body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .inspector-badge {
   display: flex;
   justify-content: space-between;
-  font-size: 0.78rem;
+  align-items: center;
+  font-size: 0.76rem;
   background: var(--surface);
   border: 1px solid var(--panel-border);
-  padding: 6px 8px;
+  padding: 5px 8px;
   border-radius: 8px;
+}
+
+.inspector-type-pill {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.inspector-id-pill {
+  font-family: monospace;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.inspector-card {
+  background: rgba(251, 248, 243, 0.65);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inspector-card-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.inspector-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inspector-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.inspector-row-label {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.inspector-select {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 0 6px;
+  font-size: 0.76rem;
+}
+
+.inspector-mini-select {
+  width: 68px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 1px 3px;
+  font-size: 0.72rem;
+}
+
+.inspector-segmented {
+  display: inline-flex;
+  background: var(--foreground);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.seg-btn {
+  padding: 3px 7px !important;
+  font-size: 0.74rem;
+  line-height: 1;
+  border: none !important;
+  background: transparent !important;
+  color: var(--text-primary);
+  border-radius: 5px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seg-btn .material-icons {
+  font-size: 16px;
+}
+
+.seg-btn:hover {
+  background: rgba(184, 93, 56, 0.12) !important;
+}
+
+.seg-btn.active {
+  background: var(--accent) !important;
+  color: #fffdf9 !important;
+}
+
+.inspector-color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.inspector-color-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.inspector-color-chip input[type="color"] {
+  width: 22px;
+  height: 20px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.inspector-toggle-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 8px !important;
+  font-size: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+}
+
+.inspector-toggle-btn.active {
+  background: rgba(184, 93, 56, 0.16);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.inspector-play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px !important;
+  font-size: 0.72rem;
+  background: var(--surface);
+  border: 1px solid var(--panel-border);
+}
+
+.inspector-play-btn.active {
+  background: var(--accent);
+  color: #fffdf9;
+  border-color: var(--accent);
+}
+
+.inspector-layer-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--foreground);
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.inspector-delete-btn:hover {
+  border-color: #dc2626 !important;
+  color: #991b1b !important;
+  background: #fee2e2 !important;
 }
 
 .inspector-actions {

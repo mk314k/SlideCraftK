@@ -493,88 +493,128 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
           ) : (
             <div className="right-inspector-body">
               <div className="inspector-badge">
-                <span>Type: <strong>{activeElem.name}</strong></span>
-                <span>ID: #{activeElem.id}</span>
+                <span className="inspector-type-pill">{activeElem.name}</span>
+                <span className="inspector-id-pill">#{activeElem.id}</span>
               </div>
 
-              <span className="inspector-section-label">Formatting</span>
-              <div className="toolset">
-                {isTextType && (
-                  <>
-                    <div className="tool" data-tooltip="Font Family" title="Font Family">
-                      <i className="material-icons">text_fields</i>
-                      <select
-                        id="font-family"
-                        value={activeElem.style['fontFamily'] ?? 'Arial'}
-                        onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
+              {isTextType && (
+                <div className="inspector-card">
+                  <span className="inspector-card-title">Typography</span>
+                  <div className="inspector-row">
+                    <select
+                      id="font-family"
+                      className="inspector-select"
+                      value={activeElem.style['fontFamily'] ?? 'Arial'}
+                      onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
+                    >
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="monospace">Monospace</option>
+                    </select>
+                    <div className="inspector-segmented">
+                      <button
+                        type="button"
+                        className="seg-btn"
+                        data-tooltip="Decrease Font Size"
+                        onClick={() => handleFontSize(-4)}
                       >
-                        <option value="Arial">Arial</option>
-                        <option value="Helvetica">Helvetica</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="monospace">Monospace</option>
-                      </select>
+                        A−
+                      </button>
+                      <button
+                        type="button"
+                        className="seg-btn"
+                        data-tooltip="Increase Font Size"
+                        onClick={() => handleFontSize(4)}
+                      >
+                        A+
+                      </button>
                     </div>
-                    <label
-                      className={`tool${activeElem.style['fontWeight'] === 'bold' ? ' tool-active' : ''}`}
-                      data-tooltip="Toggle Bold"
-                      onClick={handleBold}
-                    >
-                      <i className="material-icons">format_bold</i>
-                    </label>
-                    <label
-                      className={`tool${activeElem.style['fontStyle'] === 'italic' ? ' tool-active' : ''}`}
-                      data-tooltip="Toggle Italic"
-                      onClick={handleItalic}
-                    >
-                      <i className="material-icons">format_italic</i>
-                    </label>
-                    <label
-                      className={`tool${activeElem.style['textDecoration'] === 'underline' ? ' tool-active' : ''}`}
-                      data-tooltip="Toggle Underline"
-                      onClick={handleUnderline}
-                    >
-                      <i className="material-icons">format_underlined</i>
-                    </label>
-                    <label
-                      className={`tool${activeElem.style['textAlign'] === 'left' ? ' tool-active' : ''}`}
-                      data-tooltip="Align Left"
-                      onClick={() => handleTextAlign('left')}
-                    >
-                      <i className="material-icons">format_align_left</i>
-                    </label>
-                    <label
-                      className={`tool${(!activeElem.style['textAlign'] || activeElem.style['textAlign'] === 'center') ? ' tool-active' : ''}`}
-                      data-tooltip="Align Center"
-                      onClick={() => handleTextAlign('center')}
-                    >
-                      <i className="material-icons">format_align_center</i>
-                    </label>
-                    <label
-                      className={`tool${activeElem.style['textAlign'] === 'right' ? ' tool-active' : ''}`}
-                      data-tooltip="Align Right"
-                      onClick={() => handleTextAlign('right')}
-                    >
-                      <i className="material-icons">format_align_right</i>
-                    </label>
-                    <label
-                      className={`tool${activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none' ? ' tool-active' : ''}`}
-                      data-tooltip="Card Drop Shadow"
-                      onClick={handleShadowToggle}
-                    >
-                      <i className="material-icons">layers</i>
-                    </label>
-                  </>
-                )}
-                {(isTextType || isLatexType) && (
-                  <>
-                    <label className="tool" data-tooltip="Increase Font Size" onClick={() => handleFontSize(4)}>
-                      <i className="material-icons">text_increase</i>
-                    </label>
-                    <label className="tool" data-tooltip="Decrease Font Size" onClick={() => handleFontSize(-4)}>
-                      <i className="material-icons">text_decrease</i>
-                    </label>
-                    <label className="tool" data-tooltip="Text Color">
-                      <i className="material-icons">format_color_text</i>
+                  </div>
+                  <div className="inspector-row">
+                    <div className="inspector-segmented">
+                      <button
+                        type="button"
+                        className={`seg-btn${activeElem.style['fontWeight'] === 'bold' ? ' active' : ''}`}
+                        data-tooltip="Bold"
+                        onClick={handleBold}
+                      >
+                        <i className="material-icons">format_bold</i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`seg-btn${activeElem.style['fontStyle'] === 'italic' ? ' active' : ''}`}
+                        data-tooltip="Italic"
+                        onClick={handleItalic}
+                      >
+                        <i className="material-icons">format_italic</i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`seg-btn${activeElem.style['textDecoration'] === 'underline' ? ' active' : ''}`}
+                        data-tooltip="Underline"
+                        onClick={handleUnderline}
+                      >
+                        <i className="material-icons">format_underlined</i>
+                      </button>
+                    </div>
+                    <div className="inspector-segmented">
+                      <button
+                        type="button"
+                        className={`seg-btn${activeElem.style['textAlign'] === 'left' ? ' active' : ''}`}
+                        data-tooltip="Align Left"
+                        onClick={() => handleTextAlign('left')}
+                      >
+                        <i className="material-icons">format_align_left</i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`seg-btn${(!activeElem.style['textAlign'] || activeElem.style['textAlign'] === 'center') ? ' active' : ''}`}
+                        data-tooltip="Align Center"
+                        onClick={() => handleTextAlign('center')}
+                      >
+                        <i className="material-icons">format_align_center</i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`seg-btn${activeElem.style['textAlign'] === 'right' ? ' active' : ''}`}
+                        data-tooltip="Align Right"
+                        onClick={() => handleTextAlign('right')}
+                      >
+                        <i className="material-icons">format_align_right</i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {(isTextType || isLatexType) && (
+                <div className="inspector-card">
+                  <span className="inspector-card-title">Appearance</span>
+                  {isLatexType && (
+                    <div className="inspector-row">
+                      <span className="inspector-row-label">Equation Scale</span>
+                      <div className="inspector-segmented">
+                        <button
+                          type="button"
+                          className="seg-btn"
+                          onClick={() => handleFontSize(-4)}
+                        >
+                          −
+                        </button>
+                        <button
+                          type="button"
+                          className="seg-btn"
+                          onClick={() => handleFontSize(4)}
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="inspector-color-grid">
+                    <label className="inspector-color-chip" data-tooltip="Text Color">
+                      <span>Text</span>
                       <input
                         type="color"
                         id="text-color"
@@ -582,8 +622,8 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
                         onChange={(e) => handleStyleChange('color', e.target.value)}
                       />
                     </label>
-                    <label className="tool" data-tooltip="Background Color">
-                      <i className="material-icons">format_color_fill</i>
+                    <label className="inspector-color-chip" data-tooltip="Background Fill">
+                      <span>Fill</span>
                       <input
                         type="color"
                         id="element-bg-color"
@@ -591,13 +631,26 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
                         onChange={(e) => handleStyleChange('background', e.target.value)}
                       />
                     </label>
-                  </>
-                )}
-                {isShape && (
-                  <>
-                    <label className="tool" data-tooltip="Shape Line / Stroke Color">
-                      <i className="material-icons">border_color</i>
-                      <span className="tool-inline-label">Line</span>
+                  </div>
+                  {isTextType && (
+                    <button
+                      type="button"
+                      className={`inspector-toggle-btn${activeElem.style['boxShadow'] && activeElem.style['boxShadow'] !== 'none' ? ' active' : ''}`}
+                      onClick={handleShadowToggle}
+                    >
+                      <i className="material-icons" style={{ fontSize: '15px' }}>layers</i>
+                      <span>Soft Card Shadow</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {isShape && (
+                <div className="inspector-card">
+                  <span className="inspector-card-title">Stroke &amp; Fill</span>
+                  <div className="inspector-color-grid">
+                    <label className="inspector-color-chip" data-tooltip="Shape Line / Stroke Color">
+                      <span>Line</span>
                       <input
                         type="color"
                         id="shape-line-color"
@@ -606,47 +659,49 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
                       />
                     </label>
                     {isFilledShape && (
-                      <>
-                        <label className="tool" data-tooltip="Shape Fill Color">
-                          <i className="material-icons">format_color_fill</i>
-                          <span className="tool-inline-label">Fill</span>
-                          <input
-                            type="color"
-                            id="shape-fill-color"
-                            value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
-                            onChange={(e) => handleStyleChange('background', e.target.value)}
-                          />
-                        </label>
-                        <label
-                          className={`tool${activeElem.style['background'] === 'transparent' ? ' tool-active' : ''}`}
-                          data-tooltip="Outline Only (Transparent Fill)"
-                          onClick={() =>
-                            handleStyleChange(
-                              'background',
-                              activeElem.style['background'] === 'transparent' ? '#f2e8dc' : 'transparent'
-                            )
-                          }
-                        >
-                          <span className="tool-inline-label">No Fill</span>
-                        </label>
-                      </>
+                      <label className="inspector-color-chip" data-tooltip="Shape Fill Color">
+                        <span>Fill</span>
+                        <input
+                          type="color"
+                          id="shape-fill-color"
+                          value={activeElem.style['background']?.startsWith('#') ? activeElem.style['background'] : '#f2e8dc'}
+                          onChange={(e) => handleStyleChange('background', e.target.value)}
+                        />
+                      </label>
                     )}
-                    <div className="tool" data-tooltip="Line Thickness (px)">
-                      <span className="tool-inline-label">Width</span>
+                  </div>
+                  {isFilledShape && (
+                    <button
+                      type="button"
+                      className={`inspector-toggle-btn${activeElem.style['background'] === 'transparent' ? ' active' : ''}`}
+                      onClick={() =>
+                        handleStyleChange(
+                          'background',
+                          activeElem.style['background'] === 'transparent' ? '#f2e8dc' : 'transparent'
+                        )
+                      }
+                    >
+                      <span>Outline Only (No Fill)</span>
+                    </button>
+                  )}
+                  <div className="inspector-grid">
+                    <label className="inspector-field" data-tooltip="Line Thickness (px)">
+                      <span>Width</span>
                       <input
                         type="number"
                         min={1}
                         max={16}
-                        style={{ width: '44px' }}
                         value={parseFloat(activeElem.style['strokeWidth'] ?? '4') || 4}
                         onChange={(e) => {
                           const w = Math.max(1, Math.min(16, parseInt(e.target.value, 10) || 4));
                           handleStyleChange('strokeWidth', String(w));
                         }}
                       />
-                    </div>
-                    <div className="tool" data-tooltip="Line Dash Pattern">
+                    </label>
+                    <label className="inspector-field" data-tooltip="Line Dash Pattern">
+                      <span>Dash</span>
                       <select
+                        className="inspector-mini-select"
                         value={activeElem.style['strokeDasharray'] ?? 'none'}
                         onChange={(e) => handleStyleChange('strokeDasharray', e.target.value)}
                       >
@@ -654,203 +709,210 @@ const RightInspector: React.FC<{ isOpen: boolean; onToggle: () => void }> = ({ i
                         <option value="8,6">Dashed</option>
                         <option value="3,5">Dotted</option>
                       </select>
-                    </div>
-                  </>
-                )}
-                <label className="tool" data-tooltip="Bring Forward 1 Layer" onClick={() => handleZIndexStep(1)}>
-                  <i className="material-icons">flip_to_front</i>
-                </label>
-                <label className="tool" data-tooltip="Send Backward 1 Layer" onClick={() => handleZIndexStep(-1)}>
-                  <i className="material-icons">flip_to_back</i>
-                </label>
-                <label className="tool" data-tooltip="Bring to Front" onClick={handleBringToFront}>
-                  <i className="material-icons">vertical_align_top</i>
-                </label>
-                <label className="tool" data-tooltip="Send to Back" onClick={handleSendToBack}>
-                  <i className="material-icons">vertical_align_bottom</i>
-                </label>
-              </div>
-
-              <span className="inspector-section-label">Entrance Animation</span>
-              <div className="toolset">
-                <div className="tool" data-tooltip="Entrance Animation Style">
-                  <i className="material-icons">motion_photos_on</i>
-                  <select
-                    value={activeElem.animation ?? 'fade-in'}
-                    onChange={(e) => {
-                      const nextAnim = e.target.value as ElementAnimationType;
-                      updateElement(activeElem.id, (el) => {
-                        el.animation = nextAnim;
-                      });
-                      setTimeout(() => triggerAnimPreview(activeElem.id), 20);
-                    }}
-                  >
-                    <option value="none">None</option>
-                    <option value="fade-in">Fade In</option>
-                    <option value="rise-up">Rise Up</option>
-                    <option value="pop-in">Pop Zoom</option>
-                    <option value="slide-right">Slide Right</option>
-                    <option value="blur-in">Blur In</option>
-                  </select>
+                    </label>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  className={`tool anim-preview-btn${previewingAnim ? ' tool-active' : ''}`}
-                  data-tooltip="Preview Entrance Animation"
-                  onClick={() => triggerAnimPreview(activeElem.id)}
-                >
-                  <i className="material-icons" style={{ fontSize: '16px' }}>play_arrow</i>
-                  <span className="tool-inline-label">Preview</span>
-                </button>
-                <label className="inspector-field" style={{ width: '100%' }} data-tooltip="Animation Speed / Duration in seconds">
-                  <span>Duration (s)</span>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={3.0}
-                    step={0.05}
-                    value={activeElem.animDuration ?? 0.45}
-                    onChange={(e) => {
-                      const val = Math.min(3.0, Math.max(0.1, parseFloat(e.target.value) || 0.45));
-                      updateElement(activeElem.id, (el) => {
-                        el.animDuration = val;
-                      });
-                    }}
-                  />
-                </label>
-              </div>
+              )}
 
-              <span className="inspector-section-label">Geometry &amp; Layer</span>
-              <div className="inspector-align-bar">
-                <button
-                  type="button"
-                  title="Center Horizontally on Slide"
-                  onClick={() =>
+              <div className="inspector-card">
+                <div className="inspector-card-header-row">
+                  <span className="inspector-card-title">Entrance Animation</span>
+                  <button
+                    type="button"
+                    className={`inspector-play-btn${previewingAnim ? ' active' : ''}`}
+                    data-tooltip="Preview Entrance Animation"
+                    onClick={() => triggerAnimPreview(activeElem.id)}
+                  >
+                    <i className="material-icons" style={{ fontSize: '14px' }}>play_arrow</i>
+                    <span>Preview</span>
+                  </button>
+                </div>
+                <select
+                  className="inspector-select"
+                  value={activeElem.animation ?? 'fade-in'}
+                  onChange={(e) => {
+                    const nextAnim = e.target.value as ElementAnimationType;
                     updateElement(activeElem.id, (el) => {
-                      el.x = Math.round((SLIDE_WIDTH - el.width) / 2);
-                    })
-                  }
+                      el.animation = nextAnim;
+                    });
+                    setTimeout(() => triggerAnimPreview(activeElem.id), 20);
+                  }}
                 >
-                  Center X
-                </button>
-                <button
-                  type="button"
-                  title="Center Vertically on Slide"
-                  onClick={() =>
-                    updateElement(activeElem.id, (el) => {
-                      el.y = Math.round((SLIDE_HEIGHT - el.height) / 2);
-                    })
-                  }
-                >
-                  Center Y
-                </button>
-              </div>
-              <div className="inspector-grid">
-                <label className="inspector-field">
-                  <span>X</span>
-                  <input
-                    type="number"
-                    value={activeElem.x}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value, 10) || 0;
-                      updateElement(activeElem.id, (el) => { el.x = val; });
-                    }}
-                  />
-                </label>
-                <label className="inspector-field">
-                  <span>Y</span>
-                  <input
-                    type="number"
-                    value={activeElem.y}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value, 10) || 0;
-                      updateElement(activeElem.id, (el) => { el.y = val; });
-                    }}
-                  />
-                </label>
-                <label className="inspector-field">
-                  <span>W</span>
-                  <input
-                    type="number"
-                    min={24}
-                    value={activeElem.width}
-                    onChange={(e) => {
-                      const val = Math.max(24, parseInt(e.target.value, 10) || 24);
-                      updateElement(activeElem.id, (el) => { el.width = val; });
-                    }}
-                  />
-                </label>
-                <label className="inspector-field">
-                  <span>H</span>
-                  <input
-                    type="number"
-                    min={24}
-                    value={activeElem.height}
-                    onChange={(e) => {
-                      const val = Math.max(24, parseInt(e.target.value, 10) || 24);
-                      updateElement(activeElem.id, (el) => { el.height = val; });
-                    }}
-                  />
-                </label>
-                <label className="inspector-field">
-                  <span>Rot°</span>
-                  <input
-                    type="number"
-                    value={activeElem.rotation ?? 0}
-                    onChange={(e) => {
-                      const val = ((parseInt(e.target.value, 10) || 0) % 360 + 360) % 360;
-                      updateElement(activeElem.id, (el) => { el.rotation = val; });
-                    }}
-                  />
-                </label>
-                <label className="inspector-field">
-                  <span>Opac</span>
-                  <input
-                    type="number"
-                    min={0.1}
-                    max={1}
-                    step={0.1}
-                    value={parseFloat(activeElem.style['opacity'] ?? '1') || 1}
-                    onChange={(e) => {
-                      const val = Math.min(1, Math.max(0.1, parseFloat(e.target.value) || 1));
-                      updateElementStyle(activeElem.id, 'opacity', String(val));
-                    }}
-                  />
-                </label>
-                {!isShape && (
-                  <label className="inspector-field">
-                    <span>Rad</span>
+                  <option value="none">None (Instant)</option>
+                  <option value="fade-in">Fade In</option>
+                  <option value="rise-up">Rise Up</option>
+                  <option value="pop-in">Pop Zoom</option>
+                  <option value="slide-right">Slide Right</option>
+                  <option value="blur-in">Blur In</option>
+                </select>
+                <div className="inspector-grid">
+                  <label className="inspector-field" data-tooltip="Animation Speed / Duration in seconds">
+                    <span>Speed (s)</span>
                     <input
                       type="number"
-                      min={0}
-                      max={100}
-                      value={parseInt(activeElem.style['borderRadius'] ?? '12', 10) || 0}
+                      min={0.1}
+                      max={3.0}
+                      step={0.05}
+                      value={activeElem.animDuration ?? 0.45}
                       onChange={(e) => {
-                        const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                        updateElementStyle(activeElem.id, 'borderRadius', `${val}px`);
+                        const val = Math.min(3.0, Math.max(0.1, parseFloat(e.target.value) || 0.45));
+                        updateElement(activeElem.id, (el) => {
+                          el.animDuration = val;
+                        });
                       }}
                     />
                   </label>
-                )}
-                <label className="inspector-field">
-                  <span>Step</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={20}
-                    value={activeElem.step ?? 0}
-                    onChange={(e) => {
-                      const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                      updateElement(activeElem.id, (el) => { el.step = val; });
-                    }}
-                  />
-                </label>
+                  <label className="inspector-field" data-tooltip="Click order in Presentation Mode (0 = visible immediately)">
+                    <span>Step #</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={20}
+                      value={activeElem.step ?? 0}
+                      onChange={(e) => {
+                        const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                        updateElement(activeElem.id, (el) => { el.step = val; });
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
+
+              <div className="inspector-card">
+                <span className="inspector-card-title">Geometry &amp; Layer</span>
+                <div className="inspector-align-bar">
+                  <button
+                    type="button"
+                    title="Center Horizontally on Slide"
+                    onClick={() =>
+                      updateElement(activeElem.id, (el) => {
+                        el.x = Math.round((SLIDE_WIDTH - el.width) / 2);
+                      })
+                    }
+                  >
+                    Center X
+                  </button>
+                  <button
+                    type="button"
+                    title="Center Vertically on Slide"
+                    onClick={() =>
+                      updateElement(activeElem.id, (el) => {
+                        el.y = Math.round((SLIDE_HEIGHT - el.height) / 2);
+                      })
+                    }
+                  >
+                    Center Y
+                  </button>
+                </div>
+                <div className="inspector-grid">
+                  <label className="inspector-field">
+                    <span>X</span>
+                    <input
+                      type="number"
+                      value={activeElem.x}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10) || 0;
+                        updateElement(activeElem.id, (el) => { el.x = val; });
+                      }}
+                    />
+                  </label>
+                  <label className="inspector-field">
+                    <span>Y</span>
+                    <input
+                      type="number"
+                      value={activeElem.y}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10) || 0;
+                        updateElement(activeElem.id, (el) => { el.y = val; });
+                      }}
+                    />
+                  </label>
+                  <label className="inspector-field">
+                    <span>W</span>
+                    <input
+                      type="number"
+                      min={24}
+                      value={activeElem.width}
+                      onChange={(e) => {
+                        const val = Math.max(24, parseInt(e.target.value, 10) || 24);
+                        updateElement(activeElem.id, (el) => { el.width = val; });
+                      }}
+                    />
+                  </label>
+                  <label className="inspector-field">
+                    <span>H</span>
+                    <input
+                      type="number"
+                      min={24}
+                      value={activeElem.height}
+                      onChange={(e) => {
+                        const val = Math.max(24, parseInt(e.target.value, 10) || 24);
+                        updateElement(activeElem.id, (el) => { el.height = val; });
+                      }}
+                    />
+                  </label>
+                  <label className="inspector-field">
+                    <span>Rot°</span>
+                    <input
+                      type="number"
+                      value={activeElem.rotation ?? 0}
+                      onChange={(e) => {
+                        const val = ((parseInt(e.target.value, 10) || 0) % 360 + 360) % 360;
+                        updateElement(activeElem.id, (el) => { el.rotation = val; });
+                      }}
+                    />
+                  </label>
+                  <label className="inspector-field">
+                    <span>Opac</span>
+                    <input
+                      type="number"
+                      min={0.1}
+                      max={1}
+                      step={0.1}
+                      value={parseFloat(activeElem.style['opacity'] ?? '1') || 1}
+                      onChange={(e) => {
+                        const val = Math.min(1, Math.max(0.1, parseFloat(e.target.value) || 1));
+                        updateElementStyle(activeElem.id, 'opacity', String(val));
+                      }}
+                    />
+                  </label>
+                  {!isShape && (
+                    <label className="inspector-field">
+                      <span>Rad</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={parseInt(activeElem.style['borderRadius'] ?? '12', 10) || 0}
+                        onChange={(e) => {
+                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                          updateElementStyle(activeElem.id, 'borderRadius', `${val}px`);
+                        }}
+                      />
+                    </label>
+                  )}
+                </div>
+                <div className="inspector-layer-bar">
+                  <button type="button" className="seg-btn" data-tooltip="Send to Back" onClick={handleSendToBack}>
+                    <i className="material-icons">vertical_align_bottom</i>
+                  </button>
+                  <button type="button" className="seg-btn" data-tooltip="Send Backward" onClick={() => handleZIndexStep(-1)}>
+                    <i className="material-icons">flip_to_back</i>
+                  </button>
+                  <button type="button" className="seg-btn" data-tooltip="Bring Forward" onClick={() => handleZIndexStep(1)}>
+                    <i className="material-icons">flip_to_front</i>
+                  </button>
+                  <button type="button" className="seg-btn" data-tooltip="Bring to Front" onClick={handleBringToFront}>
+                    <i className="material-icons">vertical_align_top</i>
+                  </button>
+                </div>
+              </div>
+
               <div className="inspector-actions">
                 <button type="button" onClick={duplicateActiveElement}>
                   Duplicate
                 </button>
-                <button type="button" onClick={() => deleteElement(activeElem.id)}>
+                <button type="button" className="inspector-delete-btn" onClick={() => deleteElement(activeElem.id)}>
                   Delete
                 </button>
               </div>
