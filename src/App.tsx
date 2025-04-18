@@ -120,27 +120,33 @@ const SlideSet: React.FC<{ onOpenDev: (slideIndex: number, tab: DevTabType) => v
           </div>
         </div>
       ))}
-      <button className="mini" onClick={addSlide}>
-        + Blank
-      </button>
-      <select
-        className="template-select"
-        defaultValue=""
-        onChange={(e) => {
-          if (e.target.value) {
-            addTemplateSlide(e.target.value as SlideTemplateType);
-            e.target.value = '';
-          }
-        }}
-      >
-        <option value="" disabled>
-          + Template…
-        </option>
-        <option value="title">Title Slide</option>
-        <option value="two-column">Two-Column</option>
-        <option value="math-proof">Math Proof</option>
-        <option value="interactive">Interactive Demo</option>
-      </select>
+      <div className="add-slide-card">
+        <button type="button" className="add-slide-primary" onClick={addSlide} title="Add a blank slide">
+          <i className="material-icons">add</i>
+          <span>New Slide</span>
+        </button>
+        <div className="add-slide-template-wrap">
+          <select
+            className="add-slide-template-select"
+            defaultValue=""
+            title="Insert Slide from Template"
+            onChange={(e) => {
+              if (e.target.value) {
+                addTemplateSlide(e.target.value as SlideTemplateType);
+                e.target.value = '';
+              }
+            }}
+          >
+            <option value="" disabled>
+              From Template ▾
+            </option>
+            <option value="title">Title Slide</option>
+            <option value="two-column">Two-Column</option>
+            <option value="math-proof">Math Proof</option>
+            <option value="interactive">Interactive Demo</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 };
@@ -1273,6 +1279,7 @@ const EditorWorkspace: React.FC = () => {
       <RightInspector isOpen={inspectorOpen} onToggle={() => setInspectorOpen((v) => !v)} />
       <div className="top-sect">
         <div className="top-sect-group">
+          <span className="brand-badge">SlideCraftK</span>
           <input
             type="text"
             className="deck-title-input"
@@ -1280,37 +1287,60 @@ const EditorWorkspace: React.FC = () => {
             placeholder="Presentation title"
             onChange={(e) => setDeckTitle(e.target.value)}
           />
-          <button onClick={undo} disabled={!canUndo} title="Undo (Cmd/Ctrl+Z)">
-            Undo
-          </button>
-          <button onClick={redo} disabled={!canRedo} title="Redo (Cmd/Ctrl+Shift+Z)">
-            Redo
-          </button>
+          <div className="top-pill-cluster">
+            <button
+              type="button"
+              className="top-icon-btn"
+              onClick={undo}
+              disabled={!canUndo}
+              data-tooltip="Undo (Cmd/Ctrl+Z)"
+              title="Undo (Cmd/Ctrl+Z)"
+            >
+              <i className="material-icons">undo</i>
+            </button>
+            <button
+              type="button"
+              className="top-icon-btn"
+              onClick={redo}
+              disabled={!canRedo}
+              data-tooltip="Redo (Cmd/Ctrl+Shift+Z)"
+              title="Redo (Cmd/Ctrl+Shift+Z)"
+            >
+              <i className="material-icons">redo</i>
+            </button>
+          </div>
         </div>
+
         <div className="top-sect-group">
-          <button
-            type="button"
-            onClick={() => setZoomFactor((z) => Math.max(0.5, Number((z - 0.1).toFixed(2))))}
-            title="Zoom Out"
-          >
-            −
-          </button>
-          <button
-            type="button"
-            onClick={() => setZoomFactor(1)}
-            title="Reset Zoom to Fit"
-          >
-            {Math.round(zoomFactor * 100)}%
-          </button>
-          <button
-            type="button"
-            onClick={() => setZoomFactor((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))}
-            title="Zoom In"
-          >
-            +
-          </button>
-        </div>
-        <div className="top-sect-group">
+          <div className="top-pill-cluster">
+            <button
+              type="button"
+              className="top-icon-btn"
+              onClick={() => setZoomFactor((z) => Math.max(0.5, Number((z - 0.1).toFixed(2))))}
+              data-tooltip="Zoom Out"
+              title="Zoom Out"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              className="top-zoom-readout"
+              onClick={() => setZoomFactor(1)}
+              data-tooltip="Reset Zoom to 100%"
+              title="Reset Zoom to Fit"
+            >
+              {Math.round(zoomFactor * 100)}%
+            </button>
+            <button
+              type="button"
+              className="top-icon-btn"
+              onClick={() => setZoomFactor((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))}
+              data-tooltip="Zoom In"
+              title="Zoom In"
+            >
+              +
+            </button>
+          </div>
           <select
             className="examples-select"
             defaultValue=""
@@ -1324,50 +1354,86 @@ const EditorWorkspace: React.FC = () => {
             }}
           >
             <option value="" disabled>
-              Examples…
+              Examples ▾
             </option>
             <option value="showcase">Full Feature Showcase (4 slides)</option>
-            <option value="calculus">Calculus & Fourier Series (3 slides)</option>
-            <option value="algorithms">Algorithms & Flowcharts (2 slides)</option>
+            <option value="calculus">Calculus &amp; Fourier Series (3 slides)</option>
+            <option value="algorithms">Algorithms &amp; Flowcharts (2 slides)</option>
             <option value="statebinder">Interactive StateBinder Lab (2 slides)</option>
           </select>
-          <button
-            data-tooltip="Download .scs presentation file"
-            onClick={() =>
-              downloadFile(
-                (state.title.trim() || defaultFileName) + '.scs',
-                saveDeck()
-              )
-            }
-          >
-            Save
-          </button>
-          <label className="file-upload-btn" data-tooltip="Open a saved .scs file" title="Open .scs file">
-            Open
-            <input type="file" accept=".scs,application/json" onChange={handleLoad} style={{ display: 'none' }} />
-          </label>
-          <button onClick={() => setShowNotes((v) => !v)} data-tooltip="Toggle Speaker Notes" title="Toggle Speaker Notes">
-            Notes
-          </button>
-          <button
-            className={devModalOpen ? 'tool-active' : ''}
-            onClick={() => {
-              setDevTab(currentSlide.customCss.trim() && !currentSlide.customJs.trim() ? 'style' : 'code');
-              setDevModalOpen(true);
-            }}
-            data-tooltip="Attach Scoped Slide CSS or Interactive Code"
-            title="Developer Studio (Scoped CSS & Code)"
-          >
-            Developer
-          </button>
-          <button onClick={() => window.print()} data-tooltip="Print or Export to PDF" title="Export Deck to PDF via Print">
-            PDF
-          </button>
-          <button onClick={() => setShowShortcuts(true)} data-tooltip="Keyboard Shortcuts (?)" title="Keyboard Shortcuts (?)">
-            ?
-          </button>
+        </div>
+
+        <div className="top-sect-group">
+          <div className="top-pill-cluster">
+            <button
+              type="button"
+              className="top-cluster-btn"
+              data-tooltip="Download .scs presentation file"
+              onClick={() =>
+                downloadFile(
+                  (state.title.trim() || defaultFileName) + '.scs',
+                  saveDeck()
+                )
+              }
+            >
+              <i className="material-icons">download</i>
+              <span>Save</span>
+            </button>
+            <label className="top-cluster-btn file-upload-btn" data-tooltip="Open a saved .scs file" title="Open .scs file">
+              <i className="material-icons">folder_open</i>
+              <span>Open</span>
+              <input type="file" accept=".scs,application/json" onChange={handleLoad} style={{ display: 'none' }} />
+            </label>
+            <button
+              type="button"
+              className="top-cluster-btn"
+              onClick={() => window.print()}
+              data-tooltip="Print or Export to PDF"
+              title="Export Deck to PDF via Print"
+            >
+              <i className="material-icons">picture_as_pdf</i>
+              <span>PDF</span>
+            </button>
+          </div>
+
+          <div className="top-pill-cluster">
+            <button
+              type="button"
+              className={`top-cluster-btn${showNotes ? ' active' : ''}`}
+              onClick={() => setShowNotes((v) => !v)}
+              data-tooltip="Toggle Speaker Notes"
+              title="Toggle Speaker Notes"
+            >
+              <i className="material-icons">speaker_notes</i>
+              <span>Notes</span>
+            </button>
+            <button
+              type="button"
+              className={`top-cluster-btn${devModalOpen ? ' active' : ''}`}
+              onClick={() => {
+                setDevTab(currentSlide.customCss.trim() && !currentSlide.customJs.trim() ? 'style' : 'code');
+                setDevModalOpen(true);
+              }}
+              data-tooltip="Attach Scoped Slide CSS or Interactive Code"
+              title="Developer Studio (Scoped CSS & Code)"
+            >
+              <i className="material-icons">terminal</i>
+              <span>Developer</span>
+            </button>
+            <button
+              type="button"
+              className="top-icon-btn"
+              onClick={() => setShowShortcuts(true)}
+              data-tooltip="Keyboard Shortcuts (?)"
+              title="Keyboard Shortcuts (?)"
+            >
+              ?
+            </button>
+          </div>
+
           <button className="present-primary-btn" data-tooltip="Enter Fullscreen Presentation" onClick={handleFullScreen}>
-            Present
+            <i className="material-icons" style={{ fontSize: '16px' }}>play_arrow</i>
+            <span>Present</span>
           </button>
         </div>
         {loadError && (
